@@ -1,0 +1,1 @@
+Patient reports unilateral throbbing headache with nausea and light sensitivity. Trigger diary and acute migraine medication discussed. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.

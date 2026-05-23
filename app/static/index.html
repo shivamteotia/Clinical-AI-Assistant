@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Clinical AI System</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div>
+            <h1>Clinical AI System</h1>
+            <p>Local HIS + RAG workbench</p>
+          </div>
+          <span id="healthBadge" class="status-pill">Checking</span>
+        </div>
+
+        <div class="toolbar">
+          <label class="search-box">
+            <span>Search patients</span>
+            <input id="patientSearch" type="search" placeholder="Name, ID, diagnosis..." />
+          </label>
+          <button id="rebuildIndexBtn" class="secondary-button" type="button">Rebuild Index</button>
+        </div>
+
+        <div id="patientList" class="patient-list" aria-live="polite"></div>
+      </aside>
+
+      <main class="workspace">
+        <section class="record-panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Patient Record</p>
+              <h2 id="patientTitle">Select a patient</h2>
+            </div>
+            <span id="patientMeta" class="muted"></span>
+          </div>
+          <div id="recordContent" class="record-content empty-state">
+            Choose a patient from the left to inspect structured data and notes.
+          </div>
+        </section>
+
+        <section class="assistant-panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">RAG Assistant</p>
+              <h2>Ask the local HIS</h2>
+            </div>
+            <div class="mode-toggle" role="group" aria-label="Answer mode">
+              <button id="simpleModeBtn" class="mode-button active" type="button">Fast</button>
+              <button id="llmModeBtn" class="mode-button" type="button">Ollama</button>
+            </div>
+          </div>
+
+          <div class="question-row">
+            <textarea id="questionInput" rows="3" placeholder="Ask about a condition, lab, medication, or patient ID..."></textarea>
+            <button id="askBtn" class="primary-button" type="button">Ask</button>
+          </div>
+
+          <div class="quick-prompts">
+            <button type="button" data-query="Which patient has diabetes and high HbA1c?">Diabetes + HbA1c</button>
+            <button type="button" data-query="Which patient has chronic kidney disease with reduced eGFR?">CKD + eGFR</button>
+            <button type="button" data-query="What medication is P001 taking?">P001 medication</button>
+          </div>
+
+          <div id="answerBox" class="answer-box empty-state">
+            Ask a question to see an answer, confidence, warnings, and retrieved sources.
+          </div>
+
+          <div>
+            <div class="sources-header">
+              <p class="eyebrow">Sources</p>
+              <span id="sourceCount" class="muted">0 chunks</span>
+            </div>
+            <div id="sourcesList" class="sources-list"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

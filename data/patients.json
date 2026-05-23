@@ -1,0 +1,162 @@
+[
+  {
+    "patient_id": "P001",
+    "name": "Aarav Sharma",
+    "age": 52,
+    "gender": "Male",
+    "phone": "9990000001",
+    "address": "Mumbai, Maharashtra"
+  },
+  {
+    "patient_id": "P002",
+    "name": "Meera Iyer",
+    "age": 44,
+    "gender": "Female",
+    "phone": "9990000002",
+    "address": "Bengaluru, Karnataka"
+  },
+  {
+    "patient_id": "P003",
+    "name": "Rohan Das",
+    "age": 67,
+    "gender": "Male",
+    "phone": "9990000003",
+    "address": "Kolkata, West Bengal"
+  },
+  {
+    "patient_id": "P004",
+    "name": "Nisha Patel",
+    "age": 38,
+    "gender": "Female",
+    "phone": "9990000004",
+    "address": "Ahmedabad, Gujarat"
+  },
+  {
+    "patient_id": "P005",
+    "name": "Kabir Khan",
+    "age": 61,
+    "gender": "Male",
+    "phone": "9990000005",
+    "address": "Delhi"
+  },
+  {
+    "patient_id": "P006",
+    "name": "Ananya Rao",
+    "age": 29,
+    "gender": "Female",
+    "phone": "9990000006",
+    "address": "Hyderabad, Telangana"
+  },
+  {
+    "patient_id": "P007",
+    "name": "Vikram Singh",
+    "age": 58,
+    "gender": "Male",
+    "phone": "9990000007",
+    "address": "Jaipur, Rajasthan"
+  },
+  {
+    "patient_id": "P008",
+    "name": "Farah Ali",
+    "age": 33,
+    "gender": "Female",
+    "phone": "9990000008",
+    "address": "Lucknow, Uttar Pradesh"
+  },
+  {
+    "patient_id": "P009",
+    "name": "Suresh Nair",
+    "age": 72,
+    "gender": "Male",
+    "phone": "9990000009",
+    "address": "Kochi, Kerala"
+  },
+  {
+    "patient_id": "P010",
+    "name": "Pooja Menon",
+    "age": 26,
+    "gender": "Female",
+    "phone": "9990000010",
+    "address": "Chennai, Tamil Nadu"
+  },
+  {
+    "patient_id": "P011",
+    "name": "Aditya Verma",
+    "age": 47,
+    "gender": "Male",
+    "phone": "9990000011",
+    "address": "Pune, Maharashtra"
+  },
+  {
+    "patient_id": "P012",
+    "name": "Leela Thomas",
+    "age": 64,
+    "gender": "Female",
+    "phone": "9990000012",
+    "address": "Thiruvananthapuram, Kerala"
+  },
+  {
+    "patient_id": "P013",
+    "name": "Imran Sheikh",
+    "age": 41,
+    "gender": "Male",
+    "phone": "9990000013",
+    "address": "Bhopal, Madhya Pradesh"
+  },
+  {
+    "patient_id": "P014",
+    "name": "Tanya Roy",
+    "age": 36,
+    "gender": "Female",
+    "phone": "9990000014",
+    "address": "Guwahati, Assam"
+  },
+  {
+    "patient_id": "P015",
+    "name": "Manoj Gupta",
+    "age": 55,
+    "gender": "Male",
+    "phone": "9990000015",
+    "address": "Patna, Bihar"
+  },
+  {
+    "patient_id": "P016",
+    "name": "Sneha Kapoor",
+    "age": 31,
+    "gender": "Female",
+    "phone": "9990000016",
+    "address": "Noida, Uttar Pradesh"
+  },
+  {
+    "patient_id": "P017",
+    "name": "Harish Kulkarni",
+    "age": 69,
+    "gender": "Male",
+    "phone": "9990000017",
+    "address": "Nagpur, Maharashtra"
+  },
+  {
+    "patient_id": "P018",
+    "name": "Ritu Bansal",
+    "age": 49,
+    "gender": "Female",
+    "phone": "9990000018",
+    "address": "Indore, Madhya Pradesh"
+  },
+  {
+    "patient_id": "P019",
+    "name": "Dev Malhotra",
+    "age": 23,
+    "gender": "Male",
+    "phone": "9990000019",
+    "address": "Chandigarh"
+  },
+  {
+    "patient_id": "P020",
+    "name": "Asha Reddy",
+    "age": 57,
+    "gender": "Female",
+    "phone": "9990000020",
+    "address": "Visakhapatnam, Andhra Pradesh"
+  }
+]

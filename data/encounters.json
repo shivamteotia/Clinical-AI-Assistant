@@ -1,0 +1,162 @@
+[
+  {
+    "encounter_id": "E001",
+    "patient_id": "P001",
+    "date": "2026-03-01",
+    "visit_type": "Outpatient",
+    "chief_complaint": "Increased thirst and fatigue",
+    "diagnosis": "Type 2 diabetes mellitus"
+  },
+  {
+    "encounter_id": "E002",
+    "patient_id": "P002",
+    "date": "2026-03-02",
+    "visit_type": "Outpatient",
+    "chief_complaint": "Intermittent wheezing and cough",
+    "diagnosis": "Bronchial asthma"
+  },
+  {
+    "encounter_id": "E003",
+    "patient_id": "P003",
+    "date": "2026-03-03",
+    "visit_type": "Emergency",
+    "chief_complaint": "Chest discomfort and shortness of breath",
+    "diagnosis": "Hypertension with suspected angina"
+  },
+  {
+    "encounter_id": "E004",
+    "patient_id": "P004",
+    "date": "2026-03-04",
+    "visit_type": "Outpatient",
+    "chief_complaint": "Burning urination and fever",
+    "diagnosis": "Urinary tract infection"
+  },
+  {
+    "encounter_id": "E005",
+    "patient_id": "P005",
+    "date": "2026-03-05",
+    "visit_type": "Outpatient",
+    "chief_complaint": "Chronic cough and exertional breathlessness",
+    "diagnosis": "Chronic obstructive pulmonary disease"
+  },
+  {
+    "encounter_id": "E006",
+    "patient_id": "P006",
+    "date": "2026-03-06",
+    "visit_type": "Outpatient",
+    "chief_complaint": "Palpitations and weight loss",
+    "diagnosis": "Hyperthyroidism"
+  },
+  {
+    "encounter_id": "E007",
+    "patient_id": "P007",
+    "date": "2026-03-07",
+    "visit_type": "Outpatient",
+    "chief_complaint": "Headache and high blood pressure",
+    "diagnosis": "Essential hypertension"
+  },
+  {
+    "encounter_id": "E008",
+    "patient_id": "P008",
+    "date": "2026-03-08",
+    "visit_type": "Outpatient",
+    "chief_complaint": "Fatigue and pallor",
+    "diagnosis": "Iron deficiency anemia"
+  },
+  {
+    "encounter_id": "E009",
+    "patient_id": "P009",
+    "date": "2026-03-09",
+    "visit_type": "Outpatient",
+    "chief_complaint": "Reduced urine output and swelling",
+    "diagnosis": "Chronic kidney disease"
+  },
+  {
+    "encounter_id": "E010",
+    "patient_id": "P010",
+    "date": "2026-03-10",
+    "visit_type": "Outpatient",
+    "chief_complaint": "Missed periods and nausea",
+    "diagnosis": "Early pregnancy"
+  },
+  {
+    "encounter_id": "E011",
+    "patient_id": "P011",
+    "date": "2026-03-11",
+    "visit_type": "Outpatient",
+    "chief_complaint": "Epigastric pain and acidity",
+    "diagnosis": "Gastroesophageal reflux disease"
+  },
+  {
+    "encounter_id": "E012",
+    "patient_id": "P012",
+    "date": "2026-03-12",
+    "visit_type": "Outpatient",
+    "chief_complaint": "Knee pain and stiffness",
+    "diagnosis": "Osteoarthritis of knee"
+  },
+  {
+    "encounter_id": "E013",
+    "patient_id": "P013",
+    "date": "2026-03-13",
+    "visit_type": "Outpatient",
+    "chief_complaint": "Fever with chills",
+    "diagnosis": "Malaria"
+  },
+  {
+    "encounter_id": "E014",
+    "patient_id": "P014",
+    "date": "2026-03-14",
+    "visit_type": "Outpatient",
+    "chief_complaint": "Low mood and poor sleep",
+    "diagnosis": "Depressive symptoms"
+  },
+  {
+    "encounter_id": "E015",
+    "patient_id": "P015",
+    "date": "2026-03-15",
+    "visit_type": "Outpatient",
+    "chief_complaint": "Right upper abdominal pain",
+    "diagnosis": "Gallstone disease"
+  },
+  {
+    "encounter_id": "E016",
+    "patient_id": "P016",
+    "date": "2026-03-16",
+    "visit_type": "Outpatient",
+    "chief_complaint": "Migraine headaches",
+    "diagnosis": "Migraine"
+  },
+  {
+    "encounter_id": "E017",
+    "patient_id": "P017",
+    "date": "2026-03-17",
+    "visit_type": "Outpatient",
+    "chief_complaint": "Memory difficulty",
+    "diagnosis": "Mild cognitive impairment"
+  },
+  {
+    "encounter_id": "E018",
+    "patient_id": "P018",
+    "date": "2026-03-18",
+    "visit_type": "Outpatient",
+    "chief_complaint": "Joint pain and swelling",
+    "diagnosis": "Rheumatoid arthritis"
+  },
+  {
+    "encounter_id": "E019",
+    "patient_id": "P019",
+    "date": "2026-03-19",
+    "visit_type": "Outpatient",
+    "chief_complaint": "Fever and sore throat",
+    "diagnosis": "Viral upper respiratory infection"
+  },
+  {
+    "encounter_id": "E020",
+    "patient_id": "P020",
+    "date": "2026-03-20",
+    "visit_type": "Outpatient",
+    "chief_complaint": "Tingling feet and numbness",
+    "diagnosis": "Peripheral neuropathy"
+  }
+]

@@ -1,0 +1,153 @@
+# Clinical AI System - V1 Local HIS
+
+This is the first local prototype for the Clinical AI pipeline.
+
+The V1 goal is simple:
+
+1. Store dummy patient data locally.
+2. Load the data into SQLite.
+3. Expose patient records through a simple API.
+4. Use this API later as the data source for the RAG pipeline.
+
+## Setup
+
+Create a virtual environment:
+
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+Seed the local HIS database:
+
+```powershell
+python scripts\seed_data.py
+```
+
+Generate a larger deterministic dummy dataset:
+
+```powershell
+python scripts\generate_dummy_data.py
+python scripts\seed_data.py
+```
+
+Run the API:
+
+```powershell
+uvicorn app.main:app --reload
+```
+
+Open:
+
+```text
+http://127.0.0.1:8000/
+```
+
+API docs:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+## Current Endpoints
+
+- `GET /health`
+- `GET /patients`
+- `GET /patients/{patient_id}`
+- `GET /patients/{patient_id}/record`
+- `GET /rag/documents`
+- `GET /rag/chunks`
+- `POST /rag/index`
+- `POST /rag/search`
+- `POST /rag/ask`
+- `POST /rag/ask-llm`
+
+## Load Patient Data For RAG
+
+This script loads all local HIS patient records into LangChain `Document` objects:
+
+```powershell
+python scripts\load_langchain_documents.py
+```
+
+Each document contains the combined structured and unstructured patient record in `page_content`, with patient identifiers stored in `metadata`.
+
+## Chunk Patient Documents
+
+This script splits the LangChain patient documents into smaller chunks for vector search:
+
+```powershell
+python scripts\chunk_langchain_documents.py
+```
+
+Each chunk keeps patient metadata plus a `chunk_index`, making it ready for embeddings and vector storage.
+
+## Build And Search The Vector Store
+
+This script embeds the patient chunks and stores them in a local SQLite vector store:
+
+```powershell
+python scripts\build_vector_store.py
+```
+
+Search the local vector store:
+
+```powershell
+python scripts\search_vector_store.py "Which patient has diabetes and high HbA1c?"
+```
+
+The API also exposes:
+
+```text
+POST /rag/index
+POST /rag/search
+POST /rag/ask
+POST /rag/ask-llm
+```
+
+The current V1 embedding model is `sentence-transformers/all-MiniLM-L6-v2`, running locally through Hugging Face Sentence Transformers. The code also keeps a deterministic hash embedding fallback for simple no-download testing. Later, replace the embedding model with a clinical-grade embedding model if needed.
+
+ChromaDB was considered for V1, but on Windows it can require Microsoft C++ Build Tools for `chroma-hnswlib`. The current SQLite vector store keeps the pipeline local and easy to run, while preserving a clean place to swap in Chroma later.
+
+## Ask A RAG Question
+
+This script retrieves patient chunks and builds a simple grounded answer:
+
+```powershell
+python scripts\ask_rag.py "Which patient has diabetes and high HbA1c?"
+```
+
+The answer builder is intentionally simple in V1. It returns source chunks so the retrieved evidence can be inspected before an LLM is added.
+
+Responses include:
+
+- `confidence`
+- `safety_warnings`
+- `sources`
+
+## Evaluate Retrieval And Answers
+
+Run the basic evaluation set:
+
+```powershell
+python scripts\evaluate_rag.py --rebuild
+```
+
+The evaluation checks whether expected patient IDs and key terms appear for known dummy-data questions.
+
+## Ask With Local Ollama LLM
+
+After installing Ollama and pulling `phi3`, ask a question with the local model:
+
+```powershell
+python scripts\ask_ollama.py "Which patient has diabetes and high HbA1c?"
+```
+
+The API endpoint is:
+
+```text
+POST /rag/ask-llm
+```
+
+This endpoint retrieves patient chunks first, then asks the local Ollama model to answer only from that retrieved context.

@@ -1,0 +1,85 @@
+from pathlib import Path
+
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, Field
+
+from app.api.his import get_patient, get_patient_record, list_patients
+from app.rag.answering import answer_question
+from app.rag.chunking import load_patient_chunks
+from app.rag.loaders import load_patient_documents, serialize_documents
+from app.rag.llm import answer_with_local_llm
+from app.rag.vector_store import rebuild_vector_store, search_patient_chunks
+
+app = FastAPI(title="Clinical AI System - Local HIS", version="0.1.0")
+STATIC_DIR = Path(__file__).resolve().parent / "static"
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+
+class SearchRequest(BaseModel):
+    query: str = Field(..., min_length=1)
+    k: int = Field(default=3, ge=1, le=10)
+
+
+@app.get("/")
+def frontend() -> FileResponse:
+    return FileResponse(STATIC_DIR / "index.html")
+
+
+@app.get("/health")
+def health() -> dict[str, str]:
+    return {"status": "ok"}
+
+
+@app.get("/patients")
+def patients() -> list[dict]:
+    return list_patients()
+
+
+@app.get("/patients/{patient_id}")
+def patient(patient_id: str) -> dict:
+    result = get_patient(patient_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    return result
+
+
+@app.get("/patients/{patient_id}/record")
+def patient_record(patient_id: str) -> dict:
+    result = get_patient_record(patient_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    return result
+
+
+@app.get("/rag/documents")
+def rag_documents() -> list[dict]:
+    documents = load_patient_documents()
+    return serialize_documents(documents)
+
+
+@app.get("/rag/chunks")
+def rag_chunks() -> list[dict]:
+    chunks = load_patient_chunks()
+    return serialize_documents(chunks)
+
+
+@app.post("/rag/index")
+def rag_index() -> dict[str, int | str]:
+    return rebuild_vector_store()
+
+
+@app.post("/rag/search")
+def rag_search(request: SearchRequest) -> list[dict]:
+    return search_patient_chunks(request.query, request.k)
+
+
+@app.post("/rag/ask")
+def rag_ask(request: SearchRequest) -> dict:
+    return answer_question(request.query, request.k)
+
+
+@app.post("/rag/ask-llm")
+def rag_ask_llm(request: SearchRequest) -> dict:
+    return answer_with_local_llm(request.query, request.k)

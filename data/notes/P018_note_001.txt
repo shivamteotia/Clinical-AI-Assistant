@@ -1,0 +1,1 @@
+Patient reports small joint pain, morning stiffness, and swelling in both hands. Rheumatoid factor positive in dummy data. Rheumatology review advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.

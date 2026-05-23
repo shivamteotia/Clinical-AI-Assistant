@@ -1,0 +1,1 @@
+Patient reports reduced urine output and ankle swelling. Creatinine is elevated in the dummy record and eGFR is reduced. Nephrology review advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.

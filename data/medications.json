@@ -1,0 +1,162 @@
+[
+  {
+    "medication_id": "M001",
+    "patient_id": "P001",
+    "drug_name": "Metformin",
+    "dose": "500 mg",
+    "frequency": "Twice daily",
+    "start_date": "2026-03-01"
+  },
+  {
+    "medication_id": "M002",
+    "patient_id": "P002",
+    "drug_name": "Salbutamol inhaler",
+    "dose": "100 mcg",
+    "frequency": "As needed",
+    "start_date": "2026-03-02"
+  },
+  {
+    "medication_id": "M003",
+    "patient_id": "P003",
+    "drug_name": "Amlodipine",
+    "dose": "5 mg",
+    "frequency": "Once daily",
+    "start_date": "2026-03-03"
+  },
+  {
+    "medication_id": "M004",
+    "patient_id": "P004",
+    "drug_name": "Nitrofurantoin",
+    "dose": "100 mg",
+    "frequency": "Twice daily",
+    "start_date": "2026-03-04"
+  },
+  {
+    "medication_id": "M005",
+    "patient_id": "P005",
+    "drug_name": "Tiotropium inhaler",
+    "dose": "18 mcg",
+    "frequency": "Once daily",
+    "start_date": "2026-03-05"
+  },
+  {
+    "medication_id": "M006",
+    "patient_id": "P006",
+    "drug_name": "Carbimazole",
+    "dose": "10 mg",
+    "frequency": "Twice daily",
+    "start_date": "2026-03-06"
+  },
+  {
+    "medication_id": "M007",
+    "patient_id": "P007",
+    "drug_name": "Telmisartan",
+    "dose": "40 mg",
+    "frequency": "Once daily",
+    "start_date": "2026-03-07"
+  },
+  {
+    "medication_id": "M008",
+    "patient_id": "P008",
+    "drug_name": "Ferrous sulfate",
+    "dose": "325 mg",
+    "frequency": "Once daily",
+    "start_date": "2026-03-08"
+  },
+  {
+    "medication_id": "M009",
+    "patient_id": "P009",
+    "drug_name": "Furosemide",
+    "dose": "20 mg",
+    "frequency": "Once daily",
+    "start_date": "2026-03-09"
+  },
+  {
+    "medication_id": "M010",
+    "patient_id": "P010",
+    "drug_name": "Folic acid",
+    "dose": "5 mg",
+    "frequency": "Once daily",
+    "start_date": "2026-03-10"
+  },
+  {
+    "medication_id": "M011",
+    "patient_id": "P011",
+    "drug_name": "Pantoprazole",
+    "dose": "40 mg",
+    "frequency": "Once daily",
+    "start_date": "2026-03-11"
+  },
+  {
+    "medication_id": "M012",
+    "patient_id": "P012",
+    "drug_name": "Paracetamol",
+    "dose": "650 mg",
+    "frequency": "As needed",
+    "start_date": "2026-03-12"
+  },
+  {
+    "medication_id": "M013",
+    "patient_id": "P013",
+    "drug_name": "Artemether lumefantrine",
+    "dose": "20/120 mg",
+    "frequency": "As per schedule",
+    "start_date": "2026-03-13"
+  },
+  {
+    "medication_id": "M014",
+    "patient_id": "P014",
+    "drug_name": "Sertraline",
+    "dose": "25 mg",
+    "frequency": "Once daily",
+    "start_date": "2026-03-14"
+  },
+  {
+    "medication_id": "M015",
+    "patient_id": "P015",
+    "drug_name": "Drotaverine",
+    "dose": "80 mg",
+    "frequency": "As needed",
+    "start_date": "2026-03-15"
+  },
+  {
+    "medication_id": "M016",
+    "patient_id": "P016",
+    "drug_name": "Sumatriptan",
+    "dose": "50 mg",
+    "frequency": "As needed",
+    "start_date": "2026-03-16"
+  },
+  {
+    "medication_id": "M017",
+    "patient_id": "P017",
+    "drug_name": "Donepezil",
+    "dose": "5 mg",
+    "frequency": "Once daily",
+    "start_date": "2026-03-17"
+  },
+  {
+    "medication_id": "M018",
+    "patient_id": "P018",
+    "drug_name": "Methotrexate",
+    "dose": "7.5 mg",
+    "frequency": "Weekly",
+    "start_date": "2026-03-18"
+  },
+  {
+    "medication_id": "M019",
+    "patient_id": "P019",
+    "drug_name": "Cetirizine",
+    "dose": "10 mg",
+    "frequency": "Once daily",
+    "start_date": "2026-03-19"
+  },
+  {
+    "medication_id": "M020",
+    "patient_id": "P020",
+    "drug_name": "Pregabalin",
+    "dose": "75 mg",
+    "frequency": "At night",
+    "start_date": "2026-03-20"
+  }
+]

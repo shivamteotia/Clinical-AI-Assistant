@@ -1,0 +1,1 @@
+Patient seen for headache and repeated high blood pressure readings. Salt reduction and home blood pressure log discussed. Antihypertensive medication started. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.

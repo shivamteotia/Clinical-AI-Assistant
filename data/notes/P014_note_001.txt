@@ -1,0 +1,1 @@
+Patient reports persistent low mood, poor sleep, reduced interest, and fatigue. Safety screening documented in dummy record. Mental health follow-up advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.

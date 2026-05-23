@@ -1,0 +1,1 @@
+Patient reports right upper abdominal pain after fatty meals. Ultrasound note mentions gallstones in dummy data. Surgical review advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.

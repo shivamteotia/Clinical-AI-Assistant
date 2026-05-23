@@ -1,0 +1,1 @@
+Patient has burning urination, urinary frequency, and fever for two days. Urine dipstick showed leukocytes. Hydration advice given and antibiotic course started. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.

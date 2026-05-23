@@ -1,0 +1,1 @@
+Patient reports bilateral knee pain, morning stiffness, and difficulty climbing stairs. Weight management and physiotherapy were discussed. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.

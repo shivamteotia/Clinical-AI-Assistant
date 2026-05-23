@@ -1,0 +1,1 @@
+Patient and family report recent memory difficulty and missed appointments. Cognitive screening performed in dummy record. Neurology follow-up advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.

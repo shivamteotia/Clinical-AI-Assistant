@@ -1,0 +1,1 @@
+Patient presented with chest discomfort and shortness of breath. Blood pressure elevated at presentation. Initial troponin within reference range. ECG monitoring advised and cardiology evaluation recommended. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.
