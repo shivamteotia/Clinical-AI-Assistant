@@ -136,6 +136,14 @@ python scripts\evaluate_rag.py --rebuild
 
 The evaluation checks whether expected patient IDs and key terms appear for known dummy-data questions.
 
+## Run Tests
+
+Run the automated API, RAG, and safety tests:
+
+```powershell
+python -m unittest discover
+```
+
 ## Ask With Local Ollama LLM
 
 After installing Ollama and pulling `phi3`, ask a question with the local model:
