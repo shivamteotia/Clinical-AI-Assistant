@@ -203,19 +203,53 @@ async function askQuestion() {
 
 function renderAnswer(result) {
   const warnings = result.safety_warnings || [];
+  const limitations = result.limitations || [];
+  const evidence = result.evidence || [];
   els.answerBox.classList.remove("empty-state");
   els.answerBox.innerHTML = `
     <div class="source-meta">
       <span class="confidence-pill">Confidence: ${escapeHtml(result.confidence || "unknown")}</span>
+      <span>Intent: ${escapeHtml(formatLabel(result.intent || "unknown"))}</span>
+      <span>Safety: ${escapeHtml(formatLabel(result.safety_level || "unknown"))}</span>
       ${result.model ? `<span>Model: ${escapeHtml(result.model)}</span>` : `<span>Mode: Fast retrieval</span>`}
     </div>
     <div class="answer-text">${escapeHtml(result.answer)}</div>
+    ${
+      evidence.length
+        ? `<div class="evidence-list">
+            <div class="mini-heading">Evidence</div>
+            ${evidence.map(renderEvidenceItem).join("")}
+          </div>`
+        : ""
+    }
     ${
       warnings.length
         ? `<ul class="warning-list">${warnings.map((warning) => `<li>${escapeHtml(warning)}</li>`).join("")}</ul>`
         : ""
     }
+    ${
+      limitations.length
+        ? `<ul class="limitation-list">${limitations.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+        : ""
+    }
   `;
+}
+
+function renderEvidenceItem(item) {
+  return `
+    <div class="evidence-item">
+      <div class="source-meta">
+        <span>${escapeHtml(item.patient_id)} - ${escapeHtml(item.patient_name)}</span>
+        <span>Chunk ${escapeHtml(item.chunk_index ?? "n/a")}</span>
+        <span>Score ${Number(item.score || 0).toFixed(3)}</span>
+      </div>
+      <div>${escapeHtml(item.text)}</div>
+    </div>
+  `;
+}
+
+function formatLabel(value) {
+  return String(value).replaceAll("_", " ");
 }
 
 function renderSources(sources) {

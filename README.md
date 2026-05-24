@@ -165,8 +165,17 @@ The answer builder is intentionally simple in V1. It returns source chunks so th
 Responses include:
 
 - `confidence`
+- `intent`
+- `safety_level`
+- `evidence`
 - `safety_warnings`
+- `limitations`
 - `sources`
+
+V2 safety behavior classifies clinical intent before answering. Diagnosis,
+treatment, dosage, medication-change, and urgent-symptom questions are treated
+as restricted or urgent. The system summarizes retrieved dummy-record evidence
+only and does not provide clinical instructions.
 
 ## Evaluate Retrieval And Answers
 

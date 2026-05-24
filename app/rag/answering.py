@@ -1,7 +1,11 @@
 import re
 from collections import Counter
 
-from app.rag.safety import attach_safety_metadata
+from app.rag.safety import (
+    attach_safety_metadata,
+    classify_query_intent,
+    is_restricted_intent,
+)
 from app.rag.vector_store import search_patient_chunks
 
 SENTENCE_PATTERN = re.compile(r"(?<=[.!?])\s+")
@@ -29,25 +33,42 @@ STOP_WORDS = {
 
 
 def answer_question(query: str, k: int = 3) -> dict:
+    intent = classify_query_intent(query)
     matches = search_patient_chunks(query, k)
     if not matches:
         return attach_safety_metadata({
             "answer": "No relevant patient information was found in the local HIS index.",
+            "intent": intent,
             "sources": [],
-        })
+            "evidence": [],
+        }, query)
 
     top_patient_id = matches[0]["metadata"]["patient_id"]
     top_patient_name = matches[0]["metadata"]["patient_name"]
     patient_matches = [
         match for match in matches if match["metadata"]["patient_id"] == top_patient_id
     ]
-    evidence_sentences = _select_evidence_sentences(query, patient_matches)
+    evidence_items = _select_evidence(query, patient_matches)
+    evidence_sentences = [item["text"] for item in evidence_items]
 
-    if evidence_sentences:
-        evidence = " ".join(evidence_sentences)
+    if is_restricted_intent(intent):
+        if evidence_sentences:
+            answer = (
+                f"I cannot provide diagnosis, treatment, triage, dosage, or medication-change advice. "
+                f"The most relevant retrieved dummy record is {top_patient_name} ({top_patient_id}). "
+                f"Record evidence only: {' '.join(evidence_sentences)}"
+            )
+        else:
+            answer = (
+                f"I cannot provide diagnosis, treatment, triage, dosage, or medication-change advice. "
+                f"The most relevant retrieved dummy record is {top_patient_name} ({top_patient_id}); "
+                "review the source chunks for evidence."
+            )
+    elif evidence_sentences:
+        evidence_text = " ".join(evidence_sentences)
         answer = (
             f"The most relevant patient is {top_patient_name} ({top_patient_id}). "
-            f"Relevant record evidence: {evidence}"
+            f"Relevant record evidence: {evidence_text}"
         )
     else:
         answer = (
@@ -57,16 +78,19 @@ def answer_question(query: str, k: int = 3) -> dict:
 
     return attach_safety_metadata({
         "answer": answer,
+        "intent": intent,
+        "evidence": evidence_items,
         "sources": matches,
-    })
+    }, query)
 
 
-def _select_evidence_sentences(query: str, matches: list[dict]) -> list[str]:
+def _select_evidence(query: str, matches: list[dict]) -> list[dict]:
     query_terms = _keywords(query)
-    scored_sentences = []
+    scored_evidence = []
 
     for match in matches:
         text = _normalize_chunk_text(match["page_content"])
+        metadata = match["metadata"]
         for sentence in SENTENCE_PATTERN.split(text):
             sentence = _clean_sentence(sentence)
             if not sentence:
@@ -75,10 +99,19 @@ def _select_evidence_sentences(query: str, matches: list[dict]) -> list[str]:
             sentence_terms = _keywords(sentence)
             score = sum(sentence_terms[term] for term in query_terms)
             if score > 0:
-                scored_sentences.append((score, sentence))
+                scored_evidence.append((
+                    score,
+                    {
+                        "patient_id": metadata.get("patient_id"),
+                        "patient_name": metadata.get("patient_name"),
+                        "chunk_index": metadata.get("chunk_index"),
+                        "score": match.get("score"),
+                        "text": sentence,
+                    },
+                ))
 
-    scored_sentences.sort(key=lambda item: item[0], reverse=True)
-    return [sentence for _, sentence in scored_sentences[:3]]
+    scored_evidence.sort(key=lambda item: item[0], reverse=True)
+    return [evidence for _, evidence in scored_evidence[:3]]
 
 
 def _keywords(text: str) -> Counter:

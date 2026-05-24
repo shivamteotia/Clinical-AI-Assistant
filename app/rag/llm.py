@@ -34,7 +34,7 @@ def answer_with_local_llm(query: str, k: int = 3, model: str = DEFAULT_MODEL) ->
         "answer": response["message"]["content"],
         "model": model,
         "sources": sources,
-    })
+    }, query)
 
 
 def _format_context(sources: list[dict]) -> str:

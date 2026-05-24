@@ -36,8 +36,20 @@ class RagTests(unittest.TestCase):
 
         self.assertIn("P001", result["answer"])
         self.assertTrue(result["sources"])
+        self.assertTrue(result["evidence"])
+        self.assertEqual(result["intent"], "record_lookup")
+        self.assertEqual(result["safety_level"], "standard")
+        self.assertTrue(result["limitations"])
         self.assertIn(result["confidence"], {"low", "medium", "high"})
         self.assertTrue(result["safety_warnings"])
+
+    def test_restricted_question_does_not_give_treatment_advice(self) -> None:
+        result = answer_question("Should P001 increase metformin dose?", k=3)
+
+        self.assertEqual(result["intent"], "treatment_request")
+        self.assertEqual(result["safety_level"], "restricted")
+        self.assertIn("cannot provide diagnosis, treatment", result["answer"])
+        self.assertTrue(result["evidence"])
 
 
 if __name__ == "__main__":
