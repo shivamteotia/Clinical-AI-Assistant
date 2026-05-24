@@ -1,4 +1,5 @@
 import unittest
+import os
 from contextlib import redirect_stdout
 from io import StringIO
 
@@ -10,6 +11,7 @@ from scripts.seed_data import main as seed_data
 class RagTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        os.environ["VECTOR_STORE_PROVIDER"] = "sqlite"
         with redirect_stdout(StringIO()):
             seed_data()
         rebuild_vector_store()

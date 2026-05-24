@@ -99,6 +99,22 @@ button {
   white-space: nowrap;
 }
 
+.status-stack {
+  display: grid;
+  gap: 6px;
+  justify-items: end;
+}
+
+.status-pill.muted-pill {
+  background: #edf2f7;
+  color: #475569;
+}
+
+.status-pill.ready {
+  background: #dcfce7;
+  color: #166534;
+}
+
 .status-pill.offline {
   background: #fee2e2;
   color: var(--danger);
@@ -400,6 +416,10 @@ textarea:focus {
   .panel-header,
   .question-row {
     grid-template-columns: 1fr;
+  }
+
+  .status-stack {
+    justify-items: start;
   }
 
   .question-row {

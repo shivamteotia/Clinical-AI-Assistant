@@ -89,6 +89,48 @@ def search_patient_chunks(query: str, k: int = 3) -> list[dict]:
     return search_sqlite_patient_chunks(query, k)
 
 
+def vector_store_status() -> dict:
+    settings = get_vector_store_settings()
+    if settings.provider == "qdrant":
+        from app.rag.qdrant_store import qdrant_vector_store_status
+
+        return qdrant_vector_store_status(settings)
+    if settings.provider != "sqlite":
+        return {
+            "provider": settings.provider,
+            "status": "unsupported",
+            "connected": False,
+            "message": f"Unsupported vector store provider: {settings.provider}",
+        }
+
+    return sqlite_vector_store_status()
+
+
+def sqlite_vector_store_status() -> dict:
+    if not VECTOR_DB_PATH.exists():
+        return {
+            "provider": "sqlite",
+            "store": "sqlite_vector_store",
+            "status": "missing",
+            "connected": False,
+            "persist_path": str(VECTOR_DB_PATH),
+            "chunk_count": 0,
+        }
+
+    with _connect() as connection:
+        _create_schema(connection)
+        count = connection.execute("SELECT COUNT(*) FROM vector_chunks").fetchone()[0]
+
+    return {
+        "provider": "sqlite",
+        "store": "sqlite_vector_store",
+        "status": "ready" if count else "empty",
+        "connected": True,
+        "persist_path": str(VECTOR_DB_PATH),
+        "chunk_count": count,
+    }
+
+
 def rebuild_sqlite_vector_store() -> dict[str, int | str]:
     chunks = load_patient_chunks()
     embedding_model = HuggingFaceLocalEmbeddings()

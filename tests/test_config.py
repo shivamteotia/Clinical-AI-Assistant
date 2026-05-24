@@ -13,8 +13,10 @@ from app.rag.config import (
 
 class ConfigTests(unittest.TestCase):
     def test_default_vector_store_settings_use_sqlite(self) -> None:
-        old_provider = os.environ.pop("VECTOR_STORE_PROVIDER", None)
-        old_collection = os.environ.pop("QDRANT_COLLECTION", None)
+        old_provider = os.environ.get("VECTOR_STORE_PROVIDER")
+        old_collection = os.environ.get("QDRANT_COLLECTION")
+        os.environ["VECTOR_STORE_PROVIDER"] = DEFAULT_VECTOR_STORE_PROVIDER
+        os.environ.pop("QDRANT_COLLECTION", None)
         try:
             settings = get_vector_store_settings()
 
@@ -45,6 +47,8 @@ class ConfigTests(unittest.TestCase):
                 for key in ["VECTOR_STORE_PROVIDER", "QDRANT_URL", "QDRANT_API_KEY"]
             }
             os.environ["QDRANT_API_KEY"] = "from_environment"
+            os.environ.pop("VECTOR_STORE_PROVIDER", None)
+            os.environ.pop("QDRANT_URL", None)
             try:
                 load_dotenv_file(env_path)
 

@@ -89,6 +89,39 @@ def search_qdrant_patient_chunks(
     return sorted(matches, key=lambda match: match["score"], reverse=True)[:k]
 
 
+def qdrant_vector_store_status(settings: VectorStoreSettings) -> dict:
+    base_status = {
+        "provider": "qdrant",
+        "store": "qdrant_vector_store",
+        "collection": settings.qdrant_collection,
+    }
+
+    try:
+        client = _client(settings)
+        exists = client.collection_exists(collection_name=settings.qdrant_collection)
+        chunk_count = None
+        if exists:
+            chunk_count = client.count(
+                collection_name=settings.qdrant_collection,
+                exact=True,
+            ).count
+
+        return {
+            **base_status,
+            "status": "ready" if exists else "missing",
+            "connected": True,
+            "chunk_count": chunk_count,
+        }
+    except Exception as error:
+        return {
+            **base_status,
+            "status": "unavailable",
+            "connected": False,
+            "chunk_count": None,
+            "message": error.__class__.__name__,
+        }
+
+
 def _client(settings: VectorStoreSettings) -> Any:
     if QdrantClient is None:
         raise RuntimeError(

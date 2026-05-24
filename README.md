@@ -58,6 +58,7 @@ http://127.0.0.1:8000/docs
 - `GET /patients/{patient_id}/record`
 - `GET /rag/documents`
 - `GET /rag/chunks`
+- `GET /rag/status`
 - `POST /rag/index`
 - `POST /rag/search`
 - `POST /rag/ask`
@@ -142,6 +143,7 @@ python scripts\search_qdrant_vector_store.py "Which patient has diabetes and hig
 When `VECTOR_STORE_PROVIDER=qdrant`, the API endpoints below use Qdrant automatically:
 
 ```text
+GET /rag/status
 POST /rag/index
 POST /rag/search
 POST /rag/ask

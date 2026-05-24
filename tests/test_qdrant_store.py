@@ -34,6 +34,7 @@ class FakeModels:
 class FakeQdrantClient:
     latest = None
     search_points = []
+    collection_exists_result = False
 
     def __init__(self, url: str, api_key: str | None = None) -> None:
         self.url = url
@@ -44,7 +45,7 @@ class FakeQdrantClient:
         FakeQdrantClient.latest = self
 
     def collection_exists(self, collection_name: str) -> bool:
-        return False
+        return self.collection_exists_result
 
     def delete_collection(self, collection_name: str) -> None:
         self.deleted_collections.append(collection_name)
@@ -63,6 +64,9 @@ class FakeQdrantClient:
         with_payload: bool,
     ) -> list:
         return self.search_points[:limit]
+
+    def count(self, collection_name: str, exact: bool) -> SimpleNamespace:
+        return SimpleNamespace(count=len(self.upserted_points) or len(self.search_points))
 
 
 class QdrantStoreTests(unittest.TestCase):
@@ -141,6 +145,24 @@ class QdrantStoreTests(unittest.TestCase):
 
         self.assertEqual(matches[0]["metadata"]["patient_id"], "P001")
         self.assertGreater(matches[0]["score"], matches[0]["semantic_score"])
+
+    def test_qdrant_status_reports_ready_collection(self) -> None:
+        FakeQdrantClient.search_points = [SimpleNamespace()]
+        FakeQdrantClient.collection_exists_result = True
+        settings = VectorStoreSettings(
+            provider="qdrant",
+            qdrant_url="https://example.qdrant.tech",
+            qdrant_api_key="secret",
+            qdrant_collection="clinical_test",
+        )
+
+        status = qdrant_store.qdrant_vector_store_status(settings)
+
+        self.assertEqual(status["provider"], "qdrant")
+        self.assertEqual(status["collection"], "clinical_test")
+        self.assertTrue(status["connected"])
+        self.assertEqual(status["status"], "ready")
+        self.assertEqual(status["chunk_count"], 1)
 
 
 if __name__ == "__main__":

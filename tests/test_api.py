@@ -1,4 +1,5 @@
 import unittest
+import os
 from contextlib import redirect_stdout
 from io import StringIO
 
@@ -11,6 +12,7 @@ from scripts.seed_data import main as seed_data
 class ApiTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        os.environ["VECTOR_STORE_PROVIDER"] = "sqlite"
         with redirect_stdout(StringIO()):
             seed_data()
         cls.client = TestClient(app)
@@ -44,6 +46,15 @@ class ApiTests(unittest.TestCase):
         response = self.client.get("/patients/NOPE/record")
 
         self.assertEqual(response.status_code, 404)
+
+    def test_rag_status_reports_local_vector_store(self) -> None:
+        response = self.client.get("/rag/status")
+
+        self.assertEqual(response.status_code, 200)
+        status = response.json()
+        self.assertEqual(status["provider"], "sqlite")
+        self.assertIn(status["status"], {"ready", "empty", "missing"})
+        self.assertIn("chunk_count", status)
 
 
 if __name__ == "__main__":

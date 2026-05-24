@@ -6,6 +6,7 @@
 
 const els = {
   healthBadge: document.querySelector("#healthBadge"),
+  vectorBadge: document.querySelector("#vectorBadge"),
   patientSearch: document.querySelector("#patientSearch"),
   patientList: document.querySelector("#patientList"),
   patientTitle: document.querySelector("#patientTitle"),
@@ -56,6 +57,23 @@ async function loadHealth() {
   } catch {
     els.healthBadge.textContent = "Offline";
     els.healthBadge.classList.add("offline");
+  }
+}
+
+async function loadVectorStatus() {
+  try {
+    const status = await api("/rag/status");
+    const provider = status.provider === "qdrant" ? "Qdrant" : "SQLite";
+    const stateText = status.connected ? status.status : "offline";
+    els.vectorBadge.textContent = `${provider}: ${stateText}`;
+    els.vectorBadge.title = status.collection
+      ? `Collection: ${status.collection}`
+      : status.persist_path || "";
+    els.vectorBadge.classList.toggle("offline", !status.connected);
+    els.vectorBadge.classList.toggle("ready", status.connected && status.status === "ready");
+  } catch {
+    els.vectorBadge.textContent = "Vector: offline";
+    els.vectorBadge.classList.add("offline");
   }
 }
 
@@ -145,6 +163,7 @@ async function rebuildIndex() {
   setLoading(els.rebuildIndexBtn, "Rebuilding...", true);
   try {
     const result = await api("/rag/index", { method: "POST" });
+    await loadVectorStatus();
     els.answerBox.classList.remove("empty-state");
     els.answerBox.innerHTML = `<div class="answer-text">Index rebuilt. ${result.chunk_count} chunks indexed.</div>`;
   } catch (error) {
@@ -246,6 +265,7 @@ document.querySelectorAll("[data-query]").forEach((button) => {
 });
 
 loadHealth();
+loadVectorStatus();
 loadPatients().catch((error) => {
   els.patientList.innerHTML = `<div class="empty-state">Could not load patients. ${escapeHtml(error.message)}</div>`;
 });

@@ -10,7 +10,11 @@ from app.rag.answering import answer_question
 from app.rag.chunking import load_patient_chunks
 from app.rag.loaders import load_patient_documents, serialize_documents
 from app.rag.llm import answer_with_local_llm
-from app.rag.vector_store import rebuild_vector_store, search_patient_chunks
+from app.rag.vector_store import (
+    rebuild_vector_store,
+    search_patient_chunks,
+    vector_store_status,
+)
 
 app = FastAPI(title="Clinical AI System - Local HIS", version="0.1.0")
 STATIC_DIR = Path(__file__).resolve().parent / "static"
@@ -30,6 +34,11 @@ def frontend() -> FileResponse:
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/rag/status")
+def rag_status() -> dict:
+    return vector_store_status()
 
 
 @app.get("/patients")
