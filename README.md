@@ -110,6 +110,46 @@ The current V1 embedding model is `sentence-transformers/all-MiniLM-L6-v2`, runn
 
 ChromaDB was considered for V1, but on Windows it can require Microsoft C++ Build Tools for `chroma-hnswlib`. The current SQLite vector store keeps the pipeline local and easy to run, while preserving a clean place to swap in Chroma later.
 
+## Use Qdrant For V2 Vector Search
+
+SQLite remains the default local vector store. To switch the same RAG API and scripts to Qdrant, create a local `.env` file from `.env.example`:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Set:
+
+```text
+VECTOR_STORE_PROVIDER=qdrant
+QDRANT_URL=https://your-cluster-url.qdrant.tech
+QDRANT_API_KEY=your_qdrant_api_key
+QDRANT_COLLECTION=clinical_patient_chunks
+```
+
+Then build the Qdrant collection:
+
+```powershell
+python scripts\build_qdrant_vector_store.py
+```
+
+Search Qdrant directly:
+
+```powershell
+python scripts\search_qdrant_vector_store.py "Which patient has diabetes and high HbA1c?"
+```
+
+When `VECTOR_STORE_PROVIDER=qdrant`, the API endpoints below use Qdrant automatically:
+
+```text
+POST /rag/index
+POST /rag/search
+POST /rag/ask
+POST /rag/ask-llm
+```
+
+Keep `.env` local. It is ignored by Git and should not be committed.
+
 ## Ask A RAG Question
 
 This script retrieves patient chunks and builds a simple grounded answer:

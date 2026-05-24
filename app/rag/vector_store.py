@@ -6,6 +6,7 @@ from pathlib import Path
 
 from langchain_core.documents import Document
 
+from app.rag.config import get_vector_store_settings
 from app.rag.chunking import load_patient_chunks
 from app.rag.embeddings import HuggingFaceLocalEmbeddings
 
@@ -65,6 +66,30 @@ def _create_schema(connection: sqlite3.Connection) -> None:
 
 
 def rebuild_vector_store() -> dict[str, int | str]:
+    settings = get_vector_store_settings()
+    if settings.provider == "qdrant":
+        from app.rag.qdrant_store import rebuild_qdrant_vector_store
+
+        return rebuild_qdrant_vector_store(settings)
+    if settings.provider != "sqlite":
+        raise ValueError(f"Unsupported vector store provider: {settings.provider}")
+
+    return rebuild_sqlite_vector_store()
+
+
+def search_patient_chunks(query: str, k: int = 3) -> list[dict]:
+    settings = get_vector_store_settings()
+    if settings.provider == "qdrant":
+        from app.rag.qdrant_store import search_qdrant_patient_chunks
+
+        return search_qdrant_patient_chunks(query, k, settings)
+    if settings.provider != "sqlite":
+        raise ValueError(f"Unsupported vector store provider: {settings.provider}")
+
+    return search_sqlite_patient_chunks(query, k)
+
+
+def rebuild_sqlite_vector_store() -> dict[str, int | str]:
     chunks = load_patient_chunks()
     embedding_model = HuggingFaceLocalEmbeddings()
     texts = [chunk.page_content for chunk in chunks]
@@ -99,7 +124,7 @@ def rebuild_vector_store() -> dict[str, int | str]:
     }
 
 
-def search_patient_chunks(query: str, k: int = 3) -> list[dict]:
+def search_sqlite_patient_chunks(query: str, k: int = 3) -> list[dict]:
     _ensure_vector_store()
 
     embedding_model = HuggingFaceLocalEmbeddings()
@@ -143,7 +168,7 @@ def search_patient_chunks(query: str, k: int = 3) -> list[dict]:
 
 def _ensure_vector_store() -> None:
     if not VECTOR_DB_PATH.exists():
-        rebuild_vector_store()
+        rebuild_sqlite_vector_store()
         return
 
     with _connect() as connection:
@@ -151,7 +176,7 @@ def _ensure_vector_store() -> None:
         count = connection.execute("SELECT COUNT(*) FROM vector_chunks").fetchone()[0]
 
     if count == 0:
-        rebuild_vector_store()
+        rebuild_sqlite_vector_store()
 
 
 def _cosine_similarity(left: list[float], right: list[float]) -> float:
@@ -202,6 +227,30 @@ def _patient_id_match(query: str, metadata_json: str) -> float:
     metadata = json.loads(metadata_json)
     patient_id = metadata.get("patient_id", "").upper()
     return 1.0 if patient_id in patient_ids else 0.0
+
+
+def score_chunk_match(
+    query: str,
+    page_content: str,
+    metadata: dict,
+    semantic_score: float,
+) -> dict[str, float]:
+    keyword_score = _keyword_overlap(query, page_content)
+    phrase_score = _phrase_overlap(query, page_content)
+    patient_id_score = _patient_id_match(query, json.dumps(metadata))
+    score = (
+        semantic_score
+        + (0.15 * keyword_score)
+        + (0.35 * phrase_score)
+        + (0.60 * patient_id_score)
+    )
+    return {
+        "score": score,
+        "semantic_score": semantic_score,
+        "keyword_score": keyword_score,
+        "phrase_score": phrase_score,
+        "patient_id_score": patient_id_score,
+    }
 
 
 def _chunk_id(chunk: Document) -> str:

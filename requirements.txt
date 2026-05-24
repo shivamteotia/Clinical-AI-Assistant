@@ -8,3 +8,4 @@ transformers==4.46.3
 huggingface-hub==0.36.2
 tokenizers==0.20.3
 ollama==0.5.4
+qdrant-client==1.12.1
