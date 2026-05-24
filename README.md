@@ -140,6 +140,12 @@ Search Qdrant directly:
 python scripts\search_qdrant_vector_store.py "Which patient has diabetes and high HbA1c?"
 ```
 
+The Qdrant backend uses hybrid retrieval:
+
+- exact patient ID filters when a query names a patient such as `P001`
+- structured metadata payloads for diagnoses, lab tests, medications, and source sections
+- semantic vector similarity plus keyword, phrase, patient ID, and metadata score boosts
+
 When `VECTOR_STORE_PROVIDER=qdrant`, the API endpoints below use Qdrant automatically:
 
 ```text

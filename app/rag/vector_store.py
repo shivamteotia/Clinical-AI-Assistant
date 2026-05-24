@@ -280,11 +280,13 @@ def score_chunk_match(
     keyword_score = _keyword_overlap(query, page_content)
     phrase_score = _phrase_overlap(query, page_content)
     patient_id_score = _patient_id_match(query, json.dumps(metadata))
+    metadata_score = _metadata_overlap(query, metadata)
     score = (
         semantic_score
         + (0.15 * keyword_score)
         + (0.35 * phrase_score)
         + (0.60 * patient_id_score)
+        + (0.20 * metadata_score)
     )
     return {
         "score": score,
@@ -292,7 +294,30 @@ def score_chunk_match(
         "keyword_score": keyword_score,
         "phrase_score": phrase_score,
         "patient_id_score": patient_id_score,
+        "metadata_score": metadata_score,
     }
+
+
+def _metadata_overlap(query: str, metadata: dict) -> float:
+    query_terms = _terms(query)
+    if not query_terms:
+        return 0.0
+
+    metadata_terms = set()
+    for key in [
+        "diagnosis_terms",
+        "lab_terms",
+        "medication_terms",
+        "source_section",
+    ]:
+        value = metadata.get(key)
+        if isinstance(value, list):
+            metadata_terms.update(str(item).lower() for item in value)
+        elif value:
+            metadata_terms.update(_terms(str(value)))
+
+    matches = query_terms.intersection(metadata_terms)
+    return len(matches) / len(query_terms)
 
 
 def _chunk_id(chunk: Document) -> str:

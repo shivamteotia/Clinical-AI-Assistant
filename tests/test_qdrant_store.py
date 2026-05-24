@@ -30,18 +30,37 @@ class FakeModels:
             self.vector = vector
             self.payload = payload
 
+    class MatchAny:
+        def __init__(self, any: list[str]) -> None:
+            self.any = any
+
+    class FieldCondition:
+        def __init__(self, key: str, match) -> None:
+            self.key = key
+            self.match = match
+
+    class Filter:
+        def __init__(self, must: list) -> None:
+            self.must = must
+
+    class PayloadSchemaType:
+        KEYWORD = "keyword"
+
 
 class FakeQdrantClient:
     latest = None
     search_points = []
     collection_exists_result = False
 
-    def __init__(self, url: str, api_key: str | None = None) -> None:
+    def __init__(self, url: str, api_key: str | None = None, timeout: int | None = None) -> None:
         self.url = url
         self.api_key = api_key
+        self.timeout = timeout
         self.created_collection = None
+        self.created_payload_indexes = []
         self.deleted_collections = []
         self.upserted_points = []
+        self.last_query_filter = None
         FakeQdrantClient.latest = self
 
     def collection_exists(self, collection_name: str) -> bool:
@@ -53,16 +72,26 @@ class FakeQdrantClient:
     def create_collection(self, collection_name: str, vectors_config) -> None:
         self.created_collection = (collection_name, vectors_config)
 
+    def create_payload_index(
+        self,
+        collection_name: str,
+        field_name: str,
+        field_schema: str,
+    ) -> None:
+        self.created_payload_indexes.append((collection_name, field_name, field_schema))
+
     def upsert(self, collection_name: str, points: list) -> None:
-        self.upserted_points = points
+        self.upserted_points.extend(points)
 
     def search(
         self,
         collection_name: str,
         query_vector: list[float],
+        query_filter,
         limit: int,
         with_payload: bool,
     ) -> list:
+        self.last_query_filter = query_filter
         return self.search_points[:limit]
 
     def count(self, collection_name: str, exact: bool) -> SimpleNamespace:
@@ -111,7 +140,12 @@ class QdrantStoreTests(unittest.TestCase):
         self.assertEqual(result["chunk_count"], 1)
         self.assertEqual(client.created_collection[0], "clinical_test")
         self.assertEqual(client.created_collection[1].size, 3)
+        self.assertEqual(
+            client.created_payload_indexes,
+            [("clinical_test", "metadata.patient_id", "keyword")],
+        )
         self.assertEqual(len(client.upserted_points), 1)
+        self.assertEqual(client.timeout, 60)
         self.assertEqual(
             client.upserted_points[0].payload["metadata"]["patient_id"],
             "P001",
@@ -126,6 +160,9 @@ class QdrantStoreTests(unittest.TestCase):
                     "metadata": {
                         "patient_id": "P001",
                         "patient_name": "Aarav Sharma",
+                        "diagnosis_terms": ["diabetes"],
+                        "lab_terms": ["hba1c"],
+                        "medication_terms": [],
                     },
                 },
             )
@@ -145,6 +182,26 @@ class QdrantStoreTests(unittest.TestCase):
 
         self.assertEqual(matches[0]["metadata"]["patient_id"], "P001")
         self.assertGreater(matches[0]["score"], matches[0]["semantic_score"])
+
+    def test_search_uses_patient_id_filter_when_query_names_patient(self) -> None:
+        FakeQdrantClient.search_points = []
+        settings = VectorStoreSettings(
+            provider="qdrant",
+            qdrant_url="https://example.qdrant.tech",
+            qdrant_api_key="secret",
+            qdrant_collection="clinical_test",
+        )
+
+        qdrant_store.search_qdrant_patient_chunks(
+            "What medication is P001 taking?",
+            3,
+            settings,
+        )
+
+        client = FakeQdrantClient.latest
+        self.assertIsNotNone(client.last_query_filter)
+        self.assertEqual(client.last_query_filter.must[0].key, "metadata.patient_id")
+        self.assertEqual(client.last_query_filter.must[0].match.any, ["P001"])
 
     def test_qdrant_status_reports_ready_collection(self) -> None:
         FakeQdrantClient.search_points = [SimpleNamespace()]

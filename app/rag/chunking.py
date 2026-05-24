@@ -2,6 +2,7 @@ from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from app.rag.loaders import load_patient_documents
+from app.rag.metadata import enrich_chunk_metadata
 
 DEFAULT_CHUNK_SIZE = 700
 DEFAULT_CHUNK_OVERLAP = 120
@@ -20,12 +21,12 @@ def chunk_documents(
 
     chunks = splitter.split_documents(documents)
     for index, chunk in enumerate(chunks):
-        chunk.metadata = {
+        chunk.metadata = enrich_chunk_metadata(chunk.page_content, {
             **chunk.metadata,
             "document_type": "patient_record_chunk",
             "chunk_index": index,
             "chunk_size": len(chunk.page_content),
-        }
+        })
 
     return chunks
 
@@ -33,4 +34,3 @@ def chunk_documents(
 def load_patient_chunks() -> list[Document]:
     documents = load_patient_documents()
     return chunk_documents(documents)
-

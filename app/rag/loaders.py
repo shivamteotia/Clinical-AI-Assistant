@@ -1,6 +1,7 @@
 from langchain_core.documents import Document
 
 from app.api.his import get_patient_record, list_patients
+from app.rag.metadata import build_patient_metadata
 
 
 def _format_section(title: str, rows: list[dict]) -> str:
@@ -51,6 +52,7 @@ def load_patient_documents() -> list[Document]:
                     "document_type": "patient_record",
                     "patient_id": patient["patient_id"],
                     "patient_name": patient["name"],
+                    **build_patient_metadata(record),
                 },
             )
         )
@@ -66,4 +68,3 @@ def serialize_documents(documents: list[Document]) -> list[dict]:
         }
         for document in documents
     ]
-
