@@ -42,6 +42,29 @@ class ApiTests(unittest.TestCase):
         self.assertTrue(record["medications"])
         self.assertTrue(record["clinical_notes"])
 
+    def test_patient_journey_endpoint_returns_summary(self) -> None:
+        response = self.client.get("/patients/P001/journey")
+
+        self.assertEqual(response.status_code, 200)
+        journey = response.json()
+        self.assertEqual(journey["patient_id"], "P001")
+        self.assertIn("summary", journey)
+        self.assertTrue(journey["timeline"])
+
+    def test_patient_scoped_ask_returns_selected_patient_sources(self) -> None:
+        response = self.client.post(
+            "/patients/P001/ask",
+            json={"query": "What medications is this patient taking?", "k": 3},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        result = response.json()
+        self.assertEqual(result["scoped_patient_id"], "P001")
+        self.assertTrue(result["sources"])
+        self.assertTrue(
+            all(source["metadata"]["patient_id"] == "P001" for source in result["sources"])
+        )
+
     def test_missing_patient_returns_404(self) -> None:
         response = self.client.get("/patients/NOPE/record")
 

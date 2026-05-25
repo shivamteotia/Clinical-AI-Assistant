@@ -10,6 +10,7 @@ from app.rag.answering import answer_question
 from app.rag.chunking import load_patient_chunks
 from app.rag.loaders import load_patient_documents, serialize_documents
 from app.rag.llm import answer_with_local_llm
+from app.rag.patient_journey import get_patient_journey
 from app.rag.vector_store import (
     rebuild_vector_store,
     search_patient_chunks,
@@ -62,6 +63,14 @@ def patient_record(patient_id: str) -> dict:
     return result
 
 
+@app.get("/patients/{patient_id}/journey")
+def patient_journey(patient_id: str) -> dict:
+    result = get_patient_journey(patient_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    return result
+
+
 @app.get("/rag/documents")
 def rag_documents() -> list[dict]:
     documents = load_patient_documents()
@@ -92,3 +101,17 @@ def rag_ask(request: SearchRequest) -> dict:
 @app.post("/rag/ask-llm")
 def rag_ask_llm(request: SearchRequest) -> dict:
     return answer_with_local_llm(request.query, request.k)
+
+
+@app.post("/patients/{patient_id}/ask")
+def patient_ask(patient_id: str, request: SearchRequest) -> dict:
+    if get_patient(patient_id) is None:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    return answer_question(request.query, request.k, patient_id=patient_id)
+
+
+@app.post("/patients/{patient_id}/ask-llm")
+def patient_ask_llm(patient_id: str, request: SearchRequest) -> dict:
+    if get_patient(patient_id) is None:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    return answer_with_local_llm(request.query, request.k, patient_id=patient_id)

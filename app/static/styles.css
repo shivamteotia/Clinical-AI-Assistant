@@ -28,6 +28,7 @@ body {
 
 button,
 input,
+select,
 textarea {
   font: inherit;
 }
@@ -134,6 +135,7 @@ button {
 }
 
 input,
+select,
 textarea {
   width: 100%;
   border: 1px solid var(--line);
@@ -148,6 +150,11 @@ input {
   padding: 0 12px;
 }
 
+select {
+  height: 42px;
+  padding: 0 12px;
+}
+
 textarea {
   min-height: 92px;
   resize: vertical;
@@ -156,6 +163,7 @@ textarea {
 }
 
 input:focus,
+select:focus,
 textarea:focus {
   border-color: var(--brand);
   box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14);
@@ -190,25 +198,13 @@ textarea:focus {
   color: var(--brand-strong);
 }
 
-.patient-list {
-  display: grid;
-  gap: 8px;
-  overflow-y: auto;
-  padding-right: 4px;
-}
-
-.patient-item {
+.patient-summary-card {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #ffffff;
   padding: 12px;
   text-align: left;
-}
-
-.patient-item.active {
-  border-color: var(--brand);
-  background: var(--panel-soft);
 }
 
 .patient-name {
@@ -259,6 +255,52 @@ textarea:focus {
   gap: 12px;
   overflow-y: auto;
   padding-right: 4px;
+}
+
+.journey-block {
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f7fbfa;
+  padding: 14px;
+}
+
+.journey-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.journey-header h3 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.journey-block p {
+  margin: 0;
+  line-height: 1.55;
+}
+
+.journey-mini-section {
+  display: grid;
+  gap: 8px;
+}
+
+.compact-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+  color: #34423e;
+  font-size: 13px;
+}
+
+.journey-notice {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+  padding-top: 10px;
 }
 
 .section-block {
@@ -433,9 +475,6 @@ textarea:focus {
     border-bottom: 1px solid var(--line);
   }
 
-  .patient-list {
-    max-height: 360px;
-  }
 }
 
 @media (max-width: 640px) {

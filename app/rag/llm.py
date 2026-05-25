@@ -6,8 +6,20 @@ from app.rag.vector_store import search_patient_chunks
 DEFAULT_MODEL = "phi3"
 
 
-def answer_with_local_llm(query: str, k: int = 3, model: str = DEFAULT_MODEL) -> dict:
-    sources = search_patient_chunks(query, k)
+def answer_with_local_llm(
+    query: str,
+    k: int = 3,
+    model: str = DEFAULT_MODEL,
+    patient_id: str | None = None,
+) -> dict:
+    search_query = query if not patient_id or patient_id.upper() in query.upper() else f"{query} {patient_id}"
+    sources = search_patient_chunks(search_query, max(k * 5, k))
+    if patient_id:
+        sources = [
+            source
+            for source in sources
+            if source["metadata"].get("patient_id", "").upper() == patient_id.upper()
+        ][:k]
     context = _format_context(sources)
     prompt = _build_prompt(query, context)
 
@@ -33,6 +45,7 @@ def answer_with_local_llm(query: str, k: int = 3, model: str = DEFAULT_MODEL) ->
     return attach_safety_metadata({
         "answer": response["message"]["content"],
         "model": model,
+        "scoped_patient_id": patient_id,
         "sources": sources,
     }, query)
 

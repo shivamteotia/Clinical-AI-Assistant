@@ -56,6 +56,9 @@ http://127.0.0.1:8000/docs
 - `GET /patients`
 - `GET /patients/{patient_id}`
 - `GET /patients/{patient_id}/record`
+- `GET /patients/{patient_id}/journey`
+- `POST /patients/{patient_id}/ask`
+- `POST /patients/{patient_id}/ask-llm`
 - `GET /rag/documents`
 - `GET /rag/chunks`
 - `GET /rag/status`
@@ -159,6 +162,22 @@ POST /rag/ask-llm
 Keep `.env` local. It is ignored by Git and should not be committed.
 
 ## Ask A RAG Question
+
+## Generate Patient Journey Summaries
+
+Precompute patient journey summaries for the doctor-facing patient view:
+
+```powershell
+python scripts\generate_patient_journeys.py
+```
+
+To try local Ollama generation first, with deterministic fallback:
+
+```powershell
+python scripts\generate_patient_journeys.py --ollama
+```
+
+The app reads `data\patient_journeys.json` when a doctor selects a patient from the dropdown. Patient-scoped Q/A endpoints append the selected patient ID to retrieval so Qdrant can filter the search to that patient.
 
 This script retrieves patient chunks and builds a simple grounded answer:
 

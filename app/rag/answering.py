@@ -32,9 +32,10 @@ STOP_WORDS = {
 }
 
 
-def answer_question(query: str, k: int = 3) -> dict:
+def answer_question(query: str, k: int = 3, patient_id: str | None = None) -> dict:
     intent = classify_query_intent(query)
-    matches = search_patient_chunks(query, k)
+    search_query = _scoped_query(query, patient_id)
+    matches = _search_scoped_chunks(search_query, k, patient_id)
     if not matches:
         return attach_safety_metadata({
             "answer": "No relevant patient information was found in the local HIS index.",
@@ -79,6 +80,7 @@ def answer_question(query: str, k: int = 3) -> dict:
     return attach_safety_metadata({
         "answer": answer,
         "intent": intent,
+        "scoped_patient_id": patient_id,
         "evidence": evidence_items,
         "sources": matches,
     }, query)
@@ -129,3 +131,22 @@ def _clean_sentence(sentence: str) -> str:
     if len(sentence) > 320:
         sentence = sentence[:317].rstrip() + "..."
     return sentence
+
+
+def _scoped_query(query: str, patient_id: str | None) -> str:
+    if not patient_id or patient_id.upper() in query.upper():
+        return query
+    return f"{query} {patient_id}"
+
+
+def _search_scoped_chunks(query: str, k: int, patient_id: str | None) -> list[dict]:
+    if not patient_id:
+        return search_patient_chunks(query, k)
+
+    candidates = search_patient_chunks(query, max(k * 5, k))
+    scoped_matches = [
+        match
+        for match in candidates
+        if match["metadata"].get("patient_id", "").upper() == patient_id.upper()
+    ]
+    return scoped_matches[:k]

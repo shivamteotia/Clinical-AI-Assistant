@@ -7,8 +7,8 @@
 const els = {
   healthBadge: document.querySelector("#healthBadge"),
   vectorBadge: document.querySelector("#vectorBadge"),
-  patientSearch: document.querySelector("#patientSearch"),
-  patientList: document.querySelector("#patientList"),
+  patientSelect: document.querySelector("#patientSelect"),
+  selectedPatientCard: document.querySelector("#selectedPatientCard"),
   patientTitle: document.querySelector("#patientTitle"),
   patientMeta: document.querySelector("#patientMeta"),
   recordContent: document.querySelector("#recordContent"),
@@ -86,39 +86,51 @@ async function loadPatients() {
 }
 
 function renderPatients() {
-  const query = els.patientSearch.value.trim().toLowerCase();
-  const patients = state.patients.filter((patient) => {
-    const text = `${patient.patient_id} ${patient.name} ${patient.gender} ${patient.address}`.toLowerCase();
-    return text.includes(query);
-  });
-
-  els.patientList.innerHTML = patients
+  els.patientSelect.innerHTML = state.patients
     .map(
-      (patient) => `
-        <button class="patient-item ${patient.patient_id === state.selectedPatientId ? "active" : ""}" type="button" data-patient-id="${escapeHtml(patient.patient_id)}">
-          <div class="patient-name">
-            <span>${escapeHtml(patient.name)}</span>
-            <span>${escapeHtml(patient.patient_id)}</span>
-          </div>
-          <div class="patient-detail">${escapeHtml(patient.age)} yrs - ${escapeHtml(patient.gender)} - ${escapeHtml(patient.address)}</div>
-        </button>
-      `,
+      (patient) => `<option value="${escapeHtml(patient.patient_id)}">${escapeHtml(patient.patient_id)} - ${escapeHtml(patient.name)}</option>`,
     )
     .join("");
+  if (state.selectedPatientId) {
+    els.patientSelect.value = state.selectedPatientId;
+  }
 }
 
 async function selectPatient(patientId) {
   state.selectedPatientId = patientId;
   renderPatients();
+  renderSelectedPatientCard(patientId);
   els.recordContent.textContent = "Loading patient record...";
   els.recordContent.classList.add("empty-state");
+  els.answerBox.classList.add("empty-state");
+  els.answerBox.textContent = "Ask a question to query this selected patient's journey and retrieved record evidence.";
+  els.sourcesList.innerHTML = "";
+  els.sourceCount.textContent = "0 chunks";
 
   try {
-    const record = await api(`/patients/${encodeURIComponent(patientId)}/record`);
+    const [record, journey] = await Promise.all([
+      api(`/patients/${encodeURIComponent(patientId)}/record`),
+      api(`/patients/${encodeURIComponent(patientId)}/journey`),
+    ]);
     renderRecord(record);
+    renderJourney(journey);
   } catch (error) {
     els.recordContent.textContent = `Could not load patient record. ${error.message}`;
   }
+}
+
+function renderSelectedPatientCard(patientId) {
+  const patient = state.patients.find((item) => item.patient_id === patientId);
+  if (!patient) return;
+
+  els.selectedPatientCard.classList.remove("empty-state");
+  els.selectedPatientCard.innerHTML = `
+    <div class="patient-name">
+      <span>${escapeHtml(patient.name)}</span>
+      <span>${escapeHtml(patient.patient_id)}</span>
+    </div>
+    <div class="patient-detail">${escapeHtml(patient.age)} yrs - ${escapeHtml(patient.gender)} - ${escapeHtml(patient.address)}</div>
+  `;
 }
 
 function renderRecord(record) {
@@ -127,6 +139,7 @@ function renderRecord(record) {
   els.patientMeta.textContent = `${patient.age} yrs - ${patient.gender}`;
   els.recordContent.classList.remove("empty-state");
   els.recordContent.innerHTML = `
+    <div id="journeyContent" class="journey-block empty-state">Loading generated patient journey...</div>
     ${section("Encounters", record.encounters, (row) => `
       <strong>${escapeHtml(row.diagnosis)}</strong>
       <span>${escapeHtml(row.date)} - ${escapeHtml(row.visit_type)}</span>
@@ -144,6 +157,50 @@ function renderRecord(record) {
       <strong>${escapeHtml(row.note_type)} - ${escapeHtml(row.date)}</strong>
       <span>${escapeHtml(row.note_text)}</span>
     `)}
+  `;
+}
+
+function renderJourney(journey) {
+  const container = document.querySelector("#journeyContent");
+  if (!container) return;
+
+  container.classList.remove("empty-state");
+  container.innerHTML = `
+    <div class="journey-header">
+      <div>
+        <p class="eyebrow">Generated Patient Journey</p>
+        <h3>${escapeHtml(journey.current_focus || "Clinical journey")}</h3>
+      </div>
+      <span class="status-pill muted-pill">${escapeHtml(journey.generated_by || "stored")}</span>
+    </div>
+    <p>${escapeHtml(journey.summary)}</p>
+    ${renderJourneyList("Timeline", journey.timeline, (item) => `
+      <strong>${escapeHtml(item.date)} - ${escapeHtml(item.title)}</strong>
+      <span>${escapeHtml(item.type)} - ${escapeHtml(item.detail)}</span>
+    `)}
+    ${renderSimpleList("Key labs", journey.key_labs)}
+    ${renderSimpleList("Active medications", journey.active_medications)}
+    <div class="journey-notice">${escapeHtml(journey.safety_notice)}</div>
+  `;
+}
+
+function renderJourneyList(title, rows, renderRow) {
+  if (!rows || rows.length === 0) return "";
+  return `
+    <div class="journey-mini-section">
+      <div class="mini-heading">${escapeHtml(title)}</div>
+      <div class="data-grid">${rows.map((row) => `<div class="data-row">${renderRow(row)}</div>`).join("")}</div>
+    </div>
+  `;
+}
+
+function renderSimpleList(title, rows) {
+  if (!rows || rows.length === 0) return "";
+  return `
+    <div class="journey-mini-section">
+      <div class="mini-heading">${escapeHtml(title)}</div>
+      <ul class="compact-list">${rows.map((row) => `<li>${escapeHtml(row)}</li>`).join("")}</ul>
+    </div>
   `;
 }
 
@@ -180,7 +237,9 @@ async function askQuestion() {
     return;
   }
 
-  const endpoint = state.mode === "llm" ? "/rag/ask-llm" : "/rag/ask";
+  const endpoint = state.selectedPatientId
+    ? `/patients/${encodeURIComponent(state.selectedPatientId)}/${state.mode === "llm" ? "ask-llm" : "ask"}`
+    : state.mode === "llm" ? "/rag/ask-llm" : "/rag/ask";
   setLoading(els.askBtn, state.mode === "llm" ? "Thinking..." : "Searching...", true);
   els.answerBox.classList.add("empty-state");
   els.answerBox.textContent = state.mode === "llm" ? "Ollama is generating an answer..." : "Searching retrieved evidence...";
@@ -277,11 +336,7 @@ function setMode(mode) {
   els.llmModeBtn.classList.toggle("active", mode === "llm");
 }
 
-els.patientSearch.addEventListener("input", renderPatients);
-els.patientList.addEventListener("click", (event) => {
-  const button = event.target.closest("[data-patient-id]");
-  if (button) selectPatient(button.dataset.patientId);
-});
+els.patientSelect.addEventListener("change", (event) => selectPatient(event.target.value));
 els.rebuildIndexBtn.addEventListener("click", rebuildIndex);
 els.askBtn.addEventListener("click", askQuestion);
 els.questionInput.addEventListener("keydown", (event) => {
@@ -301,5 +356,5 @@ document.querySelectorAll("[data-query]").forEach((button) => {
 loadHealth();
 loadVectorStatus();
 loadPatients().catch((error) => {
-  els.patientList.innerHTML = `<div class="empty-state">Could not load patients. ${escapeHtml(error.message)}</div>`;
+  els.selectedPatientCard.innerHTML = `<div class="empty-state">Could not load patients. ${escapeHtml(error.message)}</div>`;
 });

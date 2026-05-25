@@ -22,13 +22,15 @@
 
         <div class="toolbar">
           <label class="search-box">
-            <span>Search patients</span>
-            <input id="patientSearch" type="search" placeholder="Name, ID, diagnosis..." />
+            <span>Select patient</span>
+            <select id="patientSelect"></select>
           </label>
           <button id="rebuildIndexBtn" class="secondary-button" type="button">Rebuild Index</button>
         </div>
 
-        <div id="patientList" class="patient-list" aria-live="polite"></div>
+        <div id="selectedPatientCard" class="patient-summary-card empty-state" aria-live="polite">
+          Select a patient to load their journey.
+        </div>
       </aside>
 
       <main class="workspace">
@@ -41,7 +43,7 @@
             <span id="patientMeta" class="muted"></span>
           </div>
           <div id="recordContent" class="record-content empty-state">
-            Choose a patient from the left to inspect structured data and notes.
+            Choose a patient from the dropdown to inspect structured data and notes.
           </div>
         </section>
 
@@ -49,7 +51,7 @@
           <div class="panel-header">
             <div>
               <p class="eyebrow">RAG Assistant</p>
-              <h2>Ask the local HIS</h2>
+              <h2>Ask about selected patient</h2>
             </div>
             <div class="mode-toggle" role="group" aria-label="Answer mode">
               <button id="simpleModeBtn" class="mode-button active" type="button">Fast</button>
@@ -58,14 +60,14 @@
           </div>
 
           <div class="question-row">
-            <textarea id="questionInput" rows="3" placeholder="Ask about a condition, lab, medication, or patient ID..."></textarea>
+            <textarea id="questionInput" rows="3" placeholder="Ask about the selected patient's journey, labs, medications, or notes..."></textarea>
             <button id="askBtn" class="primary-button" type="button">Ask</button>
           </div>
 
           <div class="quick-prompts">
-            <button type="button" data-query="Which patient has diabetes and high HbA1c?">Diabetes + HbA1c</button>
-            <button type="button" data-query="Which patient has chronic kidney disease with reduced eGFR?">CKD + eGFR</button>
-            <button type="button" data-query="What medication is P001 taking?">P001 medication</button>
+            <button type="button" data-query="Summarize this patient's clinical journey.">Journey summary</button>
+            <button type="button" data-query="What medications is this patient taking?">Medications</button>
+            <button type="button" data-query="What are the key lab findings?">Key labs</button>
           </div>
 
           <div id="answerBox" class="answer-box empty-state">
