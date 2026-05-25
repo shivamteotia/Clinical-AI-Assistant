@@ -51,6 +51,18 @@ class ApiTests(unittest.TestCase):
         self.assertIn("summary", journey)
         self.assertTrue(journey["timeline"])
 
+    def test_patient_journey_generation_endpoint_stores_summary(self) -> None:
+        response = self.client.post(
+            "/patients/P001/journey/generate",
+            json={"use_llm": False, "model": "phi3"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        journey = response.json()
+        self.assertEqual(journey["patient_id"], "P001")
+        self.assertEqual(journey["generated_by"], "local_fallback")
+        self.assertIn("summary", journey)
+
     def test_patient_scoped_ask_returns_selected_patient_sources(self) -> None:
         response = self.client.post(
             "/patients/P001/ask",

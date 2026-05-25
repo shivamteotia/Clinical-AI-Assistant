@@ -7,6 +7,22 @@ from app.rag.safety import SAFETY_NOTICE
 BASE_DIR = Path(__file__).resolve().parents[2]
 DATA_DIR = BASE_DIR / "data"
 JOURNEY_PATH = DATA_DIR / "patient_journeys.json"
+DEFAULT_JOURNEY_MODEL = "phi3"
+PATIENT_JOURNEY_SYSTEM_PROMPT = """
+You are a clinical documentation assistant inside a prototype clinical AI system.
+
+Task:
+Create a concise patient journey summary for a doctor reviewing a synthetic local HIS record.
+
+Rules:
+- Use only the supplied patient record.
+- Do not diagnose beyond diagnoses already present in the record.
+- Do not recommend treatment, medication changes, triage, or follow-up actions.
+- Do not invent missing dates, labs, medications, symptoms, or outcomes.
+- Mention that this is dummy/synthetic data only when clinically relevant.
+- Write in 1 short paragraph, suitable for a doctor-facing patient overview.
+- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.
+""".strip()
 
 
 def load_patient_journeys() -> dict[str, dict]:
@@ -26,6 +42,14 @@ def save_patient_journeys(journeys: list[dict]) -> None:
         file.write("\n")
 
 
+def upsert_patient_journey(journey: dict) -> None:
+    journeys_by_patient = load_patient_journeys()
+    journeys_by_patient[journey["patient_id"]] = journey
+    save_patient_journeys(
+        sorted(journeys_by_patient.values(), key=lambda item: item["patient_id"])
+    )
+
+
 def get_patient_journey(patient_id: str) -> dict | None:
     record = get_patient_record(patient_id)
     if record is None:
@@ -35,21 +59,43 @@ def get_patient_journey(patient_id: str) -> dict | None:
     return journeys.get(patient_id) or build_patient_journey(record, generated_by="local_fallback")
 
 
-def build_all_patient_journeys(use_llm: bool = False) -> list[dict]:
+def generate_and_store_patient_journey(
+    patient_id: str,
+    use_llm: bool = True,
+    model: str = DEFAULT_JOURNEY_MODEL,
+) -> dict | None:
+    record = get_patient_record(patient_id)
+    if record is None:
+        return None
+
+    journey = build_patient_journey(record, use_llm=use_llm, model=model)
+    upsert_patient_journey(journey)
+    return journey
+
+
+def build_all_patient_journeys(
+    use_llm: bool = False,
+    model: str = DEFAULT_JOURNEY_MODEL,
+) -> list[dict]:
     journeys = []
     for patient in list_patients():
         record = get_patient_record(patient["patient_id"])
         if record is None:
             continue
-        journeys.append(build_patient_journey(record, use_llm=use_llm))
+        journeys.append(build_patient_journey(record, use_llm=use_llm, model=model))
     return journeys
 
 
-def build_patient_journey(record: dict, use_llm: bool = False, generated_by: str = "local_fallback") -> dict:
+def build_patient_journey(
+    record: dict,
+    use_llm: bool = False,
+    generated_by: str = "local_fallback",
+    model: str = DEFAULT_JOURNEY_MODEL,
+) -> dict:
     if use_llm:
-        llm_summary = _try_llm_summary(record)
+        llm_summary = _try_llm_summary(record, model)
         if llm_summary:
-            generated_by = "ollama"
+            generated_by = f"ollama:{model}"
         else:
             llm_summary = _fallback_summary(record)
     else:
@@ -61,6 +107,8 @@ def build_patient_journey(record: dict, use_llm: bool = False, generated_by: str
         "patient_id": patient["patient_id"],
         "patient_name": patient["name"],
         "generated_by": generated_by,
+        "journey_model": model if generated_by.startswith("ollama") else None,
+        "system_prompt": PATIENT_JOURNEY_SYSTEM_PROMPT if generated_by.startswith("ollama") else None,
         "summary": llm_summary,
         "timeline": _timeline(record),
         "current_focus": _current_focus(latest_encounter),
@@ -70,29 +118,35 @@ def build_patient_journey(record: dict, use_llm: bool = False, generated_by: str
     }
 
 
-def _try_llm_summary(record: dict) -> str | None:
+def _try_llm_summary(record: dict, model: str) -> str | None:
     try:
         import ollama
 
         response = ollama.chat(
-            model="phi3",
+            model=model,
             messages=[
                 {
                     "role": "system",
-                    "content": (
-                        "Summarize this dummy clinical record as a concise patient journey. "
-                        "Do not diagnose, recommend treatment, or add facts not in the record."
-                    ),
+                    "content": PATIENT_JOURNEY_SYSTEM_PROMPT,
                 },
                 {
                     "role": "user",
-                    "content": json.dumps(record, ensure_ascii=True),
+                    "content": _format_record_for_llm(record),
                 },
             ],
         )
         return response["message"]["content"].strip()
     except Exception:
         return None
+
+
+def _format_record_for_llm(record: dict) -> str:
+    return "\n".join(
+        [
+            "Patient record JSON:",
+            json.dumps(record, ensure_ascii=True, indent=2),
+        ]
+    )
 
 
 def _fallback_summary(record: dict) -> str:

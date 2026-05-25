@@ -3,6 +3,8 @@
     "patient_id": "P001",
     "patient_name": "Aarav Sharma",
     "generated_by": "local_fallback",
+    "journey_model": null,
+    "system_prompt": null,
     "summary": "Aarav Sharma (P001) is a 52-year-old male patient. The latest recorded encounter lists Type 2 diabetes mellitus after a visit for Increased thirst and fatigue. Recorded labs include HbA1c, Fasting glucose. Current recorded medications include Metformin. Clinical note context: Patient reports increased thirst, frequent urination, and fatigue for the last three months. Lifestyle counseling provided. Started on metformin and advised dietary modification, glucose monitoring, and follow-up in four weeks. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
     "timeline": [
       {
@@ -32,6 +34,8 @@
     "patient_id": "P002",
     "patient_name": "Meera Iyer",
     "generated_by": "local_fallback",
+    "journey_model": null,
+    "system_prompt": null,
     "summary": "Meera Iyer (P002) is a 44-year-old female patient. The latest recorded encounter lists Bronchial asthma after a visit for Intermittent wheezing and cough. Recorded labs include no recorded labs. Current recorded medications include Salbutamol inhaler. Clinical note context: Patient reports intermittent wheezing, cough, and mild breathlessness, worse at night and after dust exposure. No fever or chest pain. Salbutamol inhaler prescribed as rescue medication. Advised trigger avoidance. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
     "timeline": [
       {
@@ -58,6 +62,8 @@
     "patient_id": "P003",
     "patient_name": "Rohan Das",
     "generated_by": "local_fallback",
+    "journey_model": null,
+    "system_prompt": null,
     "summary": "Rohan Das (P003) is a 67-year-old male patient. The latest recorded encounter lists Hypertension with suspected angina after a visit for Chest discomfort and shortness of breath. Recorded labs include Troponin I. Current recorded medications include Amlodipine. Clinical note context: Patient presented with chest discomfort and shortness of breath. Blood pressure elevated at presentation. Initial troponin within reference range. ECG monitoring advised and cardiology evaluation recommended. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
     "timeline": [
       {
@@ -86,6 +92,8 @@
     "patient_id": "P004",
     "patient_name": "Nisha Patel",
     "generated_by": "local_fallback",
+    "journey_model": null,
+    "system_prompt": null,
     "summary": "Nisha Patel (P004) is a 38-year-old female patient. The latest recorded encounter lists Urinary tract infection after a visit for Burning urination and fever. Recorded labs include Urine leukocytes, Temperature. Current recorded medications include Nitrofurantoin. Clinical note context: Patient has burning urination, urinary frequency, and fever for two days. Urine dipstick showed leukocytes. Hydration advice given and antibiotic course started. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
     "timeline": [
       {
@@ -115,6 +123,8 @@
     "patient_id": "P005",
     "patient_name": "Kabir Khan",
     "generated_by": "local_fallback",
+    "journey_model": null,
+    "system_prompt": null,
     "summary": "Kabir Khan (P005) is a 61-year-old male patient. The latest recorded encounter lists Chronic obstructive pulmonary disease after a visit for Chronic cough and exertional breathlessness. Recorded labs include SpO2. Current recorded medications include Tiotropium inhaler. Clinical note context: Patient reports chronic cough, sputum production, and exertional breathlessness. Smoking history noted in dummy record. Inhaler technique reviewed and pulmonary follow-up advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
     "timeline": [
       {
@@ -143,6 +153,8 @@
     "patient_id": "P006",
     "patient_name": "Ananya Rao",
     "generated_by": "local_fallback",
+    "journey_model": null,
+    "system_prompt": null,
     "summary": "Ananya Rao (P006) is a 29-year-old female patient. The latest recorded encounter lists Hyperthyroidism after a visit for Palpitations and weight loss. Recorded labs include TSH, Free T4. Current recorded medications include Carbimazole. Clinical note context: Patient reports palpitations, heat intolerance, tremor, and unintentional weight loss. Thyroid labs reviewed and endocrinology follow-up advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
     "timeline": [
       {
@@ -172,6 +184,8 @@
     "patient_id": "P007",
     "patient_name": "Vikram Singh",
     "generated_by": "local_fallback",
+    "journey_model": null,
+    "system_prompt": null,
     "summary": "Vikram Singh (P007) is a 58-year-old male patient. The latest recorded encounter lists Essential hypertension after a visit for Headache and high blood pressure. Recorded labs include Blood pressure. Current recorded medications include Telmisartan. Clinical note context: Patient seen for headache and repeated high blood pressure readings. Salt reduction and home blood pressure log discussed. Antihypertensive medication started. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
     "timeline": [
       {
@@ -200,6 +214,8 @@
     "patient_id": "P008",
     "patient_name": "Farah Ali",
     "generated_by": "local_fallback",
+    "journey_model": null,
+    "system_prompt": null,
     "summary": "Farah Ali (P008) is a 33-year-old female patient. The latest recorded encounter lists Iron deficiency anemia after a visit for Fatigue and pallor. Recorded labs include Hemoglobin, Ferritin. Current recorded medications include Ferrous sulfate. Clinical note context: Patient reports fatigue, dizziness, and pallor. Labs show low hemoglobin and ferritin. Iron supplementation started and dietary counseling provided. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
     "timeline": [
       {
@@ -229,6 +245,8 @@
     "patient_id": "P009",
     "patient_name": "Suresh Nair",
     "generated_by": "local_fallback",
+    "journey_model": null,
+    "system_prompt": null,
     "summary": "Suresh Nair (P009) is a 72-year-old male patient. The latest recorded encounter lists Chronic kidney disease after a visit for Reduced urine output and swelling. Recorded labs include Creatinine, eGFR. Current recorded medications include Furosemide. Clinical note context: Patient reports reduced urine output and ankle swelling. Creatinine is elevated in the dummy record and eGFR is reduced. Nephrology review advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
     "timeline": [
       {
@@ -258,6 +276,8 @@
     "patient_id": "P010",
     "patient_name": "Pooja Menon",
     "generated_by": "local_fallback",
+    "journey_model": null,
+    "system_prompt": null,
     "summary": "Pooja Menon (P010) is a 26-year-old female patient. The latest recorded encounter lists Early pregnancy after a visit for Missed periods and nausea. Recorded labs include Urine pregnancy test. Current recorded medications include Folic acid. Clinical note context: Patient reports missed periods, nausea, and breast tenderness. Urine pregnancy test is positive. Antenatal counseling and obstetric follow-up advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
     "timeline": [
       {
@@ -286,6 +306,8 @@
     "patient_id": "P011",
     "patient_name": "Aditya Verma",
     "generated_by": "local_fallback",
+    "journey_model": null,
+    "system_prompt": null,
     "summary": "Aditya Verma (P011) is a 47-year-old male patient. The latest recorded encounter lists Gastroesophageal reflux disease after a visit for Epigastric pain and acidity. Recorded labs include no recorded labs. Current recorded medications include Pantoprazole. Clinical note context: Patient reports epigastric burning, sour regurgitation, and symptoms after spicy meals. Lifestyle advice and proton pump inhibitor therapy started. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
     "timeline": [
       {
@@ -312,6 +334,8 @@
     "patient_id": "P012",
     "patient_name": "Leela Thomas",
     "generated_by": "local_fallback",
+    "journey_model": null,
+    "system_prompt": null,
     "summary": "Leela Thomas (P012) is a 64-year-old female patient. The latest recorded encounter lists Osteoarthritis of knee after a visit for Knee pain and stiffness. Recorded labs include no recorded labs. Current recorded medications include Paracetamol. Clinical note context: Patient reports bilateral knee pain, morning stiffness, and difficulty climbing stairs. Weight management and physiotherapy were discussed. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
     "timeline": [
       {
@@ -338,6 +362,8 @@
     "patient_id": "P013",
     "patient_name": "Imran Sheikh",
     "generated_by": "local_fallback",
+    "journey_model": null,
+    "system_prompt": null,
     "summary": "Imran Sheikh (P013) is a 41-year-old male patient. The latest recorded encounter lists Malaria after a visit for Fever with chills. Recorded labs include Malaria parasite smear, Platelets. Current recorded medications include Artemether lumefantrine. Clinical note context: Patient reports fever with chills and body ache. Peripheral smear is positive for malaria parasite in dummy data. Antimalarial treatment started. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
     "timeline": [
       {
@@ -367,6 +393,8 @@
     "patient_id": "P014",
     "patient_name": "Tanya Roy",
     "generated_by": "local_fallback",
+    "journey_model": null,
+    "system_prompt": null,
     "summary": "Tanya Roy (P014) is a 36-year-old female patient. The latest recorded encounter lists Depressive symptoms after a visit for Low mood and poor sleep. Recorded labs include no recorded labs. Current recorded medications include Sertraline. Clinical note context: Patient reports persistent low mood, poor sleep, reduced interest, and fatigue. Safety screening documented in dummy record. Mental health follow-up advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
     "timeline": [
       {
@@ -393,6 +421,8 @@
     "patient_id": "P015",
     "patient_name": "Manoj Gupta",
     "generated_by": "local_fallback",
+    "journey_model": null,
+    "system_prompt": null,
     "summary": "Manoj Gupta (P015) is a 55-year-old male patient. The latest recorded encounter lists Gallstone disease after a visit for Right upper abdominal pain. Recorded labs include Total bilirubin. Current recorded medications include Drotaverine. Clinical note context: Patient reports right upper abdominal pain after fatty meals. Ultrasound note mentions gallstones in dummy data. Surgical review advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
     "timeline": [
       {
@@ -421,6 +451,8 @@
     "patient_id": "P016",
     "patient_name": "Sneha Kapoor",
     "generated_by": "local_fallback",
+    "journey_model": null,
+    "system_prompt": null,
     "summary": "Sneha Kapoor (P016) is a 31-year-old female patient. The latest recorded encounter lists Migraine after a visit for Migraine headaches. Recorded labs include no recorded labs. Current recorded medications include Sumatriptan. Clinical note context: Patient reports unilateral throbbing headache with nausea and light sensitivity. Trigger diary and acute migraine medication discussed. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
     "timeline": [
       {
@@ -447,6 +479,8 @@
     "patient_id": "P017",
     "patient_name": "Harish Kulkarni",
     "generated_by": "local_fallback",
+    "journey_model": null,
+    "system_prompt": null,
     "summary": "Harish Kulkarni (P017) is a 69-year-old male patient. The latest recorded encounter lists Mild cognitive impairment after a visit for Memory difficulty. Recorded labs include Vitamin B12. Current recorded medications include Donepezil. Clinical note context: Patient and family report recent memory difficulty and missed appointments. Cognitive screening performed in dummy record. Neurology follow-up advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
     "timeline": [
       {
@@ -475,6 +509,8 @@
     "patient_id": "P018",
     "patient_name": "Ritu Bansal",
     "generated_by": "local_fallback",
+    "journey_model": null,
+    "system_prompt": null,
     "summary": "Ritu Bansal (P018) is a 49-year-old female patient. The latest recorded encounter lists Rheumatoid arthritis after a visit for Joint pain and swelling. Recorded labs include Rheumatoid factor, ESR. Current recorded medications include Methotrexate. Clinical note context: Patient reports small joint pain, morning stiffness, and swelling in both hands. Rheumatoid factor positive in dummy data. Rheumatology review advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
     "timeline": [
       {
@@ -504,6 +540,8 @@
     "patient_id": "P019",
     "patient_name": "Dev Malhotra",
     "generated_by": "local_fallback",
+    "journey_model": null,
+    "system_prompt": null,
     "summary": "Dev Malhotra (P019) is a 23-year-old male patient. The latest recorded encounter lists Viral upper respiratory infection after a visit for Fever and sore throat. Recorded labs include COVID antigen. Current recorded medications include Cetirizine. Clinical note context: Patient reports fever, sore throat, runny nose, and mild cough. COVID antigen test is negative in dummy data. Symptomatic care advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
     "timeline": [
       {
@@ -532,6 +570,8 @@
     "patient_id": "P020",
     "patient_name": "Asha Reddy",
     "generated_by": "local_fallback",
+    "journey_model": null,
+    "system_prompt": null,
     "summary": "Asha Reddy (P020) is a 57-year-old female patient. The latest recorded encounter lists Peripheral neuropathy after a visit for Tingling feet and numbness. Recorded labs include Vitamin B12. Current recorded medications include Pregabalin. Clinical note context: Patient reports tingling feet, numbness, and burning sensation at night. Vitamin B12 is low in dummy data. Neuropathy assessment documented. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
     "timeline": [
       {

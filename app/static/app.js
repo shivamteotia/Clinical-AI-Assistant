@@ -13,6 +13,7 @@ const els = {
   patientMeta: document.querySelector("#patientMeta"),
   recordContent: document.querySelector("#recordContent"),
   rebuildIndexBtn: document.querySelector("#rebuildIndexBtn"),
+  generateJourneyBtn: document.querySelector("#generateJourneyBtn"),
   simpleModeBtn: document.querySelector("#simpleModeBtn"),
   llmModeBtn: document.querySelector("#llmModeBtn"),
   questionInput: document.querySelector("#questionInput"),
@@ -230,6 +231,26 @@ async function rebuildIndex() {
   }
 }
 
+async function generateJourney() {
+  if (!state.selectedPatientId) return;
+
+  setLoading(els.generateJourneyBtn, "Generating...", true);
+  try {
+    const journey = await api(`/patients/${encodeURIComponent(state.selectedPatientId)}/journey/generate`, {
+      method: "POST",
+      body: JSON.stringify({ use_llm: true, model: "phi3" }),
+    });
+    renderJourney(journey);
+    els.answerBox.classList.remove("empty-state");
+    els.answerBox.innerHTML = `<div class="answer-text">Patient journey generated and stored using ${escapeHtml(journey.generated_by)}.</div>`;
+  } catch (error) {
+    els.answerBox.classList.remove("empty-state");
+    els.answerBox.innerHTML = `<div class="answer-text">Journey generation failed. ${escapeHtml(error.message)}</div>`;
+  } finally {
+    setLoading(els.generateJourneyBtn, "Generate LLM Journey", false);
+  }
+}
+
 async function askQuestion() {
   const query = els.questionInput.value.trim();
   if (!query) {
@@ -338,6 +359,7 @@ function setMode(mode) {
 
 els.patientSelect.addEventListener("change", (event) => selectPatient(event.target.value));
 els.rebuildIndexBtn.addEventListener("click", rebuildIndex);
+els.generateJourneyBtn.addEventListener("click", generateJourney);
 els.askBtn.addEventListener("click", askQuestion);
 els.questionInput.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {

@@ -15,9 +15,14 @@ def main() -> None:
         action="store_true",
         help="Use local Ollama phi3 when available; falls back to local deterministic summaries.",
     )
+    parser.add_argument(
+        "--model",
+        default="phi3",
+        help="Ollama model to use when --ollama is enabled.",
+    )
     args = parser.parse_args()
 
-    journeys = build_all_patient_journeys(use_llm=args.ollama)
+    journeys = build_all_patient_journeys(use_llm=args.ollama, model=args.model)
     save_patient_journeys(journeys)
     print(f"Generated {len(journeys)} patient journey summaries.")
 
