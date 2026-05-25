@@ -222,7 +222,7 @@ textarea:focus {
 
 .workspace {
   display: grid;
-  grid-template-columns: minmax(360px, 0.95fr) minmax(420px, 1.05fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 18px;
   padding: 22px;
 }

@@ -26,11 +26,10 @@
             <select id="patientSelect"></select>
           </label>
           <button id="rebuildIndexBtn" class="secondary-button" type="button">Rebuild Index</button>
-          <button id="generateJourneyBtn" class="secondary-button" type="button">Generate LLM Journey</button>
         </div>
 
         <div id="selectedPatientCard" class="patient-summary-card empty-state" aria-live="polite">
-          Select a patient to load their journey.
+          Select a patient to load their holistic view.
         </div>
       </aside>
 
@@ -38,49 +37,13 @@
         <section class="record-panel">
           <div class="panel-header">
             <div>
-              <p class="eyebrow">Patient Record</p>
+              <p class="eyebrow">Doctor Review</p>
               <h2 id="patientTitle">Select a patient</h2>
             </div>
             <span id="patientMeta" class="muted"></span>
           </div>
           <div id="recordContent" class="record-content empty-state">
             Choose a patient from the dropdown to inspect structured data and notes.
-          </div>
-        </section>
-
-        <section class="assistant-panel">
-          <div class="panel-header">
-            <div>
-              <p class="eyebrow">RAG Assistant</p>
-              <h2>Ask about selected patient</h2>
-            </div>
-            <div class="mode-toggle" role="group" aria-label="Answer mode">
-              <button id="simpleModeBtn" class="mode-button active" type="button">Fast</button>
-              <button id="llmModeBtn" class="mode-button" type="button">Ollama</button>
-            </div>
-          </div>
-
-          <div class="question-row">
-            <textarea id="questionInput" rows="3" placeholder="Ask about the selected patient's journey, labs, medications, or notes..."></textarea>
-            <button id="askBtn" class="primary-button" type="button">Ask</button>
-          </div>
-
-          <div class="quick-prompts">
-            <button type="button" data-query="Summarize this patient's clinical journey.">Journey summary</button>
-            <button type="button" data-query="What medications is this patient taking?">Medications</button>
-            <button type="button" data-query="What are the key lab findings?">Key labs</button>
-          </div>
-
-          <div id="answerBox" class="answer-box empty-state">
-            Ask a question to see an answer, confidence, warnings, and retrieved sources.
-          </div>
-
-          <div>
-            <div class="sources-header">
-              <p class="eyebrow">Sources</p>
-              <span id="sourceCount" class="muted">0 chunks</span>
-            </div>
-            <div id="sourcesList" class="sources-list"></div>
           </div>
         </section>
       </main>

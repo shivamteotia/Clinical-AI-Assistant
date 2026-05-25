@@ -13,14 +13,6 @@ const els = {
   patientMeta: document.querySelector("#patientMeta"),
   recordContent: document.querySelector("#recordContent"),
   rebuildIndexBtn: document.querySelector("#rebuildIndexBtn"),
-  generateJourneyBtn: document.querySelector("#generateJourneyBtn"),
-  simpleModeBtn: document.querySelector("#simpleModeBtn"),
-  llmModeBtn: document.querySelector("#llmModeBtn"),
-  questionInput: document.querySelector("#questionInput"),
-  askBtn: document.querySelector("#askBtn"),
-  answerBox: document.querySelector("#answerBox"),
-  sourceCount: document.querySelector("#sourceCount"),
-  sourcesList: document.querySelector("#sourcesList"),
 };
 
 async function api(path, options = {}) {
@@ -103,10 +95,6 @@ async function selectPatient(patientId) {
   renderSelectedPatientCard(patientId);
   els.recordContent.textContent = "Loading patient record...";
   els.recordContent.classList.add("empty-state");
-  els.answerBox.classList.add("empty-state");
-  els.answerBox.textContent = "Ask a question to query this selected patient's journey and retrieved record evidence.";
-  els.sourcesList.innerHTML = "";
-  els.sourceCount.textContent = "0 chunks";
 
   try {
     const [record, journey] = await Promise.all([
@@ -140,7 +128,7 @@ function renderRecord(record) {
   els.patientMeta.textContent = `${patient.age} yrs - ${patient.gender}`;
   els.recordContent.classList.remove("empty-state");
   els.recordContent.innerHTML = `
-    <div id="journeyContent" class="journey-block empty-state">Loading generated patient journey...</div>
+    <div id="journeyContent" class="journey-block empty-state">Loading pre-generated holistic patient view...</div>
     ${section("Encounters", record.encounters, (row) => `
       <strong>${escapeHtml(row.diagnosis)}</strong>
       <span>${escapeHtml(row.date)} - ${escapeHtml(row.visit_type)}</span>
@@ -169,7 +157,7 @@ function renderJourney(journey) {
   container.innerHTML = `
     <div class="journey-header">
       <div>
-        <p class="eyebrow">Generated Patient Journey</p>
+        <p class="eyebrow">Holistic Patient View</p>
         <h3>${escapeHtml(journey.current_focus || "Clinical journey")}</h3>
       </div>
       <span class="status-pill muted-pill">${escapeHtml(journey.generated_by || "stored")}</span>
@@ -220,160 +208,17 @@ function section(title, rows, renderRow) {
 async function rebuildIndex() {
   setLoading(els.rebuildIndexBtn, "Rebuilding...", true);
   try {
-    const result = await api("/rag/index", { method: "POST" });
+    await api("/rag/index", { method: "POST" });
     await loadVectorStatus();
-    els.answerBox.classList.remove("empty-state");
-    els.answerBox.innerHTML = `<div class="answer-text">Index rebuilt. ${result.chunk_count} chunks indexed.</div>`;
   } catch (error) {
-    els.answerBox.innerHTML = `<div class="answer-text">Index rebuild failed. ${escapeHtml(error.message)}</div>`;
+    els.recordContent.innerHTML = `<div class="empty-state">Index rebuild failed. ${escapeHtml(error.message)}</div>`;
   } finally {
     setLoading(els.rebuildIndexBtn, "Rebuild Index", false);
   }
 }
 
-async function generateJourney() {
-  if (!state.selectedPatientId) return;
-
-  setLoading(els.generateJourneyBtn, "Generating...", true);
-  try {
-    const journey = await api(`/patients/${encodeURIComponent(state.selectedPatientId)}/journey/generate`, {
-      method: "POST",
-      body: JSON.stringify({ use_llm: true, model: "phi3" }),
-    });
-    renderJourney(journey);
-    els.answerBox.classList.remove("empty-state");
-    els.answerBox.innerHTML = `<div class="answer-text">Patient journey generated and stored using ${escapeHtml(journey.generated_by)}.</div>`;
-  } catch (error) {
-    els.answerBox.classList.remove("empty-state");
-    els.answerBox.innerHTML = `<div class="answer-text">Journey generation failed. ${escapeHtml(error.message)}</div>`;
-  } finally {
-    setLoading(els.generateJourneyBtn, "Generate LLM Journey", false);
-  }
-}
-
-async function askQuestion() {
-  const query = els.questionInput.value.trim();
-  if (!query) {
-    els.questionInput.focus();
-    return;
-  }
-
-  const endpoint = state.selectedPatientId
-    ? `/patients/${encodeURIComponent(state.selectedPatientId)}/${state.mode === "llm" ? "ask-llm" : "ask"}`
-    : state.mode === "llm" ? "/rag/ask-llm" : "/rag/ask";
-  setLoading(els.askBtn, state.mode === "llm" ? "Thinking..." : "Searching...", true);
-  els.answerBox.classList.add("empty-state");
-  els.answerBox.textContent = state.mode === "llm" ? "Ollama is generating an answer..." : "Searching retrieved evidence...";
-  els.sourcesList.innerHTML = "";
-  els.sourceCount.textContent = "0 chunks";
-
-  try {
-    const result = await api(endpoint, {
-      method: "POST",
-      body: JSON.stringify({ query, k: 3 }),
-    });
-    renderAnswer(result);
-    renderSources(result.sources || []);
-  } catch (error) {
-    els.answerBox.textContent = `Question failed. ${error.message}`;
-  } finally {
-    setLoading(els.askBtn, "Ask", false);
-  }
-}
-
-function renderAnswer(result) {
-  const warnings = result.safety_warnings || [];
-  const limitations = result.limitations || [];
-  const evidence = result.evidence || [];
-  els.answerBox.classList.remove("empty-state");
-  els.answerBox.innerHTML = `
-    <div class="source-meta">
-      <span class="confidence-pill">Confidence: ${escapeHtml(result.confidence || "unknown")}</span>
-      <span>Intent: ${escapeHtml(formatLabel(result.intent || "unknown"))}</span>
-      <span>Safety: ${escapeHtml(formatLabel(result.safety_level || "unknown"))}</span>
-      ${result.model ? `<span>Model: ${escapeHtml(result.model)}</span>` : `<span>Mode: Fast retrieval</span>`}
-    </div>
-    <div class="answer-text">${escapeHtml(result.answer)}</div>
-    ${
-      evidence.length
-        ? `<div class="evidence-list">
-            <div class="mini-heading">Evidence</div>
-            ${evidence.map(renderEvidenceItem).join("")}
-          </div>`
-        : ""
-    }
-    ${
-      warnings.length
-        ? `<ul class="warning-list">${warnings.map((warning) => `<li>${escapeHtml(warning)}</li>`).join("")}</ul>`
-        : ""
-    }
-    ${
-      limitations.length
-        ? `<ul class="limitation-list">${limitations.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
-        : ""
-    }
-  `;
-}
-
-function renderEvidenceItem(item) {
-  return `
-    <div class="evidence-item">
-      <div class="source-meta">
-        <span>${escapeHtml(item.patient_id)} - ${escapeHtml(item.patient_name)}</span>
-        <span>Chunk ${escapeHtml(item.chunk_index ?? "n/a")}</span>
-        <span>Score ${Number(item.score || 0).toFixed(3)}</span>
-      </div>
-      <div>${escapeHtml(item.text)}</div>
-    </div>
-  `;
-}
-
-function formatLabel(value) {
-  return String(value).replaceAll("_", " ");
-}
-
-function renderSources(sources) {
-  els.sourceCount.textContent = `${sources.length} chunk${sources.length === 1 ? "" : "s"}`;
-  els.sourcesList.innerHTML = sources
-    .map((source, index) => {
-      const metadata = source.metadata || {};
-      return `
-        <article class="source-card">
-          <div class="source-meta">
-            <span>#${index + 1}</span>
-            <span>${escapeHtml(metadata.patient_id)} - ${escapeHtml(metadata.patient_name)}</span>
-            <span>Score ${Number(source.score || 0).toFixed(3)}</span>
-          </div>
-          <div class="source-text">${escapeHtml(source.page_content)}</div>
-        </article>
-      `;
-    })
-    .join("");
-}
-
-function setMode(mode) {
-  state.mode = mode;
-  els.simpleModeBtn.classList.toggle("active", mode === "fast");
-  els.llmModeBtn.classList.toggle("active", mode === "llm");
-}
-
 els.patientSelect.addEventListener("change", (event) => selectPatient(event.target.value));
 els.rebuildIndexBtn.addEventListener("click", rebuildIndex);
-els.generateJourneyBtn.addEventListener("click", generateJourney);
-els.askBtn.addEventListener("click", askQuestion);
-els.questionInput.addEventListener("keydown", (event) => {
-  if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
-    askQuestion();
-  }
-});
-els.simpleModeBtn.addEventListener("click", () => setMode("fast"));
-els.llmModeBtn.addEventListener("click", () => setMode("llm"));
-document.querySelectorAll("[data-query]").forEach((button) => {
-  button.addEventListener("click", () => {
-    els.questionInput.value = button.dataset.query;
-    askQuestion();
-  });
-});
 
 loadHealth();
 loadVectorStatus();

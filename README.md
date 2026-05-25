@@ -164,9 +164,9 @@ Keep `.env` local. It is ignored by Git and should not be committed.
 
 ## Ask A RAG Question
 
-## Generate Patient Journey Summaries
+## Precompute Holistic Patient Views
 
-Precompute patient journey summaries for the doctor-facing patient view:
+Precompute LLM patient summaries for the doctor-facing patient view:
 
 ```powershell
 python scripts\generate_patient_journeys.py
@@ -184,7 +184,7 @@ Use a specific local Ollama model:
 python scripts\generate_patient_journeys.py --ollama --model phi3
 ```
 
-The app reads `data\patient_journeys.json` when a doctor selects a patient from the dropdown. The doctor page can also call `POST /patients/{patient_id}/journey/generate` through the Generate LLM Journey button, which stores the generated journey and immediately renders it. Patient-scoped Q/A endpoints append the selected patient ID to retrieval so Qdrant can filter the search to that patient.
+The app reads `data\patient_journeys.json` when a doctor selects a patient from the dropdown. This keeps the doctor-facing page fast: patient selection renders the stored holistic view immediately instead of waiting for an LLM call. `POST /patients/{patient_id}/journey/generate` remains available for admin/background refresh workflows, not as a normal doctor interaction.
 
 This script retrieves patient chunks and builds a simple grounded answer:
 
