@@ -230,15 +230,7 @@ def _try_groq_summary(
             error="GROQ_API_KEY is required for Groq patient journey generation.",
         )
 
-    payload = {
-        "model": model,
-        "messages": [
-            {"role": "system", "content": PATIENT_JOURNEY_SYSTEM_PROMPT},
-            {"role": "user", "content": _format_record_for_llm(record)},
-        ],
-        "temperature": 0.2,
-        "max_tokens": 550,
-    }
+    payload = build_groq_journey_payload(record, model)
     request = Request(
         base_url,
         data=json.dumps(payload).encode("utf-8"),
@@ -283,6 +275,18 @@ def _try_groq_summary(
         model=model,
         error="Groq generation failed after retries.",
     )
+
+
+def build_groq_journey_payload(record: dict, model: str) -> dict:
+    return {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": PATIENT_JOURNEY_SYSTEM_PROMPT},
+            {"role": "user", "content": _format_record_for_llm(record)},
+        ],
+        "temperature": 0.2,
+        "max_tokens": 550,
+    }
 
 
 def _format_record_for_llm(record: dict) -> str:

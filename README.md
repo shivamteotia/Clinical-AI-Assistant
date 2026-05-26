@@ -194,6 +194,18 @@ python scripts\generate_patient_journeys.py --ollama --model phi3
 
 The app reads `data\patient_journeys.json` when a doctor selects a patient from the dropdown. This keeps the doctor-facing page fast: patient selection renders the stored holistic view immediately instead of waiting for an LLM call. `POST /patients/{patient_id}/journey/generate` remains available for admin/background refresh workflows, not as a normal doctor interaction. Use `--require-llm` for production-style generation so local fallback summaries are not saved by accident.
 
+Inspect the internal journey pipeline for one patient without calling the LLM:
+
+```powershell
+python scripts\inspect_patient_journey_pipeline.py P006
+```
+
+This prints each step's source function or endpoint, input, output type, output shape, and data. To also inspect the live provider response without saving anything:
+
+```powershell
+python scripts\inspect_patient_journey_pipeline.py P006 --call-llm
+```
+
 This script retrieves patient chunks and builds a simple grounded answer:
 
 ```powershell

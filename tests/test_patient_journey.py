@@ -8,6 +8,7 @@ from app.rag.patient_journey import (
     JourneySummaryResult,
     PATIENT_JOURNEY_SYSTEM_PROMPT,
     build_all_patient_journeys,
+    build_groq_journey_payload,
     build_patient_journey,
     get_patient_journey,
 )
@@ -137,6 +138,23 @@ class PatientJourneyTests(unittest.TestCase):
         self.assertEqual(captured["authorization"], "Bearer secret")
         self.assertEqual(captured["body"]["model"], "llama-test")
         self.assertEqual(captured["body"]["messages"][0]["role"], "system")
+
+    def test_groq_payload_can_be_inspected_without_calling_provider(self) -> None:
+        record = {
+            "patient": {"patient_id": "PX01", "name": "Test Patient"},
+            "encounters": [],
+            "labs": [],
+            "medications": [],
+            "clinical_notes": [],
+        }
+
+        payload = build_groq_journey_payload(record, "llama-test")
+
+        self.assertEqual(payload["model"], "llama-test")
+        self.assertEqual(payload["temperature"], 0.2)
+        self.assertEqual(payload["max_tokens"], 550)
+        self.assertEqual(payload["messages"][0]["content"], PATIENT_JOURNEY_SYSTEM_PROMPT)
+        self.assertIn('"patient_id": "PX01"', payload["messages"][1]["content"])
 
 
 if __name__ == "__main__":
