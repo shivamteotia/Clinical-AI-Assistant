@@ -6,6 +6,7 @@ from io import StringIO
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.rag.patient_journey import JOURNEY_PATH
 from scripts.seed_data import main as seed_data
 
 
@@ -51,11 +52,30 @@ class ApiTests(unittest.TestCase):
         self.assertIn("summary", journey)
         self.assertTrue(journey["timeline"])
 
+    def test_patient_journey_inspection_endpoint_returns_pipeline_stages(self) -> None:
+        response = self.client.get("/patients/P001/journey/inspect")
+
+        self.assertEqual(response.status_code, 200)
+        inspection = response.json()
+        self.assertEqual(inspection["patient_id"], "P001")
+        self.assertTrue(inspection["dry_run"])
+        self.assertGreaterEqual(len(inspection["stages"]), 7)
+        self.assertEqual(inspection["stages"][0]["title"], "HIS Patient Row")
+        self.assertEqual(inspection["stages"][1]["title"], "HIS Full Record")
+        self.assertEqual(inspection["stages"][4]["title"], "LLM Request Payload")
+
     def test_patient_journey_generation_endpoint_stores_summary(self) -> None:
-        response = self.client.post(
-            "/patients/P001/journey/generate",
-            json={"use_llm": False, "model": "phi3", "require_llm": False},
-        )
+        original_journeys = JOURNEY_PATH.read_bytes() if JOURNEY_PATH.exists() else None
+        try:
+            response = self.client.post(
+                "/patients/P001/journey/generate",
+                json={"use_llm": False, "model": "phi3", "require_llm": False},
+            )
+        finally:
+            if original_journeys is None:
+                JOURNEY_PATH.unlink(missing_ok=True)
+            else:
+                JOURNEY_PATH.write_bytes(original_journeys)
 
         self.assertEqual(response.status_code, 200)
         journey = response.json()

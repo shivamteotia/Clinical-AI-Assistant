@@ -11,7 +11,7 @@ from app.api.his import get_patient, get_patient_record
 from app.rag.config import get_patient_journey_llm_settings
 from app.rag.patient_journey import (
     PATIENT_JOURNEY_SYSTEM_PROMPT,
-    build_groq_journey_payload,
+    build_journey_llm_payload,
     build_patient_journey,
     get_patient_journey,
     load_patient_journeys,
@@ -162,15 +162,7 @@ def main() -> None:
 
 
 def build_llm_payload(provider: str, model: str, record: dict) -> dict:
-    if provider == "groq":
-        return build_groq_journey_payload(record, model)
-    return {
-        "model": model,
-        "messages": [
-            {"role": "system", "content": PATIENT_JOURNEY_SYSTEM_PROMPT},
-            {"role": "user", "content": _format_record_for_llm(record)},
-        ],
-    }
+    return build_journey_llm_payload(record, provider, model)
 
 
 def print_stage(

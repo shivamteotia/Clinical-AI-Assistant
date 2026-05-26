@@ -206,6 +206,12 @@ This prints each step's source function or endpoint, input, output type, output 
 python scripts\inspect_patient_journey_pipeline.py P006 --call-llm
 ```
 
+Open the same dry-run inspection chain in the browser:
+
+```text
+http://127.0.0.1:8000/inspect
+```
+
 This script retrieves patient chunks and builds a simple grounded answer:
 
 ```powershell

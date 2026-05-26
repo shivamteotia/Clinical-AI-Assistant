@@ -14,6 +14,7 @@ from app.rag.patient_journey import (
     DEFAULT_JOURNEY_MODEL,
     generate_and_store_patient_journey,
     get_patient_journey,
+    inspect_patient_journey_pipeline,
 )
 from app.rag.vector_store import (
     rebuild_vector_store,
@@ -41,6 +42,11 @@ class JourneyGenerationRequest(BaseModel):
 @app.get("/")
 def frontend() -> FileResponse:
     return FileResponse(STATIC_DIR / "index.html")
+
+
+@app.get("/inspect")
+def inspector_frontend() -> FileResponse:
+    return FileResponse(STATIC_DIR / "inspect.html")
 
 
 @app.get("/health")
@@ -77,6 +83,14 @@ def patient_record(patient_id: str) -> dict:
 @app.get("/patients/{patient_id}/journey")
 def patient_journey(patient_id: str) -> dict:
     result = get_patient_journey(patient_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    return result
+
+
+@app.get("/patients/{patient_id}/journey/inspect")
+def patient_journey_inspection(patient_id: str) -> dict:
+    result = inspect_patient_journey_pipeline(patient_id)
     if result is None:
         raise HTTPException(status_code=404, detail="Patient not found")
     return result

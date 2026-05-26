@@ -73,6 +73,87 @@ def get_patient_journey(patient_id: str) -> dict | None:
     return journeys.get(patient_id) or build_patient_journey(record, generated_by="local_fallback")
 
 
+def inspect_patient_journey_pipeline(
+    patient_id: str,
+    provider: str | None = None,
+    model: str | None = None,
+) -> dict | None:
+    record = get_patient_record(patient_id)
+    if record is None:
+        return None
+
+    settings = get_patient_journey_llm_settings()
+    resolved_provider = (provider or settings.provider).lower()
+    resolved_model = model or settings.model
+    patient = record["patient"]
+    stored_journey = load_patient_journeys().get(patient_id)
+    formatted_prompt = _format_record_for_llm(record)
+    llm_payload = build_journey_llm_payload(record, resolved_provider, resolved_model)
+    endpoint_output = stored_journey or build_patient_journey(record, generated_by="local_fallback")
+
+    return {
+        "patient_id": patient_id,
+        "provider": resolved_provider,
+        "model": resolved_model,
+        "dry_run": True,
+        "stages": [
+            _inspection_stage(
+                "HIS Patient Row",
+                "app.api.his.get_patient",
+                {"patient_id": patient_id},
+                patient,
+                "Single row from the patients table.",
+            ),
+            _inspection_stage(
+                "HIS Full Record",
+                "app.api.his.get_patient_record",
+                {"patient_id": patient_id},
+                record,
+                "Structured patient data plus unstructured clinical note text.",
+            ),
+            _inspection_stage(
+                "System Prompt",
+                "app.rag.patient_journey.PATIENT_JOURNEY_SYSTEM_PROMPT",
+                None,
+                PATIENT_JOURNEY_SYSTEM_PROMPT,
+                "Instruction sent as the LLM system message.",
+            ),
+            _inspection_stage(
+                "Formatted User Prompt",
+                "app.rag.patient_journey._format_record_for_llm",
+                {"record": _shape_of(record)},
+                formatted_prompt,
+                "HIS record JSON converted into the LLM user message.",
+            ),
+            _inspection_stage(
+                "LLM Request Payload",
+                "app.rag.patient_journey.build_journey_llm_payload",
+                {
+                    "provider": resolved_provider,
+                    "model": resolved_model,
+                    "record": _shape_of(record),
+                },
+                llm_payload,
+                "Dry-run request body only. API keys are not included or returned.",
+            ),
+            _inspection_stage(
+                "Stored Journey JSON",
+                "app.rag.patient_journey.load_patient_journeys",
+                {"patient_id": patient_id},
+                stored_journey or {},
+                "Precomputed journey currently stored for the doctor page.",
+            ),
+            _inspection_stage(
+                "Doctor UI Endpoint Output",
+                f"GET /patients/{patient_id}/journey",
+                {"path_patient_id": patient_id},
+                endpoint_output,
+                "Effective JSON returned to the doctor-facing page.",
+            ),
+        ],
+    }
+
+
 def generate_and_store_patient_journey(
     patient_id: str,
     use_llm: bool = True,
@@ -287,6 +368,60 @@ def build_groq_journey_payload(record: dict, model: str) -> dict:
         "temperature": 0.2,
         "max_tokens": 550,
     }
+
+
+def build_journey_llm_payload(record: dict, provider: str, model: str) -> dict:
+    if provider == "groq":
+        return build_groq_journey_payload(record, model)
+
+    return {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": PATIENT_JOURNEY_SYSTEM_PROMPT},
+            {"role": "user", "content": _format_record_for_llm(record)},
+        ],
+    }
+
+
+def _inspection_stage(
+    title: str,
+    source: str,
+    input_value,
+    output_value,
+    note: str,
+) -> dict:
+    return {
+        "title": title,
+        "source": source,
+        "input": input_value,
+        "note": note,
+        "output_type": type(output_value).__name__,
+        "output_shape": _shape_of(output_value),
+        "data": output_value,
+    }
+
+
+def _shape_of(value) -> str:
+    if isinstance(value, dict):
+        parts = []
+        for key, item in value.items():
+            if isinstance(item, list):
+                item_shape = f"list[{len(item)}]"
+                if item and isinstance(item[0], dict):
+                    item_shape += f" of dict keys {list(item[0].keys())}"
+            elif isinstance(item, dict):
+                item_shape = f"dict keys {list(item.keys())}"
+            else:
+                item_shape = type(item).__name__
+            parts.append(f"{key}: {item_shape}")
+        return "; ".join(parts)
+    if isinstance(value, list):
+        if not value:
+            return "list[0]"
+        return f"list[{len(value)}] item_type={type(value[0]).__name__}"
+    if isinstance(value, str):
+        return f"str length={len(value)}"
+    return type(value).__name__
 
 
 def _format_record_for_llm(record: dict) -> str:
