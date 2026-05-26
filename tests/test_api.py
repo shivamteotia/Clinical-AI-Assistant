@@ -50,6 +50,8 @@ class ApiTests(unittest.TestCase):
         journey = response.json()
         self.assertEqual(journey["patient_id"], "P001")
         self.assertIn("summary", journey)
+        self.assertIn("claims", journey)
+        self.assertTrue(journey["claims"])
         self.assertTrue(journey["timeline"])
 
     def test_patient_journey_inspection_endpoint_returns_pipeline_stages(self) -> None:

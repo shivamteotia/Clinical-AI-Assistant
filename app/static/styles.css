@@ -296,6 +296,39 @@ textarea:focus {
   font-size: 13px;
 }
 
+.claim-list {
+  display: grid;
+  gap: 8px;
+}
+
+.claim-row {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 10px;
+  color: #34423e;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.source-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.source-chip {
+  border: 1px solid #c7d2fe;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 7px;
+}
+
 .journey-notice {
   border-top: 1px solid var(--line);
   color: var(--muted);

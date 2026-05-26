@@ -28,6 +28,9 @@ Rules:
 - Mention that this is dummy/synthetic data only when clinically relevant.
 - Write in 1 short paragraph, suitable for a doctor-facing patient overview.
 - Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.
+- Return only valid JSON with this shape:
+  {"summary":"one paragraph","claims":[{"sentence":"one sentence from the summary","sources":["patient:P001","encounter:E001"]}]}
+- Every claim source must use IDs from the supplied record: patient:{patient_id}, encounter:{encounter_id}, lab:{lab_id}, medication:{medication_id}, note:{note_id}.
 """.strip()
 
 
@@ -36,6 +39,7 @@ class JourneySummaryResult:
     summary: str | None
     provider: str | None
     model: str | None
+    claims: list[dict] | None = None
     error: str | None = None
 
 
@@ -70,7 +74,8 @@ def get_patient_journey(patient_id: str) -> dict | None:
         return None
 
     journeys = load_patient_journeys()
-    return journeys.get(patient_id) or build_patient_journey(record, generated_by="local_fallback")
+    journey = journeys.get(patient_id) or build_patient_journey(record, generated_by="local_fallback")
+    return _with_grounded_claims(journey, record)
 
 
 def inspect_patient_journey_pipeline(
@@ -89,7 +94,10 @@ def inspect_patient_journey_pipeline(
     stored_journey = load_patient_journeys().get(patient_id)
     formatted_prompt = _format_record_for_llm(record)
     llm_payload = build_journey_llm_payload(record, resolved_provider, resolved_model)
-    endpoint_output = stored_journey or build_patient_journey(record, generated_by="local_fallback")
+    endpoint_output = _with_grounded_claims(
+        stored_journey or build_patient_journey(record, generated_by="local_fallback"),
+        record,
+    )
 
     return {
         "patient_id": patient_id,
@@ -140,7 +148,7 @@ def inspect_patient_journey_pipeline(
                 "Stored Journey JSON",
                 "app.rag.patient_journey.load_patient_journeys",
                 {"patient_id": patient_id},
-                stored_journey or {},
+                _with_grounded_claims(stored_journey, record) if stored_journey else {},
                 "Precomputed journey currently stored for the doctor page.",
             ),
             _inspection_stage(
@@ -212,10 +220,12 @@ def build_patient_journey(
     require_llm: bool = False,
 ) -> dict:
     llm_error = None
+    claims = None
     if use_llm:
         llm_result = _try_llm_summary(record, model=model, provider=provider)
         if llm_result.summary:
             llm_summary = llm_result.summary
+            claims = llm_result.claims
             generated_by = f"{llm_result.provider}:{llm_result.model}"
             model = llm_result.model
         else:
@@ -236,6 +246,7 @@ def build_patient_journey(
         "system_prompt": PATIENT_JOURNEY_SYSTEM_PROMPT if generated_by != "local_fallback" else None,
         "llm_error": llm_error,
         "summary": llm_summary,
+        "claims": _normalize_claims(claims, record, llm_summary),
         "timeline": _timeline(record),
         "current_focus": _current_focus(latest_encounter),
         "key_labs": _key_labs(record),
@@ -283,10 +294,12 @@ def _try_ollama_summary(record: dict, model: str) -> JourneySummaryResult:
                 },
             ],
         )
+        parsed = _parse_llm_journey_content(response["message"]["content"])
         return JourneySummaryResult(
-            summary=response["message"]["content"].strip(),
+            summary=parsed["summary"],
             provider="ollama",
             model=model,
+            claims=parsed["claims"],
         )
     except Exception as error:
         return JourneySummaryResult(
@@ -328,8 +341,13 @@ def _try_groq_summary(
         try:
             with urlopen(request, timeout=60) as response:
                 data = json.loads(response.read().decode("utf-8"))
-            summary = data["choices"][0]["message"]["content"].strip()
-            return JourneySummaryResult(summary=summary, provider="groq", model=model)
+            parsed = _parse_llm_journey_content(data["choices"][0]["message"]["content"])
+            return JourneySummaryResult(
+                summary=parsed["summary"],
+                provider="groq",
+                model=model,
+                claims=parsed["claims"],
+            )
         except HTTPError as error:
             if error.code == 429 and attempt < 2:
                 retry_after = error.headers.get("Retry-After")
@@ -431,6 +449,170 @@ def _format_record_for_llm(record: dict) -> str:
             json.dumps(record, ensure_ascii=True, indent=2),
         ]
     )
+
+
+def _parse_llm_journey_content(content: str) -> dict:
+    text = content.strip()
+    try:
+        parsed = json.loads(_extract_json_object(text))
+    except json.JSONDecodeError:
+        return {"summary": text, "claims": None}
+
+    if not isinstance(parsed, dict):
+        return {"summary": text, "claims": None}
+
+    summary = parsed.get("summary")
+    claims = parsed.get("claims")
+    return {
+        "summary": summary.strip() if isinstance(summary, str) and summary.strip() else text,
+        "claims": claims if isinstance(claims, list) else None,
+    }
+
+
+def _extract_json_object(text: str) -> str:
+    if text.startswith("```"):
+        lines = text.splitlines()
+        if lines and lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].startswith("```"):
+            lines = lines[:-1]
+        text = "\n".join(lines).strip()
+
+    start = text.find("{")
+    end = text.rfind("}")
+    if start != -1 and end != -1 and end > start:
+        return text[start:end + 1]
+    return text
+
+
+def _with_grounded_claims(journey: dict | None, record: dict) -> dict | None:
+    if journey is None:
+        return None
+
+    if journey.get("claims"):
+        return journey
+
+    augmented = dict(journey)
+    augmented["claims"] = _claims_for_summary(record, augmented.get("summary", ""))
+    return augmented
+
+
+def _normalize_claims(claims: list[dict] | None, record: dict, summary: str) -> list[dict]:
+    allowed_sources = _source_catalog(record)
+    normalized = []
+    for claim in claims or []:
+        if not isinstance(claim, dict):
+            continue
+        sentence = claim.get("sentence")
+        if not isinstance(sentence, str) or not sentence.strip():
+            continue
+        sources = [
+            source
+            for source in claim.get("sources", [])
+            if isinstance(source, str) and source in allowed_sources
+        ]
+        if sources:
+            normalized.append({
+                "sentence": sentence.strip(),
+                "sources": sources,
+            })
+
+    return normalized or _claims_for_summary(record, summary)
+
+
+def _claims_for_summary(record: dict, summary: str) -> list[dict]:
+    sentences = _split_sentences(summary)
+    return [
+        {
+            "sentence": sentence,
+            "sources": _infer_sources_for_sentence(record, sentence),
+        }
+        for sentence in sentences
+    ]
+
+
+def _split_sentences(text: str) -> list[str]:
+    cleaned = " ".join((text or "").split())
+    if not cleaned:
+        return []
+
+    sentences = []
+    start = 0
+    for index, character in enumerate(cleaned):
+        if character not in ".!?":
+            continue
+        if index + 1 < len(cleaned) and not cleaned[index + 1].isspace():
+            continue
+        sentence = cleaned[start:index + 1].strip()
+        if sentence:
+            sentences.append(sentence)
+        start = index + 1
+
+    remainder = cleaned[start:].strip()
+    if remainder:
+        sentences.append(remainder)
+    return sentences
+
+
+def _infer_sources_for_sentence(record: dict, sentence: str) -> list[str]:
+    text = sentence.lower()
+    sources = []
+    patient = record["patient"]
+
+    if (
+        patient["patient_id"].lower() in text
+        or patient["name"].lower() in text
+        or str(patient["age"]) in text
+        or patient["gender"].lower() in text
+    ):
+        sources.append(f"patient:{patient['patient_id']}")
+
+    for encounter in record["encounters"]:
+        if (
+            encounter["encounter_id"].lower() in text
+            or encounter["diagnosis"].lower() in text
+            or encounter["chief_complaint"].lower() in text
+            or encounter["date"].lower() in text
+        ):
+            sources.append(f"encounter:{encounter['encounter_id']}")
+
+    for lab in record["labs"]:
+        if lab["lab_id"].lower() in text or lab["test_name"].lower() in text or lab["value"].lower() in text:
+            sources.append(f"lab:{lab['lab_id']}")
+
+    for medication in record["medications"]:
+        if (
+            medication["medication_id"].lower() in text
+            or medication["drug_name"].lower() in text
+            or medication["dose"].lower() in text
+        ):
+            sources.append(f"medication:{medication['medication_id']}")
+
+    for note in record["clinical_notes"]:
+        note_terms = [
+            note["note_id"].lower(),
+            note["date"].lower(),
+            note["note_type"].lower(),
+            "progress note",
+            "symptom",
+            "symptoms",
+            "follow-up",
+            "synthetic",
+            "dummy",
+        ]
+        if any(term in text for term in note_terms):
+            sources.append(f"note:{note['note_id']}")
+
+    return list(dict.fromkeys(sources)) or [f"patient:{patient['patient_id']}"]
+
+
+def _source_catalog(record: dict) -> set[str]:
+    sources = {f"patient:{record['patient']['patient_id']}"}
+    sources.update(f"encounter:{row['encounter_id']}" for row in record["encounters"])
+    sources.update(f"lab:{row['lab_id']}" for row in record["labs"])
+    sources.update(f"medication:{row['medication_id']}" for row in record["medications"])
+    sources.update(f"note:{row['note_id']}" for row in record["clinical_notes"])
+    return sources
 
 
 def _fallback_summary(record: dict) -> str:

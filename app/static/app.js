@@ -163,6 +163,7 @@ function renderJourney(journey) {
       <span class="status-pill muted-pill">${escapeHtml(journey.generated_by || "stored")}</span>
     </div>
     <p>${escapeHtml(journey.summary)}</p>
+    ${renderGroundedClaims(journey.claims)}
     ${renderJourneyList("Timeline", journey.timeline, (item) => `
       <strong>${escapeHtml(item.date)} - ${escapeHtml(item.title)}</strong>
       <span>${escapeHtml(item.type)} - ${escapeHtml(item.detail)}</span>
@@ -170,6 +171,25 @@ function renderJourney(journey) {
     ${renderSimpleList("Key labs", journey.key_labs)}
     ${renderSimpleList("Active medications", journey.active_medications)}
     <div class="journey-notice">${escapeHtml(journey.safety_notice)}</div>
+  `;
+}
+
+function renderGroundedClaims(claims) {
+  if (!claims || claims.length === 0) return "";
+  return `
+    <div class="journey-mini-section">
+      <div class="mini-heading">Source-grounded claims</div>
+      <div class="claim-list">
+        ${claims.map((claim) => `
+          <div class="claim-row">
+            <span>${escapeHtml(claim.sentence)}</span>
+            <div class="source-chip-row">
+              ${(claim.sources || []).map((source) => `<span class="source-chip">${escapeHtml(source)}</span>`).join("")}
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
   `;
 }
 

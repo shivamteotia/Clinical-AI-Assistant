@@ -27,6 +27,8 @@ class PatientJourneyTests(unittest.TestCase):
         self.assertEqual(len(journeys), 20)
         self.assertEqual(journeys[0]["patient_id"], "P001")
         self.assertIn("summary", journeys[0])
+        self.assertIn("claims", journeys[0])
+        self.assertTrue(journeys[0]["claims"])
         self.assertTrue(journeys[0]["timeline"])
 
     def test_get_patient_journey_returns_stored_or_fallback_summary(self) -> None:
@@ -35,6 +37,8 @@ class PatientJourneyTests(unittest.TestCase):
         self.assertIsNotNone(journey)
         self.assertEqual(journey["patient_id"], "P001")
         self.assertIn("Aarav Sharma", journey["summary"])
+        self.assertTrue(journey["claims"])
+        self.assertTrue(journey["claims"][0]["sources"])
         self.assertTrue(journey["key_labs"])
 
     def test_llm_journey_uses_system_prompt_and_model_metadata(self) -> None:
@@ -55,6 +59,12 @@ class PatientJourneyTests(unittest.TestCase):
             summary="LLM generated journey.",
             provider="groq",
             model="llama-test",
+            claims=[
+                {
+                    "sentence": "LLM generated journey.",
+                    "sources": ["patient:PX01"],
+                }
+            ],
         )
         try:
             journey = build_patient_journey(
@@ -70,6 +80,7 @@ class PatientJourneyTests(unittest.TestCase):
         self.assertEqual(journey["generated_by"], "groq:llama-test")
         self.assertEqual(journey["journey_model"], "llama-test")
         self.assertEqual(journey["system_prompt"], PATIENT_JOURNEY_SYSTEM_PROMPT)
+        self.assertEqual(journey["claims"][0]["sources"], ["patient:PX01"])
 
     def test_require_llm_raises_when_provider_fails(self) -> None:
         record = {
@@ -110,7 +121,19 @@ class PatientJourneyTests(unittest.TestCase):
             def read(self) -> bytes:
                 return json.dumps({
                     "choices": [
-                        {"message": {"content": "Hosted LLM holistic view."}}
+                        {
+                            "message": {
+                                "content": json.dumps({
+                                    "summary": "Hosted LLM holistic view.",
+                                    "claims": [
+                                        {
+                                            "sentence": "Hosted LLM holistic view.",
+                                            "sources": ["patient:P001"],
+                                        }
+                                    ],
+                                })
+                            }
+                        }
                     ]
                 }).encode("utf-8")
 
@@ -135,6 +158,7 @@ class PatientJourneyTests(unittest.TestCase):
 
         self.assertEqual(result.summary, "Hosted LLM holistic view.")
         self.assertEqual(result.provider, "groq")
+        self.assertEqual(result.claims[0]["sources"], ["patient:P001"])
         self.assertEqual(captured["authorization"], "Bearer secret")
         self.assertEqual(captured["body"]["model"], "llama-test")
         self.assertEqual(captured["body"]["messages"][0]["role"], "system")
@@ -154,7 +178,46 @@ class PatientJourneyTests(unittest.TestCase):
         self.assertEqual(payload["temperature"], 0.2)
         self.assertEqual(payload["max_tokens"], 550)
         self.assertEqual(payload["messages"][0]["content"], PATIENT_JOURNEY_SYSTEM_PROMPT)
+        self.assertIn("Return only valid JSON", payload["messages"][0]["content"])
         self.assertIn('"patient_id": "PX01"', payload["messages"][1]["content"])
+
+    def test_plain_journey_gets_fallback_source_grounding(self) -> None:
+        record = {
+            "patient": {
+                "patient_id": "PX01",
+                "name": "Test Patient",
+                "age": 50,
+                "gender": "Female",
+            },
+            "encounters": [
+                {
+                    "encounter_id": "EX01",
+                    "date": "2026-01-01",
+                    "visit_type": "Outpatient",
+                    "chief_complaint": "Fatigue",
+                    "diagnosis": "Anemia",
+                }
+            ],
+            "labs": [
+                {
+                    "lab_id": "LX01",
+                    "date": "2026-01-01",
+                    "test_name": "Hemoglobin",
+                    "value": "9.8",
+                    "unit": "g/dL",
+                    "reference_range": "12-16",
+                }
+            ],
+            "medications": [],
+            "clinical_notes": [],
+        }
+
+        journey = build_patient_journey(record, use_llm=False)
+
+        self.assertTrue(journey["claims"])
+        all_sources = [source for claim in journey["claims"] for source in claim["sources"]]
+        self.assertIn("patient:PX01", all_sources)
+        self.assertIn("encounter:EX01", all_sources)
 
 
 if __name__ == "__main__":
