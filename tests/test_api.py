@@ -54,7 +54,7 @@ class ApiTests(unittest.TestCase):
     def test_patient_journey_generation_endpoint_stores_summary(self) -> None:
         response = self.client.post(
             "/patients/P001/journey/generate",
-            json={"use_llm": False, "model": "phi3"},
+            json={"use_llm": False, "model": "phi3", "require_llm": False},
         )
 
         self.assertEqual(response.status_code, 200)

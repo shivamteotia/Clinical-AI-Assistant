@@ -172,19 +172,27 @@ Precompute LLM patient summaries for the doctor-facing patient view:
 python scripts\generate_patient_journeys.py
 ```
 
-To generate LLM-written journeys with a system prompt, using deterministic fallback if Ollama is unavailable:
+To generate LLM-written journeys with a hosted Groq model:
 
 ```powershell
-python scripts\generate_patient_journeys.py --ollama
+python scripts\generate_patient_journeys.py --provider groq --model llama-3.3-70b-versatile --require-llm
 ```
 
-Use a specific local Ollama model:
+Required `.env` values:
+
+```text
+PATIENT_JOURNEY_LLM_PROVIDER=groq
+PATIENT_JOURNEY_MODEL=llama-3.3-70b-versatile
+GROQ_API_KEY=your_groq_api_key
+```
+
+To generate with local Ollama instead:
 
 ```powershell
 python scripts\generate_patient_journeys.py --ollama --model phi3
 ```
 
-The app reads `data\patient_journeys.json` when a doctor selects a patient from the dropdown. This keeps the doctor-facing page fast: patient selection renders the stored holistic view immediately instead of waiting for an LLM call. `POST /patients/{patient_id}/journey/generate` remains available for admin/background refresh workflows, not as a normal doctor interaction.
+The app reads `data\patient_journeys.json` when a doctor selects a patient from the dropdown. This keeps the doctor-facing page fast: patient selection renders the stored holistic view immediately instead of waiting for an LLM call. `POST /patients/{patient_id}/journey/generate` remains available for admin/background refresh workflows, not as a normal doctor interaction. Use `--require-llm` for production-style generation so local fallback summaries are not saved by accident.
 
 This script retrieves patient chunks and builds a simple grounded answer:
 

@@ -33,7 +33,9 @@ class SearchRequest(BaseModel):
 
 class JourneyGenerationRequest(BaseModel):
     use_llm: bool = True
-    model: str = Field(default=DEFAULT_JOURNEY_MODEL, min_length=1)
+    model: str | None = Field(default=DEFAULT_JOURNEY_MODEL, min_length=1)
+    provider: str | None = None
+    require_llm: bool = False
 
 
 @app.get("/")
@@ -89,6 +91,8 @@ def generate_patient_journey(
         patient_id,
         use_llm=request.use_llm,
         model=request.model,
+        provider=request.provider,
+        require_llm=request.require_llm,
     )
     if result is None:
         raise HTTPException(status_code=404, detail="Patient not found")

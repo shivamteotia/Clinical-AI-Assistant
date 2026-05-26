@@ -1,13 +1,18 @@
 import json
+from dataclasses import dataclass
 from pathlib import Path
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
 from app.api.his import get_patient_record, list_patients
+from app.rag.config import get_patient_journey_llm_settings
 from app.rag.safety import SAFETY_NOTICE
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 DATA_DIR = BASE_DIR / "data"
 JOURNEY_PATH = DATA_DIR / "patient_journeys.json"
 DEFAULT_JOURNEY_MODEL = "phi3"
+DEFAULT_GROQ_MODEL = "llama-3.3-70b-versatile"
 PATIENT_JOURNEY_SYSTEM_PROMPT = """
 You are a clinical documentation assistant inside a prototype clinical AI system.
 
@@ -23,6 +28,14 @@ Rules:
 - Write in 1 short paragraph, suitable for a doctor-facing patient overview.
 - Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.
 """.strip()
+
+
+@dataclass(frozen=True)
+class JourneySummaryResult:
+    summary: str | None
+    provider: str | None
+    model: str | None
+    error: str | None = None
 
 
 def load_patient_journeys() -> dict[str, dict]:
@@ -62,27 +75,45 @@ def get_patient_journey(patient_id: str) -> dict | None:
 def generate_and_store_patient_journey(
     patient_id: str,
     use_llm: bool = True,
-    model: str = DEFAULT_JOURNEY_MODEL,
+    model: str | None = None,
+    provider: str | None = None,
+    require_llm: bool = False,
 ) -> dict | None:
     record = get_patient_record(patient_id)
     if record is None:
         return None
 
-    journey = build_patient_journey(record, use_llm=use_llm, model=model)
+    journey = build_patient_journey(
+        record,
+        use_llm=use_llm,
+        model=model,
+        provider=provider,
+        require_llm=require_llm,
+    )
     upsert_patient_journey(journey)
     return journey
 
 
 def build_all_patient_journeys(
     use_llm: bool = False,
-    model: str = DEFAULT_JOURNEY_MODEL,
+    model: str | None = None,
+    provider: str | None = None,
+    require_llm: bool = False,
 ) -> list[dict]:
     journeys = []
     for patient in list_patients():
         record = get_patient_record(patient["patient_id"])
         if record is None:
             continue
-        journeys.append(build_patient_journey(record, use_llm=use_llm, model=model))
+        journeys.append(
+            build_patient_journey(
+                record,
+                use_llm=use_llm,
+                model=model,
+                provider=provider,
+                require_llm=require_llm,
+            )
+        )
     return journeys
 
 
@@ -90,13 +121,21 @@ def build_patient_journey(
     record: dict,
     use_llm: bool = False,
     generated_by: str = "local_fallback",
-    model: str = DEFAULT_JOURNEY_MODEL,
+    model: str | None = None,
+    provider: str | None = None,
+    require_llm: bool = False,
 ) -> dict:
+    llm_error = None
     if use_llm:
-        llm_summary = _try_llm_summary(record, model)
-        if llm_summary:
-            generated_by = f"ollama:{model}"
+        llm_result = _try_llm_summary(record, model=model, provider=provider)
+        if llm_result.summary:
+            llm_summary = llm_result.summary
+            generated_by = f"{llm_result.provider}:{llm_result.model}"
+            model = llm_result.model
         else:
+            llm_error = llm_result.error
+            if require_llm:
+                raise RuntimeError(llm_error or "LLM patient journey generation failed.")
             llm_summary = _fallback_summary(record)
     else:
         llm_summary = _fallback_summary(record)
@@ -107,8 +146,9 @@ def build_patient_journey(
         "patient_id": patient["patient_id"],
         "patient_name": patient["name"],
         "generated_by": generated_by,
-        "journey_model": model if generated_by.startswith("ollama") else None,
-        "system_prompt": PATIENT_JOURNEY_SYSTEM_PROMPT if generated_by.startswith("ollama") else None,
+        "journey_model": model if generated_by != "local_fallback" else None,
+        "system_prompt": PATIENT_JOURNEY_SYSTEM_PROMPT if generated_by != "local_fallback" else None,
+        "llm_error": llm_error,
         "summary": llm_summary,
         "timeline": _timeline(record),
         "current_focus": _current_focus(latest_encounter),
@@ -118,7 +158,29 @@ def build_patient_journey(
     }
 
 
-def _try_llm_summary(record: dict, model: str) -> str | None:
+def _try_llm_summary(
+    record: dict,
+    model: str | None = None,
+    provider: str | None = None,
+) -> JourneySummaryResult:
+    settings = get_patient_journey_llm_settings()
+    resolved_provider = (provider or settings.provider).lower()
+    resolved_model = model or settings.model
+
+    if resolved_provider == "groq":
+        return _try_groq_summary(record, resolved_model, settings.groq_api_key, settings.groq_base_url)
+    if resolved_provider == "ollama":
+        return _try_ollama_summary(record, resolved_model)
+
+    return JourneySummaryResult(
+        summary=None,
+        provider=resolved_provider,
+        model=resolved_model,
+        error=f"Unsupported patient journey LLM provider: {resolved_provider}",
+    )
+
+
+def _try_ollama_summary(record: dict, model: str) -> JourneySummaryResult:
     try:
         import ollama
 
@@ -135,9 +197,72 @@ def _try_llm_summary(record: dict, model: str) -> str | None:
                 },
             ],
         )
-        return response["message"]["content"].strip()
-    except Exception:
-        return None
+        return JourneySummaryResult(
+            summary=response["message"]["content"].strip(),
+            provider="ollama",
+            model=model,
+        )
+    except Exception as error:
+        return JourneySummaryResult(
+            summary=None,
+            provider="ollama",
+            model=model,
+            error=f"Ollama generation failed: {error.__class__.__name__}",
+        )
+
+
+def _try_groq_summary(
+    record: dict,
+    model: str,
+    api_key: str | None,
+    base_url: str,
+) -> JourneySummaryResult:
+    if not api_key:
+        return JourneySummaryResult(
+            summary=None,
+            provider="groq",
+            model=model,
+            error="GROQ_API_KEY is required for Groq patient journey generation.",
+        )
+
+    payload = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": PATIENT_JOURNEY_SYSTEM_PROMPT},
+            {"role": "user", "content": _format_record_for_llm(record)},
+        ],
+        "temperature": 0.2,
+        "max_tokens": 550,
+    }
+    request = Request(
+        base_url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+
+    try:
+        with urlopen(request, timeout=60) as response:
+            data = json.loads(response.read().decode("utf-8"))
+        summary = data["choices"][0]["message"]["content"].strip()
+        return JourneySummaryResult(summary=summary, provider="groq", model=model)
+    except HTTPError as error:
+        return JourneySummaryResult(
+            summary=None,
+            provider="groq",
+            model=model,
+            error=f"Groq generation failed: HTTP {error.code}",
+        )
+    except (KeyError, IndexError, URLError, TimeoutError, OSError) as error:
+        return JourneySummaryResult(
+            summary=None,
+            provider="groq",
+            model=model,
+            error=f"Groq generation failed: {error.__class__.__name__}",
+        )
 
 
 def _format_record_for_llm(record: dict) -> str:
