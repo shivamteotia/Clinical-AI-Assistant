@@ -1,4 +1,5 @@
 import json
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.error import HTTPError, URLError
@@ -99,9 +100,11 @@ def build_all_patient_journeys(
     model: str | None = None,
     provider: str | None = None,
     require_llm: bool = False,
+    request_delay_seconds: float = 0.0,
 ) -> list[dict]:
     journeys = []
-    for patient in list_patients():
+    patients = list_patients()
+    for index, patient in enumerate(patients):
         record = get_patient_record(patient["patient_id"])
         if record is None:
             continue
@@ -114,6 +117,8 @@ def build_all_patient_journeys(
                 require_llm=require_llm,
             )
         )
+        if use_llm and request_delay_seconds > 0 and index < len(patients) - 1:
+            time.sleep(request_delay_seconds)
     return journeys
 
 
@@ -240,29 +245,44 @@ def _try_groq_summary(
         headers={
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
+            "Accept": "application/json",
+            "User-Agent": "ClinicalAISystem/0.1",
         },
         method="POST",
     )
 
-    try:
-        with urlopen(request, timeout=60) as response:
-            data = json.loads(response.read().decode("utf-8"))
-        summary = data["choices"][0]["message"]["content"].strip()
-        return JourneySummaryResult(summary=summary, provider="groq", model=model)
-    except HTTPError as error:
-        return JourneySummaryResult(
-            summary=None,
-            provider="groq",
-            model=model,
-            error=f"Groq generation failed: HTTP {error.code}",
-        )
-    except (KeyError, IndexError, URLError, TimeoutError, OSError) as error:
-        return JourneySummaryResult(
-            summary=None,
-            provider="groq",
-            model=model,
-            error=f"Groq generation failed: {error.__class__.__name__}",
-        )
+    for attempt in range(3):
+        try:
+            with urlopen(request, timeout=60) as response:
+                data = json.loads(response.read().decode("utf-8"))
+            summary = data["choices"][0]["message"]["content"].strip()
+            return JourneySummaryResult(summary=summary, provider="groq", model=model)
+        except HTTPError as error:
+            if error.code == 429 and attempt < 2:
+                retry_after = error.headers.get("Retry-After")
+                wait_seconds = float(retry_after) if retry_after else 10.0
+                time.sleep(wait_seconds)
+                continue
+            return JourneySummaryResult(
+                summary=None,
+                provider="groq",
+                model=model,
+                error=f"Groq generation failed: HTTP {error.code}",
+            )
+        except (KeyError, IndexError, URLError, TimeoutError, OSError) as error:
+            return JourneySummaryResult(
+                summary=None,
+                provider="groq",
+                model=model,
+                error=f"Groq generation failed: {error.__class__.__name__}",
+            )
+
+    return JourneySummaryResult(
+        summary=None,
+        provider="groq",
+        model=model,
+        error="Groq generation failed after retries.",
+    )
 
 
 def _format_record_for_llm(record: dict) -> str:

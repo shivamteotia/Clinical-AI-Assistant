@@ -31,15 +31,25 @@ def main() -> None:
         action="store_true",
         help="Fail instead of saving local fallback summaries if LLM generation fails.",
     )
+    parser.add_argument(
+        "--delay-seconds",
+        type=float,
+        default=None,
+        help="Delay between LLM calls. Defaults to 2.5 seconds for Groq to respect free-tier RPM limits.",
+    )
     args = parser.parse_args()
 
     provider = "ollama" if args.ollama else args.provider
     use_llm = provider != "local"
+    delay_seconds = args.delay_seconds
+    if delay_seconds is None:
+        delay_seconds = 2.5 if provider == "groq" else 0.0
     journeys = build_all_patient_journeys(
         use_llm=use_llm,
         model=args.model,
         provider=provider,
         require_llm=args.require_llm,
+        request_delay_seconds=delay_seconds,
     )
     save_patient_journeys(journeys)
     print(f"Generated {len(journeys)} patient journey summaries.")

@@ -2,11 +2,11 @@
   {
     "patient_id": "P001",
     "patient_name": "Aarav Sharma",
-    "generated_by": "local_fallback",
-    "journey_model": null,
-    "system_prompt": null,
+    "generated_by": "groq:llama-3.3-70b-versatile",
+    "journey_model": "llama-3.3-70b-versatile",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
     "llm_error": null,
-    "summary": "Aarav Sharma (P001) is a 52-year-old male patient. The latest recorded encounter lists Type 2 diabetes mellitus after a visit for Increased thirst and fatigue. Recorded labs include HbA1c, Fasting glucose. Current recorded medications include Metformin. Clinical note context: Patient reports increased thirst, frequent urination, and fatigue for the last three months. Lifestyle counseling provided. Started on metformin and advised dietary modification, glucose monitoring, and follow-up in four weeks. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
+    "summary": "Aarav Sharma, a 52-year-old male, presented on 2026-03-01 with increased thirst and fatigue, receiving a diagnosis of Type 2 diabetes mellitus. Key lab results from the same day include an HbA1c of 8.2% and fasting glucose of 168 mg/dL. He was started on Metformin 500 mg twice daily. A progress note from 2026-02-20 documents the patient's symptoms and initial management plan, including lifestyle counseling and medication; please note this is synthetic dummy clinical data for testing purposes only.",
     "timeline": [
       {
         "date": "2026-03-01",
@@ -34,11 +34,11 @@
   {
     "patient_id": "P002",
     "patient_name": "Meera Iyer",
-    "generated_by": "local_fallback",
-    "journey_model": null,
-    "system_prompt": null,
+    "generated_by": "groq:llama-3.3-70b-versatile",
+    "journey_model": "llama-3.3-70b-versatile",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
     "llm_error": null,
-    "summary": "Meera Iyer (P002) is a 44-year-old female patient. The latest recorded encounter lists Bronchial asthma after a visit for Intermittent wheezing and cough. Recorded labs include no recorded labs. Current recorded medications include Salbutamol inhaler. Clinical note context: Patient reports intermittent wheezing, cough, and mild breathlessness, worse at night and after dust exposure. No fever or chest pain. Salbutamol inhaler prescribed as rescue medication. Advised trigger avoidance. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
+    "summary": "Meera Iyer, a 44-year-old female, presented with intermittent wheezing and cough on 2026-03-02 during an outpatient visit, receiving a diagnosis of Bronchial asthma. She was prescribed a Salbutamol inhaler, 100 mcg, to be used as needed, starting on the same day. Prior to this, on 2026-02-20, she reported symptoms of wheezing, cough, and mild breathlessness, worsened by nighttime and dust exposure, with no fever or chest pain noted, as documented in her progress note - please note this is based on synthetic dummy clinical data for testing purposes only.",
     "timeline": [
       {
         "date": "2026-03-02",
@@ -63,11 +63,11 @@
   {
     "patient_id": "P003",
     "patient_name": "Rohan Das",
-    "generated_by": "local_fallback",
-    "journey_model": null,
-    "system_prompt": null,
+    "generated_by": "groq:llama-3.3-70b-versatile",
+    "journey_model": "llama-3.3-70b-versatile",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
     "llm_error": null,
-    "summary": "Rohan Das (P003) is a 67-year-old male patient. The latest recorded encounter lists Hypertension with suspected angina after a visit for Chest discomfort and shortness of breath. Recorded labs include Troponin I. Current recorded medications include Amlodipine. Clinical note context: Patient presented with chest discomfort and shortness of breath. Blood pressure elevated at presentation. Initial troponin within reference range. ECG monitoring advised and cardiology evaluation recommended. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
+    "summary": "Rohan Das, a 67-year-old male, presented to the emergency department on 2026-03-03 with chest discomfort and shortness of breath, diagnosed with hypertension with suspected angina. His troponin I level was 0.02 ng/mL, within the reference range, on the same day. He was started on Amlodipine 5 mg once daily. A prior progress note on 2026-02-20 mentioned elevated blood pressure, initial troponin within reference range, and recommendations for ECG monitoring and cardiology evaluation, noting this is part of synthetic dummy clinical data for testing purposes.",
     "timeline": [
       {
         "date": "2026-03-03",
@@ -94,11 +94,11 @@
   {
     "patient_id": "P004",
     "patient_name": "Nisha Patel",
-    "generated_by": "local_fallback",
-    "journey_model": null,
-    "system_prompt": null,
+    "generated_by": "groq:llama-3.3-70b-versatile",
+    "journey_model": "llama-3.3-70b-versatile",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
     "llm_error": null,
-    "summary": "Nisha Patel (P004) is a 38-year-old female patient. The latest recorded encounter lists Urinary tract infection after a visit for Burning urination and fever. Recorded labs include Urine leukocytes, Temperature. Current recorded medications include Nitrofurantoin. Clinical note context: Patient has burning urination, urinary frequency, and fever for two days. Urine dipstick showed leukocytes. Hydration advice given and antibiotic course started. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
+    "summary": "Nisha Patel, a 38-year-old female, presented with a chief complaint of burning urination and fever on 2026-03-04, and was diagnosed with a urinary tract infection. Key lab results from the same day include a positive urine leukocytes test and an elevated temperature of 38.4\u00b0C. She was prescribed Nitrofurantoin 100mg twice daily, starting on 2026-03-04. A prior progress note on 2026-02-20 documented similar symptoms, with hydration advice and an antibiotic course initiated, noting this is part of synthetic dummy clinical data for testing purposes.",
     "timeline": [
       {
         "date": "2026-03-04",
@@ -126,11 +126,11 @@
   {
     "patient_id": "P005",
     "patient_name": "Kabir Khan",
-    "generated_by": "local_fallback",
-    "journey_model": null,
-    "system_prompt": null,
+    "generated_by": "groq:llama-3.3-70b-versatile",
+    "journey_model": "llama-3.3-70b-versatile",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
     "llm_error": null,
-    "summary": "Kabir Khan (P005) is a 61-year-old male patient. The latest recorded encounter lists Chronic obstructive pulmonary disease after a visit for Chronic cough and exertional breathlessness. Recorded labs include SpO2. Current recorded medications include Tiotropium inhaler. Clinical note context: Patient reports chronic cough, sputum production, and exertional breathlessness. Smoking history noted in dummy record. Inhaler technique reviewed and pulmonary follow-up advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
+    "summary": "Kabir Khan, a 61-year-old male, presented with chronic cough and exertional breathlessness on 2026-03-05, and was diagnosed with Chronic obstructive pulmonary disease. His SpO2 level was 93% on the same day, which is below the reference range. He was prescribed Tiotropium inhaler 18 mcg once daily starting from 2026-03-05. A progress note from 2026-02-20 mentions his symptoms and a review of inhaler technique, noting a smoking history in this synthetic record.",
     "timeline": [
       {
         "date": "2026-03-05",
@@ -157,11 +157,11 @@
   {
     "patient_id": "P006",
     "patient_name": "Ananya Rao",
-    "generated_by": "local_fallback",
-    "journey_model": null,
-    "system_prompt": null,
+    "generated_by": "groq:llama-3.3-70b-versatile",
+    "journey_model": "llama-3.3-70b-versatile",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
     "llm_error": null,
-    "summary": "Ananya Rao (P006) is a 29-year-old female patient. The latest recorded encounter lists Hyperthyroidism after a visit for Palpitations and weight loss. Recorded labs include TSH, Free T4. Current recorded medications include Carbimazole. Clinical note context: Patient reports palpitations, heat intolerance, tremor, and unintentional weight loss. Thyroid labs reviewed and endocrinology follow-up advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
+    "summary": "Ananya Rao, a 29-year-old female, presented with palpitations and weight loss on 2026-03-06, and was diagnosed with Hyperthyroidism. Key lab results from the same day include a TSH level of 0.02 mIU/L and Free T4 level of 2.4 ng/dL, which are outside the normal reference ranges. She was started on Carbimazole 10mg twice daily. A prior progress note on 2026-02-20 documented symptoms of palpitations, heat intolerance, tremor, and unintentional weight loss, with a plan for endocrinology follow-up; please note that this information is part of synthetic dummy clinical data for testing purposes only.",
     "timeline": [
       {
         "date": "2026-03-06",
@@ -189,11 +189,11 @@
   {
     "patient_id": "P007",
     "patient_name": "Vikram Singh",
-    "generated_by": "local_fallback",
-    "journey_model": null,
-    "system_prompt": null,
+    "generated_by": "groq:llama-3.3-70b-versatile",
+    "journey_model": "llama-3.3-70b-versatile",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
     "llm_error": null,
-    "summary": "Vikram Singh (P007) is a 58-year-old male patient. The latest recorded encounter lists Essential hypertension after a visit for Headache and high blood pressure. Recorded labs include Blood pressure. Current recorded medications include Telmisartan. Clinical note context: Patient seen for headache and repeated high blood pressure readings. Salt reduction and home blood pressure log discussed. Antihypertensive medication started. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
+    "summary": "Vikram Singh, a 58-year-old male, presented with a chief complaint of headache and high blood pressure on 2026-03-07, during an outpatient visit, and was diagnosed with essential hypertension. His blood pressure was recorded as 158/96 mmHg on the same day. He was started on Telmisartan 40 mg once daily. A prior progress note on 2026-02-20 discussed salt reduction, home blood pressure logging, and initiation of antihypertensive medication, noting that this is synthetic dummy clinical data for testing purposes, with no real patient information present.",
     "timeline": [
       {
         "date": "2026-03-07",
@@ -220,11 +220,11 @@
   {
     "patient_id": "P008",
     "patient_name": "Farah Ali",
-    "generated_by": "local_fallback",
-    "journey_model": null,
-    "system_prompt": null,
+    "generated_by": "groq:llama-3.3-70b-versatile",
+    "journey_model": "llama-3.3-70b-versatile",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
     "llm_error": null,
-    "summary": "Farah Ali (P008) is a 33-year-old female patient. The latest recorded encounter lists Iron deficiency anemia after a visit for Fatigue and pallor. Recorded labs include Hemoglobin, Ferritin. Current recorded medications include Ferrous sulfate. Clinical note context: Patient reports fatigue, dizziness, and pallor. Labs show low hemoglobin and ferritin. Iron supplementation started and dietary counseling provided. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
+    "summary": "Farah Ali, a 33-year-old female, presented with fatigue and pallor on 2026-03-08, and was diagnosed with iron deficiency anemia. Key lab results include a hemoglobin level of 9.8 g/dL and a ferritin level of 8 ng/mL, both below the reference range. She was started on ferrous sulfate 325 mg once daily. A prior progress note on 2026-02-20 documented similar symptoms, low lab values, and initiation of iron supplementation and dietary counseling, noting that this is synthetic dummy clinical data for testing purposes only.",
     "timeline": [
       {
         "date": "2026-03-08",
@@ -252,11 +252,11 @@
   {
     "patient_id": "P009",
     "patient_name": "Suresh Nair",
-    "generated_by": "local_fallback",
-    "journey_model": null,
-    "system_prompt": null,
+    "generated_by": "groq:llama-3.3-70b-versatile",
+    "journey_model": "llama-3.3-70b-versatile",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
     "llm_error": null,
-    "summary": "Suresh Nair (P009) is a 72-year-old male patient. The latest recorded encounter lists Chronic kidney disease after a visit for Reduced urine output and swelling. Recorded labs include Creatinine, eGFR. Current recorded medications include Furosemide. Clinical note context: Patient reports reduced urine output and ankle swelling. Creatinine is elevated in the dummy record and eGFR is reduced. Nephrology review advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
+    "summary": "Suresh Nair, a 72-year-old male, presented on 2026-03-09 with reduced urine output and swelling, diagnosed with chronic kidney disease. Key lab results from the same day include an elevated creatinine level of 2.1 mg/dL and a decreased eGFR of 34 mL/min/1.73m2. He was started on Furosemide 20 mg once daily. A prior progress note on 2026-02-20 mentioned similar symptoms and advised nephrology review, noting elevated creatinine and reduced eGFR in this synthetic record.",
     "timeline": [
       {
         "date": "2026-03-09",
@@ -284,11 +284,11 @@
   {
     "patient_id": "P010",
     "patient_name": "Pooja Menon",
-    "generated_by": "local_fallback",
-    "journey_model": null,
-    "system_prompt": null,
+    "generated_by": "groq:llama-3.3-70b-versatile",
+    "journey_model": "llama-3.3-70b-versatile",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
     "llm_error": null,
-    "summary": "Pooja Menon (P010) is a 26-year-old female patient. The latest recorded encounter lists Early pregnancy after a visit for Missed periods and nausea. Recorded labs include Urine pregnancy test. Current recorded medications include Folic acid. Clinical note context: Patient reports missed periods, nausea, and breast tenderness. Urine pregnancy test is positive. Antenatal counseling and obstetric follow-up advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
+    "summary": "Pooja Menon, a 26-year-old female, presented with missed periods and nausea on 2026-03-10, with a diagnosis of early pregnancy confirmed by a positive urine pregnancy test. She was prescribed 5mg of folic acid to be taken once daily, starting from the same date. A prior progress note on 2026-02-20 documented her symptoms, including breast tenderness, and advised antenatal counseling and obstetric follow-up, noting that this information is part of synthetic dummy clinical data for testing purposes only.",
     "timeline": [
       {
         "date": "2026-03-10",
@@ -315,11 +315,11 @@
   {
     "patient_id": "P011",
     "patient_name": "Aditya Verma",
-    "generated_by": "local_fallback",
-    "journey_model": null,
-    "system_prompt": null,
+    "generated_by": "groq:llama-3.3-70b-versatile",
+    "journey_model": "llama-3.3-70b-versatile",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
     "llm_error": null,
-    "summary": "Aditya Verma (P011) is a 47-year-old male patient. The latest recorded encounter lists Gastroesophageal reflux disease after a visit for Epigastric pain and acidity. Recorded labs include no recorded labs. Current recorded medications include Pantoprazole. Clinical note context: Patient reports epigastric burning, sour regurgitation, and symptoms after spicy meals. Lifestyle advice and proton pump inhibitor therapy started. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
+    "summary": "Aditya Verma, a 47-year-old male, presented with epigastric pain and acidity on 2026-03-11, during an outpatient visit, and was diagnosed with Gastroesophageal reflux disease. He was started on Pantoprazole 40 mg once daily from the same date. Prior to this, on 2026-02-20, he reported symptoms of epigastric burning and sour regurgitation, particularly after spicy meals, as noted in a progress note, which also marked the initiation of lifestyle advice and proton pump inhibitor therapy. Please note that this information is based on synthetic dummy clinical data for testing purposes only.",
     "timeline": [
       {
         "date": "2026-03-11",
@@ -344,11 +344,11 @@
   {
     "patient_id": "P012",
     "patient_name": "Leela Thomas",
-    "generated_by": "local_fallback",
-    "journey_model": null,
-    "system_prompt": null,
+    "generated_by": "groq:llama-3.3-70b-versatile",
+    "journey_model": "llama-3.3-70b-versatile",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
     "llm_error": null,
-    "summary": "Leela Thomas (P012) is a 64-year-old female patient. The latest recorded encounter lists Osteoarthritis of knee after a visit for Knee pain and stiffness. Recorded labs include no recorded labs. Current recorded medications include Paracetamol. Clinical note context: Patient reports bilateral knee pain, morning stiffness, and difficulty climbing stairs. Weight management and physiotherapy were discussed. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
+    "summary": "Leela Thomas, a 64-year-old female, presented with knee pain and stiffness on 2026-03-12 during an outpatient visit, receiving a diagnosis of osteoarthritis of the knee. She was prescribed Paracetamol 650 mg as needed, starting on the same day. Prior to this, on 2026-02-20, she reported bilateral knee pain, morning stiffness, and difficulty climbing stairs in a progress note, where weight management and physiotherapy were discussed; please note this is based on synthetic dummy clinical data for testing purposes.",
     "timeline": [
       {
         "date": "2026-03-12",
@@ -373,11 +373,11 @@
   {
     "patient_id": "P013",
     "patient_name": "Imran Sheikh",
-    "generated_by": "local_fallback",
-    "journey_model": null,
-    "system_prompt": null,
+    "generated_by": "groq:llama-3.3-70b-versatile",
+    "journey_model": "llama-3.3-70b-versatile",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
     "llm_error": null,
-    "summary": "Imran Sheikh (P013) is a 41-year-old male patient. The latest recorded encounter lists Malaria after a visit for Fever with chills. Recorded labs include Malaria parasite smear, Platelets. Current recorded medications include Artemether lumefantrine. Clinical note context: Patient reports fever with chills and body ache. Peripheral smear is positive for malaria parasite in dummy data. Antimalarial treatment started. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
+    "summary": "Imran Sheikh, a 41-year-old male, presented with fever and chills on 2026-03-13, and was diagnosed with Malaria. Key lab results include a positive Malaria parasite smear and a platelet count of 118,000/uL, which is below the normal range. He was started on Artemether lumefantrine 20/120 mg as per schedule. A prior progress note on 2026-02-20 mentions the patient's symptoms and initiation of antimalarial treatment, noting that the peripheral smear was positive for malaria parasite, and it is essential to consider that this information is part of synthetic dummy clinical data for pipeline testing purposes only.",
     "timeline": [
       {
         "date": "2026-03-13",
@@ -405,11 +405,11 @@
   {
     "patient_id": "P014",
     "patient_name": "Tanya Roy",
-    "generated_by": "local_fallback",
-    "journey_model": null,
-    "system_prompt": null,
+    "generated_by": "groq:llama-3.3-70b-versatile",
+    "journey_model": "llama-3.3-70b-versatile",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
     "llm_error": null,
-    "summary": "Tanya Roy (P014) is a 36-year-old female patient. The latest recorded encounter lists Depressive symptoms after a visit for Low mood and poor sleep. Recorded labs include no recorded labs. Current recorded medications include Sertraline. Clinical note context: Patient reports persistent low mood, poor sleep, reduced interest, and fatigue. Safety screening documented in dummy record. Mental health follow-up advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
+    "summary": "Tanya Roy, a 36-year-old female, presented with low mood and poor sleep as her chief complaint during an outpatient visit on 2026-03-14, resulting in a diagnosis of depressive symptoms. She was started on Sertraline 25 mg once daily from the same date. Prior to this, a progress note on 2026-02-20 documented her persistent symptoms, including reduced interest and fatigue, with a mention of safety screening and advice for mental health follow-up, noting that this information is part of synthetic dummy clinical data for testing purposes.",
     "timeline": [
       {
         "date": "2026-03-14",
@@ -434,11 +434,11 @@
   {
     "patient_id": "P015",
     "patient_name": "Manoj Gupta",
-    "generated_by": "local_fallback",
-    "journey_model": null,
-    "system_prompt": null,
+    "generated_by": "groq:llama-3.3-70b-versatile",
+    "journey_model": "llama-3.3-70b-versatile",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
     "llm_error": null,
-    "summary": "Manoj Gupta (P015) is a 55-year-old male patient. The latest recorded encounter lists Gallstone disease after a visit for Right upper abdominal pain. Recorded labs include Total bilirubin. Current recorded medications include Drotaverine. Clinical note context: Patient reports right upper abdominal pain after fatty meals. Ultrasound note mentions gallstones in dummy data. Surgical review advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
+    "summary": "Manoj Gupta, a 55-year-old male, presented with right upper abdominal pain, particularly after fatty meals, as noted in a progress note on 2026-02-20. He was diagnosed with gallstone disease during an outpatient encounter on 2026-03-15. On the same day, his total bilirubin level was within the normal range at 1.0 mg/dL. He was prescribed Drotaverine 80 mg as needed, starting on 2026-03-15. Please note that the ultrasound findings and this entire record are part of synthetic dummy clinical data for testing purposes only.",
     "timeline": [
       {
         "date": "2026-03-15",
@@ -465,11 +465,11 @@
   {
     "patient_id": "P016",
     "patient_name": "Sneha Kapoor",
-    "generated_by": "local_fallback",
-    "journey_model": null,
-    "system_prompt": null,
+    "generated_by": "groq:llama-3.3-70b-versatile",
+    "journey_model": "llama-3.3-70b-versatile",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
     "llm_error": null,
-    "summary": "Sneha Kapoor (P016) is a 31-year-old female patient. The latest recorded encounter lists Migraine after a visit for Migraine headaches. Recorded labs include no recorded labs. Current recorded medications include Sumatriptan. Clinical note context: Patient reports unilateral throbbing headache with nausea and light sensitivity. Trigger diary and acute migraine medication discussed. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
+    "summary": "Sneha Kapoor, a 31-year-old female, presented with migraine headaches as her chief complaint during an outpatient visit on 2026-03-16, resulting in a diagnosis of Migraine. She was prescribed Sumatriptan 50 mg to be taken as needed, starting on the same day. Prior to this, on 2026-02-20, a progress note documented her symptoms of unilateral throbbing headache, nausea, and light sensitivity, with discussion on trigger diary and acute migraine medication. Note that this information is based on synthetic dummy clinical data for testing purposes only.",
     "timeline": [
       {
         "date": "2026-03-16",
@@ -494,11 +494,11 @@
   {
     "patient_id": "P017",
     "patient_name": "Harish Kulkarni",
-    "generated_by": "local_fallback",
-    "journey_model": null,
-    "system_prompt": null,
+    "generated_by": "groq:llama-3.3-70b-versatile",
+    "journey_model": "llama-3.3-70b-versatile",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
     "llm_error": null,
-    "summary": "Harish Kulkarni (P017) is a 69-year-old male patient. The latest recorded encounter lists Mild cognitive impairment after a visit for Memory difficulty. Recorded labs include Vitamin B12. Current recorded medications include Donepezil. Clinical note context: Patient and family report recent memory difficulty and missed appointments. Cognitive screening performed in dummy record. Neurology follow-up advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
+    "summary": "Harish Kulkarni, a 69-year-old male, presented with memory difficulty as his chief complaint during an outpatient visit on 2026-03-17, resulting in a diagnosis of mild cognitive impairment. On the same day, his Vitamin B12 level was found to be 420 pg/mL, within the normal range of 200-900 pg/mL. He was started on Donepezil 5 mg once daily. A prior progress note from 2026-02-20 documented the patient's and family's reports of recent memory difficulty, with cognitive screening performed, and neurology follow-up advised, noting that this information is part of synthetic dummy clinical data for testing purposes only.",
     "timeline": [
       {
         "date": "2026-03-17",
@@ -525,11 +525,11 @@
   {
     "patient_id": "P018",
     "patient_name": "Ritu Bansal",
-    "generated_by": "local_fallback",
-    "journey_model": null,
-    "system_prompt": null,
+    "generated_by": "groq:llama-3.3-70b-versatile",
+    "journey_model": "llama-3.3-70b-versatile",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
     "llm_error": null,
-    "summary": "Ritu Bansal (P018) is a 49-year-old female patient. The latest recorded encounter lists Rheumatoid arthritis after a visit for Joint pain and swelling. Recorded labs include Rheumatoid factor, ESR. Current recorded medications include Methotrexate. Clinical note context: Patient reports small joint pain, morning stiffness, and swelling in both hands. Rheumatoid factor positive in dummy data. Rheumatology review advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
+    "summary": "Ritu Bansal, a 49-year-old female, presented with joint pain and swelling on 2026-03-18, and was diagnosed with Rheumatoid arthritis. Key lab results from the same day include a positive Rheumatoid factor and an elevated ESR of 42 mm/hr. She was started on Methotrexate 7.5 mg weekly. A progress note from 2026-02-20 documents her symptoms of small joint pain, morning stiffness, and swelling in both hands, with a positive Rheumatoid factor noted in this synthetic dummy data, which is for testing purposes only and does not represent real patient information.",
     "timeline": [
       {
         "date": "2026-03-18",
@@ -557,11 +557,11 @@
   {
     "patient_id": "P019",
     "patient_name": "Dev Malhotra",
-    "generated_by": "local_fallback",
-    "journey_model": null,
-    "system_prompt": null,
+    "generated_by": "groq:llama-3.3-70b-versatile",
+    "journey_model": "llama-3.3-70b-versatile",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
     "llm_error": null,
-    "summary": "Dev Malhotra (P019) is a 23-year-old male patient. The latest recorded encounter lists Viral upper respiratory infection after a visit for Fever and sore throat. Recorded labs include COVID antigen. Current recorded medications include Cetirizine. Clinical note context: Patient reports fever, sore throat, runny nose, and mild cough. COVID antigen test is negative in dummy data. Symptomatic care advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
+    "summary": "Dev Malhotra, a 23-year-old male, presented to the outpatient clinic on 2026-03-19 with a chief complaint of fever and sore throat, diagnosed with viral upper respiratory infection. A COVID antigen test on the same day was negative. He was prescribed Cetirizine 10 mg once daily, starting on 2026-03-19. Notably, a progress note from 2026-02-20, which is prior to the encounter and may not reflect the current visit, mentions symptomatic care and includes a negative COVID antigen test result, but it is essential to consider that this information is part of synthetic dummy clinical data for pipeline testing purposes only.",
     "timeline": [
       {
         "date": "2026-03-19",
@@ -588,11 +588,11 @@
   {
     "patient_id": "P020",
     "patient_name": "Asha Reddy",
-    "generated_by": "local_fallback",
-    "journey_model": null,
-    "system_prompt": null,
+    "generated_by": "groq:llama-3.3-70b-versatile",
+    "journey_model": "llama-3.3-70b-versatile",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
     "llm_error": null,
-    "summary": "Asha Reddy (P020) is a 57-year-old female patient. The latest recorded encounter lists Peripheral neuropathy after a visit for Tingling feet and numbness. Recorded labs include Vitamin B12. Current recorded medications include Pregabalin. Clinical note context: Patient reports tingling feet, numbness, and burning sensation at night. Vitamin B12 is low in dummy data. Neuropathy assessment documented. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.",
+    "summary": "Asha Reddy, a 57-year-old female, presented with tingling feet and numbness on 2026-03-20, and was diagnosed with Peripheral neuropathy. Her Vitamin B12 level was 180 pg/mL, which is below the reference range, on the same day. She was started on Pregabalin 75 mg at night. A prior progress note on 2026-02-20 documented her symptoms of tingling, numbness, and burning sensation at night, with a mention of low Vitamin B12, noting this is synthetic dummy clinical data for testing purposes only.",
     "timeline": [
       {
         "date": "2026-03-20",
