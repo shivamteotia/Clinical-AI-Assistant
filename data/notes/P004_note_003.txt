@@ -1,0 +1,1 @@
+Subsequent review for Urinary tract infection. Patient journey includes prior evaluation, follow-up, medication review, and interval clinical monitoring. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present.

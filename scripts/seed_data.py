@@ -128,8 +128,20 @@ def seed_medications(connection: sqlite3.Connection) -> None:
 
 
 def seed_notes(connection: sqlite3.Connection) -> None:
+    note_dates = {
+        1: "2026-01-20",
+        2: "2026-02-20",
+        3: "2026-03-20",
+    }
+    note_types = {
+        1: "Initial note",
+        2: "Follow-up note",
+        3: "Progress note",
+    }
     for index, note_path in enumerate(sorted(NOTES_DIR.glob("*.txt")), start=1):
-        patient_id = note_path.stem.split("_")[0]
+        parts = note_path.stem.split("_")
+        patient_id = parts[0]
+        note_number = int(parts[-1]) if parts[-1].isdigit() else 1
         note_text = note_path.read_text(encoding="utf-8")
         connection.execute(
             """
@@ -141,8 +153,8 @@ def seed_notes(connection: sqlite3.Connection) -> None:
             (
                 f"N{index:03d}",
                 patient_id,
-                "2026-02-20",
-                "Progress note",
+                note_dates.get(note_number, "2026-03-20"),
+                note_types.get(note_number, "Progress note"),
                 note_text,
                 note_path.name,
             ),
@@ -164,4 +176,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

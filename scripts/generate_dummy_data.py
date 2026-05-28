@@ -264,7 +264,6 @@ def main() -> None:
     lab_index = 1
     for index, case in enumerate(CASES, start=1):
         patient_id = case["patient_id"]
-        date = f"2026-03-{index:02d}"
         patients.append(
             {
                 "patient_id": patient_id,
@@ -275,16 +274,39 @@ def main() -> None:
                 "address": case["address"],
             }
         )
-        encounters.append(
-            {
-                "encounter_id": f"E{index:03d}",
-                "patient_id": patient_id,
-                "date": date,
-                "visit_type": "Outpatient" if index != 3 else "Emergency",
-                "chief_complaint": case["chief_complaint"],
-                "diagnosis": case["diagnosis"],
-            }
-        )
+
+        visit_dates = [
+            f"2026-01-{index:02d}",
+            f"2026-02-{index:02d}",
+            f"2026-03-{index:02d}",
+        ]
+        visit_types = [
+            "Emergency" if index == 3 else "Outpatient",
+            "Follow-up",
+            "Follow-up",
+        ]
+        complaints = [
+            case["chief_complaint"],
+            f"Follow-up for {case['diagnosis']}",
+            f"Review of {case['diagnosis']} progress",
+        ]
+        diagnoses = [
+            f"Suspected {case['diagnosis']}",
+            case["diagnosis"],
+            case["diagnosis"],
+        ]
+
+        for visit_number, date in enumerate(visit_dates, start=1):
+            encounters.append(
+                {
+                    "encounter_id": f"E{index:03d}_{visit_number}",
+                    "patient_id": patient_id,
+                    "date": date,
+                    "visit_type": visit_types[visit_number - 1],
+                    "chief_complaint": complaints[visit_number - 1],
+                    "diagnosis": diagnoses[visit_number - 1],
+                }
+            )
 
         drug_name, dose, frequency = case["medication"]
         medications.append(
@@ -294,29 +316,48 @@ def main() -> None:
                 "drug_name": drug_name,
                 "dose": dose,
                 "frequency": frequency,
-                "start_date": date,
+                "start_date": visit_dates[1],
             }
         )
 
-        for test_name, value, unit, reference_range in case["labs"]:
-            labs.append(
-                {
-                    "lab_id": f"L{lab_index:03d}",
-                    "patient_id": patient_id,
-                    "date": date,
-                    "test_name": test_name,
-                    "value": value,
-                    "unit": unit,
-                    "reference_range": reference_range,
-                }
-            )
-            lab_index += 1
+        for visit_number, date in enumerate(visit_dates, start=1):
+            for test_name, value, unit, reference_range in case["labs"]:
+                labs.append(
+                    {
+                        "lab_id": f"L{lab_index:03d}",
+                        "patient_id": patient_id,
+                        "date": date,
+                        "test_name": test_name,
+                        "value": longitudinal_lab_value(value, visit_number),
+                        "unit": unit,
+                        "reference_range": reference_range,
+                    }
+                )
+                lab_index += 1
 
-        note = (
-            f"{case['note']} This is synthetic dummy clinical data for pipeline testing only. "
-            f"No real patient information is present."
-        )
-        (NOTES_DIR / f"{patient_id}_note_001.txt").write_text(note, encoding="utf-8")
+        notes = [
+            (
+                f"Initial visit for {case['chief_complaint']}. {case['note']} "
+                f"Working diagnosis recorded as suspected {case['diagnosis']}."
+            ),
+            (
+                f"Follow-up visit for {case['diagnosis']}. Symptoms reviewed after initial assessment. "
+                f"{drug_name} {dose} {frequency} documented in the medication plan."
+            ),
+            (
+                f"Subsequent review for {case['diagnosis']}. Patient journey includes prior evaluation, "
+                f"follow-up, medication review, and interval clinical monitoring."
+            ),
+        ]
+        for note_number, note in enumerate(notes, start=1):
+            full_note = (
+                f"{note} This is synthetic dummy clinical data for pipeline testing only. "
+                f"No real patient information is present."
+            )
+            (NOTES_DIR / f"{patient_id}_note_{note_number:03d}.txt").write_text(
+                full_note,
+                encoding="utf-8",
+            )
 
     write_json("patients.json", patients)
     write_json("encounters.json", encounters)
@@ -330,6 +371,30 @@ def main() -> None:
     print(f"Generated {len(list(NOTES_DIR.glob('*.txt')))} notes")
 
 
+def longitudinal_lab_value(value: str, visit_number: int) -> str:
+    if not is_number(value):
+        return value
+
+    numeric_value = float(value)
+    if visit_number == 1:
+        adjusted = numeric_value * 1.12
+    elif visit_number == 2:
+        adjusted = numeric_value * 1.04
+    else:
+        adjusted = numeric_value
+
+    if "." in value:
+        return f"{adjusted:.2f}".rstrip("0").rstrip(".")
+    return str(int(round(adjusted)))
+
+
+def is_number(value: str) -> bool:
+    try:
+        float(value)
+    except ValueError:
+        return False
+    return True
+
 def write_json(filename: str, rows: list[dict]) -> None:
     with open(DATA_DIR / filename, "w", encoding="utf-8") as file:
         json.dump(rows, file, indent=2)
@@ -338,4 +403,3 @@ def write_json(filename: str, rows: list[dict]) -> None:
 
 if __name__ == "__main__":
     main()
-

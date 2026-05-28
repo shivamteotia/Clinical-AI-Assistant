@@ -4,27 +4,76 @@
     "patient_name": "Aarav Sharma",
     "generated_by": "groq:llama-3.3-70b-versatile",
     "journey_model": "llama-3.3-70b-versatile",
-    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.\n- Return only valid JSON with this shape:\n  {\"summary\":\"one paragraph\",\"claims\":[{\"sentence\":\"one sentence from the summary\",\"sources\":[\"patient:P001\",\"encounter:E001\"]}]}\n- Every claim source must use IDs from the supplied record: patient:{patient_id}, encounter:{encounter_id}, lab:{lab_id}, medication:{medication_id}, note:{note_id}.",
     "llm_error": null,
-    "summary": "Aarav Sharma, a 52-year-old male, presented on 2026-03-01 with increased thirst and fatigue, receiving a diagnosis of Type 2 diabetes mellitus. Key lab results from the same day include an HbA1c of 8.2% and fasting glucose of 168 mg/dL. He was started on Metformin 500 mg twice daily. A progress note from 2026-02-20 documents the patient's symptoms and initial management plan, including lifestyle counseling and medication; please note this is synthetic dummy clinical data for testing purposes only.",
-    "timeline": [
+    "summary": "Aarav Sharma, a 52-year-old male, presented with increased thirst and fatigue, leading to a suspected diagnosis of Type 2 diabetes mellitus on 2026-01-01. He was started on Metformin 500 mg twice daily and advised lifestyle modifications. Follow-up encounters on 2026-02-01 and 2026-03-01 confirmed the diagnosis of Type 2 diabetes mellitus, with lab results showing elevated HbA1c (8.53% on 2026-02-01 and 8.2% on 2026-03-01) and fasting glucose (175 mg/dL on 2026-02-01 and 168 mg/dL on 2026-03-01). Please note that this is synthetic dummy clinical data for pipeline testing only, and no real patient information is present.",
+    "claims": [
       {
-        "date": "2026-03-01",
-        "type": "Outpatient",
-        "title": "Type 2 diabetes mellitus",
-        "detail": "Increased thirst and fatigue"
+        "sentence": "Aarav Sharma, a 52-year-old male, presented with increased thirst and fatigue, leading to a suspected diagnosis of Type 2 diabetes mellitus on 2026-01-01.",
+        "sources": [
+          "patient:P001",
+          "encounter:E001_1"
+        ]
       },
       {
-        "date": "2026-02-20",
-        "type": "Progress note",
-        "title": "Clinical note",
-        "detail": "Patient reports increased thirst, frequent urination, and fatigue for the last three months. Lifestyle counseling provided. Started on metformin and advised dietary modification, glucose monitoring, and follow-up in four weeks. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+        "sentence": "He was started on Metformin 500 mg twice daily and advised lifestyle modifications.",
+        "sources": [
+          "medication:M001",
+          "note:N001"
+        ]
+      },
+      {
+        "sentence": "Follow-up encounters on 2026-02-01 and 2026-03-01 confirmed the diagnosis of Type 2 diabetes mellitus, with lab results showing elevated HbA1c (8.53% on 2026-02-01 and 8.2% on 2026-03-01) and fasting glucose (175 mg/dL on 2026-02-01 and 168 mg/dL on 2026-03-01).",
+        "sources": [
+          "encounter:E001_2",
+          "encounter:E001_3",
+          "lab:L003",
+          "lab:L004",
+          "lab:L005",
+          "lab:L006"
+        ]
+      },
+      {
+        "sentence": "Please note that this is synthetic dummy clinical data for pipeline testing only, and no real patient information is present.",
+        "sources": [
+          "note:N001",
+          "note:N002",
+          "note:N003"
+        ]
       }
     ],
-    "current_focus": "Type 2 diabetes mellitus - Increased thirst and fatigue",
+    "timeline": [
+      {
+        "date": "2026-03-20",
+        "type": "Progress note",
+        "title": "Clinical note",
+        "detail": "Subsequent review for Type 2 diabetes mellitus. Patient journey includes prior evaluation, follow-up, medication review, and interval clinical monitoring. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+      },
+      {
+        "date": "2026-03-01",
+        "type": "Follow-up",
+        "title": "Type 2 diabetes mellitus",
+        "detail": "Review of Type 2 diabetes mellitus progress"
+      },
+      {
+        "date": "2026-02-01",
+        "type": "Follow-up",
+        "title": "Type 2 diabetes mellitus",
+        "detail": "Follow-up for Type 2 diabetes mellitus"
+      },
+      {
+        "date": "2026-01-01",
+        "type": "Outpatient",
+        "title": "Suspected Type 2 diabetes mellitus",
+        "detail": "Increased thirst and fatigue"
+      }
+    ],
+    "current_focus": "Type 2 diabetes mellitus - Review of Type 2 diabetes mellitus progress",
     "key_labs": [
       "HbA1c: 8.2 % (ref < 5.7)",
-      "Fasting glucose: 168 mg/dL (ref 70-99)"
+      "Fasting glucose: 168 mg/dL (ref 70-99)",
+      "HbA1c: 8.53 % (ref < 5.7)",
+      "Fasting glucose: 175 mg/dL (ref 70-99)"
     ],
     "active_medications": [
       "Metformin 500 mg Twice daily"
@@ -36,24 +85,67 @@
     "patient_name": "Meera Iyer",
     "generated_by": "groq:llama-3.3-70b-versatile",
     "journey_model": "llama-3.3-70b-versatile",
-    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.\n- Return only valid JSON with this shape:\n  {\"summary\":\"one paragraph\",\"claims\":[{\"sentence\":\"one sentence from the summary\",\"sources\":[\"patient:P001\",\"encounter:E001\"]}]}\n- Every claim source must use IDs from the supplied record: patient:{patient_id}, encounter:{encounter_id}, lab:{lab_id}, medication:{medication_id}, note:{note_id}.",
     "llm_error": null,
-    "summary": "Meera Iyer, a 44-year-old female, presented with intermittent wheezing and cough on 2026-03-02 during an outpatient visit, receiving a diagnosis of Bronchial asthma. She was prescribed a Salbutamol inhaler, 100 mcg, to be used as needed, starting on the same day. Prior to this, on 2026-02-20, she reported symptoms of wheezing, cough, and mild breathlessness, worsened by nighttime and dust exposure, with no fever or chest pain noted, as documented in her progress note - please note this is based on synthetic dummy clinical data for testing purposes only.",
-    "timeline": [
+    "summary": "Meera Iyer, a 44-year-old female patient, presented with intermittent wheezing and cough, which led to a working diagnosis of suspected Bronchial asthma during her initial outpatient visit on 2026-01-02. She was prescribed a Salbutamol inhaler 100 mcg as needed. Subsequent follow-up visits on 2026-02-02 and 2026-03-02 confirmed the diagnosis of Bronchial asthma. The patient's journey, as noted in the clinical records, includes prior evaluation, follow-up, medication review, and interval clinical monitoring, with the clinical notes explicitly stating that this is synthetic dummy clinical data for pipeline testing only, containing no real patient information.",
+    "claims": [
       {
-        "date": "2026-03-02",
-        "type": "Outpatient",
-        "title": "Bronchial asthma",
-        "detail": "Intermittent wheezing and cough"
+        "sentence": "Meera Iyer, a 44-year-old female patient, presented with intermittent wheezing and cough, which led to a working diagnosis of suspected Bronchial asthma during her initial outpatient visit on 2026-01-02.",
+        "sources": [
+          "patient:P002",
+          "encounter:E002_1"
+        ]
       },
       {
-        "date": "2026-02-20",
-        "type": "Progress note",
-        "title": "Clinical note",
-        "detail": "Patient reports intermittent wheezing, cough, and mild breathlessness, worse at night and after dust exposure. No fever or chest pain. Salbutamol inhaler prescribed as rescue medication. Advised trigger avoidance. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+        "sentence": "She was prescribed a Salbutamol inhaler 100 mcg as needed.",
+        "sources": [
+          "medication:M002",
+          "encounter:E002_1"
+        ]
+      },
+      {
+        "sentence": "Subsequent follow-up visits on 2026-02-02 and 2026-03-02 confirmed the diagnosis of Bronchial asthma.",
+        "sources": [
+          "encounter:E002_2",
+          "encounter:E002_3"
+        ]
+      },
+      {
+        "sentence": "The patient's journey, as noted in the clinical records, includes prior evaluation, follow-up, medication review, and interval clinical monitoring, with the clinical notes explicitly stating that this is synthetic dummy clinical data for pipeline testing only, containing no real patient information.",
+        "sources": [
+          "note:N004",
+          "note:N005",
+          "note:N006"
+        ]
       }
     ],
-    "current_focus": "Bronchial asthma - Intermittent wheezing and cough",
+    "timeline": [
+      {
+        "date": "2026-03-20",
+        "type": "Progress note",
+        "title": "Clinical note",
+        "detail": "Subsequent review for Bronchial asthma. Patient journey includes prior evaluation, follow-up, medication review, and interval clinical monitoring. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+      },
+      {
+        "date": "2026-03-02",
+        "type": "Follow-up",
+        "title": "Bronchial asthma",
+        "detail": "Review of Bronchial asthma progress"
+      },
+      {
+        "date": "2026-02-02",
+        "type": "Follow-up",
+        "title": "Bronchial asthma",
+        "detail": "Follow-up for Bronchial asthma"
+      },
+      {
+        "date": "2026-01-02",
+        "type": "Outpatient",
+        "title": "Suspected Bronchial asthma",
+        "detail": "Intermittent wheezing and cough"
+      }
+    ],
+    "current_focus": "Bronchial asthma - Review of Bronchial asthma progress",
     "key_labs": [],
     "active_medications": [
       "Salbutamol inhaler 100 mcg As needed"
@@ -65,25 +157,69 @@
     "patient_name": "Rohan Das",
     "generated_by": "groq:llama-3.3-70b-versatile",
     "journey_model": "llama-3.3-70b-versatile",
-    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.\n- Return only valid JSON with this shape:\n  {\"summary\":\"one paragraph\",\"claims\":[{\"sentence\":\"one sentence from the summary\",\"sources\":[\"patient:P001\",\"encounter:E001\"]}]}\n- Every claim source must use IDs from the supplied record: patient:{patient_id}, encounter:{encounter_id}, lab:{lab_id}, medication:{medication_id}, note:{note_id}.",
     "llm_error": null,
-    "summary": "Rohan Das, a 67-year-old male, presented to the emergency department on 2026-03-03 with chest discomfort and shortness of breath, diagnosed with hypertension with suspected angina. His troponin I level was 0.02 ng/mL, within the reference range, on the same day. He was started on Amlodipine 5 mg once daily. A prior progress note on 2026-02-20 mentioned elevated blood pressure, initial troponin within reference range, and recommendations for ECG monitoring and cardiology evaluation, noting this is part of synthetic dummy clinical data for testing purposes.",
-    "timeline": [
+    "summary": "Rohan Das, a 67-year-old male, presented with chest discomfort and shortness of breath on 2026-01-03, with an initial diagnosis of suspected Hypertension with suspected angina. He was subsequently followed up on 2026-02-03 and 2026-03-03, with a confirmed diagnosis of Hypertension with suspected angina. His troponin levels were within the reference range on all three visits (L007, L008, L009). He was prescribed Amlodipine 5 mg once daily starting from 2026-02-03 (M003). This is a summary of synthetic dummy clinical data for pipeline testing only, with no real patient information present.",
+    "claims": [
       {
-        "date": "2026-03-03",
-        "type": "Emergency",
-        "title": "Hypertension with suspected angina",
-        "detail": "Chest discomfort and shortness of breath"
+        "sentence": "Rohan Das, a 67-year-old male, presented with chest discomfort and shortness of breath on 2026-01-03, with an initial diagnosis of suspected Hypertension with suspected angina.",
+        "sources": [
+          "patient:P003",
+          "encounter:E003_1"
+        ]
       },
       {
-        "date": "2026-02-20",
-        "type": "Progress note",
-        "title": "Clinical note",
-        "detail": "Patient presented with chest discomfort and shortness of breath. Blood pressure elevated at presentation. Initial troponin within reference range. ECG monitoring advised and cardiology evaluation recommended. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+        "sentence": "He was subsequently followed up on 2026-02-03 and 2026-03-03, with a confirmed diagnosis of Hypertension with suspected angina.",
+        "sources": [
+          "encounter:E003_2",
+          "encounter:E003_3"
+        ]
+      },
+      {
+        "sentence": "His troponin levels were within the reference range on all three visits (L007, L008, L009).",
+        "sources": [
+          "lab:L007",
+          "lab:L008",
+          "lab:L009"
+        ]
+      },
+      {
+        "sentence": "He was prescribed Amlodipine 5 mg once daily starting from 2026-02-03 (M003).",
+        "sources": [
+          "medication:M003"
+        ]
       }
     ],
-    "current_focus": "Hypertension with suspected angina - Chest discomfort and shortness of breath",
+    "timeline": [
+      {
+        "date": "2026-03-20",
+        "type": "Progress note",
+        "title": "Clinical note",
+        "detail": "Subsequent review for Hypertension with suspected angina. Patient journey includes prior evaluation, follow-up, medication review, and interval clinical monitoring. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+      },
+      {
+        "date": "2026-03-03",
+        "type": "Follow-up",
+        "title": "Hypertension with suspected angina",
+        "detail": "Review of Hypertension with suspected angina progress"
+      },
+      {
+        "date": "2026-02-03",
+        "type": "Follow-up",
+        "title": "Hypertension with suspected angina",
+        "detail": "Follow-up for Hypertension with suspected angina"
+      },
+      {
+        "date": "2026-01-03",
+        "type": "Emergency",
+        "title": "Suspected Hypertension with suspected angina",
+        "detail": "Chest discomfort and shortness of breath"
+      }
+    ],
+    "current_focus": "Hypertension with suspected angina - Review of Hypertension with suspected angina progress",
     "key_labs": [
+      "Troponin I: 0.02 ng/mL (ref < 0.04)",
+      "Troponin I: 0.02 ng/mL (ref < 0.04)",
       "Troponin I: 0.02 ng/mL (ref < 0.04)"
     ],
     "active_medications": [
@@ -96,27 +232,82 @@
     "patient_name": "Nisha Patel",
     "generated_by": "groq:llama-3.3-70b-versatile",
     "journey_model": "llama-3.3-70b-versatile",
-    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.\n- Return only valid JSON with this shape:\n  {\"summary\":\"one paragraph\",\"claims\":[{\"sentence\":\"one sentence from the summary\",\"sources\":[\"patient:P001\",\"encounter:E001\"]}]}\n- Every claim source must use IDs from the supplied record: patient:{patient_id}, encounter:{encounter_id}, lab:{lab_id}, medication:{medication_id}, note:{note_id}.",
     "llm_error": null,
-    "summary": "Nisha Patel, a 38-year-old female, presented with a chief complaint of burning urination and fever on 2026-03-04, and was diagnosed with a urinary tract infection. Key lab results from the same day include a positive urine leukocytes test and an elevated temperature of 38.4\u00b0C. She was prescribed Nitrofurantoin 100mg twice daily, starting on 2026-03-04. A prior progress note on 2026-02-20 documented similar symptoms, with hydration advice and an antibiotic course initiated, noting this is part of synthetic dummy clinical data for testing purposes.",
-    "timeline": [
+    "summary": "Nisha Patel, a 38-year-old female patient, presented with burning urination and fever, prompting a suspected Urinary tract infection diagnosis on 2026-01-04. Subsequent follow-up encounters on 2026-02-04 and 2026-03-04 confirmed the diagnosis of Urinary tract infection. Key lab results include positive urine leukocytes (L010, L012, L014) and elevated temperatures (L011, L013, L015). The patient was prescribed Nitrofurantoin 100 mg Twice daily (M004) starting from 2026-02-04. Clinical notes (N010, N011, N012) document the patient's progress, follow-up, and medication review, noting this is synthetic dummy clinical data for pipeline testing only.",
+    "claims": [
       {
-        "date": "2026-03-04",
-        "type": "Outpatient",
-        "title": "Urinary tract infection",
-        "detail": "Burning urination and fever"
+        "sentence": "Nisha Patel, a 38-year-old female patient, presented with burning urination and fever, prompting a suspected Urinary tract infection diagnosis on 2026-01-04.",
+        "sources": [
+          "patient:P004",
+          "encounter:E004_1"
+        ]
       },
       {
-        "date": "2026-02-20",
-        "type": "Progress note",
-        "title": "Clinical note",
-        "detail": "Patient has burning urination, urinary frequency, and fever for two days. Urine dipstick showed leukocytes. Hydration advice given and antibiotic course started. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+        "sentence": "Subsequent follow-up encounters on 2026-02-04 and 2026-03-04 confirmed the diagnosis of Urinary tract infection.",
+        "sources": [
+          "encounter:E004_2",
+          "encounter:E004_3"
+        ]
+      },
+      {
+        "sentence": "Key lab results include positive urine leukocytes (L010, L012, L014) and elevated temperatures (L011, L013, L015).",
+        "sources": [
+          "lab:L010",
+          "lab:L012",
+          "lab:L014",
+          "lab:L011",
+          "lab:L013",
+          "lab:L015"
+        ]
+      },
+      {
+        "sentence": "The patient was prescribed Nitrofurantoin 100 mg Twice daily (M004) starting from 2026-02-04.",
+        "sources": [
+          "medication:M004"
+        ]
+      },
+      {
+        "sentence": "Clinical notes (N010, N011, N012) document the patient's progress, follow-up, and medication review, noting this is synthetic dummy clinical data for pipeline testing only.",
+        "sources": [
+          "note:N010",
+          "note:N011",
+          "note:N012"
+        ]
       }
     ],
-    "current_focus": "Urinary tract infection - Burning urination and fever",
+    "timeline": [
+      {
+        "date": "2026-03-20",
+        "type": "Progress note",
+        "title": "Clinical note",
+        "detail": "Subsequent review for Urinary tract infection. Patient journey includes prior evaluation, follow-up, medication review, and interval clinical monitoring. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+      },
+      {
+        "date": "2026-03-04",
+        "type": "Follow-up",
+        "title": "Urinary tract infection",
+        "detail": "Review of Urinary tract infection progress"
+      },
+      {
+        "date": "2026-02-04",
+        "type": "Follow-up",
+        "title": "Urinary tract infection",
+        "detail": "Follow-up for Urinary tract infection"
+      },
+      {
+        "date": "2026-01-04",
+        "type": "Outpatient",
+        "title": "Suspected Urinary tract infection",
+        "detail": "Burning urination and fever"
+      }
+    ],
+    "current_focus": "Urinary tract infection - Review of Urinary tract infection progress",
     "key_labs": [
       "Urine leukocytes: Positive  (ref Negative)",
-      "Temperature: 38.4 C (ref 36.5-37.5)"
+      "Temperature: 38.4 C (ref 36.5-37.5)",
+      "Urine leukocytes: Positive  (ref Negative)",
+      "Temperature: 39.94 C (ref 36.5-37.5)"
     ],
     "active_medications": [
       "Nitrofurantoin 100 mg Twice daily"
@@ -128,26 +319,65 @@
     "patient_name": "Kabir Khan",
     "generated_by": "groq:llama-3.3-70b-versatile",
     "journey_model": "llama-3.3-70b-versatile",
-    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.\n- Return only valid JSON with this shape:\n  {\"summary\":\"one paragraph\",\"claims\":[{\"sentence\":\"one sentence from the summary\",\"sources\":[\"patient:P001\",\"encounter:E001\"]}]}\n- Every claim source must use IDs from the supplied record: patient:{patient_id}, encounter:{encounter_id}, lab:{lab_id}, medication:{medication_id}, note:{note_id}.",
     "llm_error": null,
-    "summary": "Kabir Khan, a 61-year-old male, presented with chronic cough and exertional breathlessness on 2026-03-05, and was diagnosed with Chronic obstructive pulmonary disease. His SpO2 level was 93% on the same day, which is below the reference range. He was prescribed Tiotropium inhaler 18 mcg once daily starting from 2026-03-05. A progress note from 2026-02-20 mentions his symptoms and a review of inhaler technique, noting a smoking history in this synthetic record.",
-    "timeline": [
+    "summary": "Kabir Khan, a 61-year-old male, presented with chronic cough and exertional breathlessness, leading to a suspected diagnosis of Chronic obstructive pulmonary disease on 2026-01-05. He was subsequently diagnosed with Chronic obstructive pulmonary disease and started on Tiotropium inhaler 18 mcg once daily on 2026-02-05. Follow-up visits on 2026-02-05 and 2026-03-05 monitored his progress, with SpO2 lab results showing values of 97% and 93% respectively. This is a review of synthetic dummy clinical data for pipeline testing only, with no real patient information present.",
+    "claims": [
       {
-        "date": "2026-03-05",
-        "type": "Outpatient",
-        "title": "Chronic obstructive pulmonary disease",
-        "detail": "Chronic cough and exertional breathlessness"
+        "sentence": "Kabir Khan, a 61-year-old male, presented with chronic cough and exertional breathlessness, leading to a suspected diagnosis of Chronic obstructive pulmonary disease on 2026-01-05.",
+        "sources": [
+          "patient:P005",
+          "encounter:E005_1"
+        ]
       },
       {
-        "date": "2026-02-20",
-        "type": "Progress note",
-        "title": "Clinical note",
-        "detail": "Patient reports chronic cough, sputum production, and exertional breathlessness. Smoking history noted in dummy record. Inhaler technique reviewed and pulmonary follow-up advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+        "sentence": "He was subsequently diagnosed with Chronic obstructive pulmonary disease and started on Tiotropium inhaler 18 mcg once daily on 2026-02-05.",
+        "sources": [
+          "encounter:E005_2",
+          "medication:M005"
+        ]
+      },
+      {
+        "sentence": "Follow-up visits on 2026-02-05 and 2026-03-05 monitored his progress, with SpO2 lab results showing values of 97% and 93% respectively.",
+        "sources": [
+          "encounter:E005_2",
+          "lab:L017",
+          "encounter:E005_3",
+          "lab:L018"
+        ]
       }
     ],
-    "current_focus": "Chronic obstructive pulmonary disease - Chronic cough and exertional breathlessness",
+    "timeline": [
+      {
+        "date": "2026-03-20",
+        "type": "Progress note",
+        "title": "Clinical note",
+        "detail": "Subsequent review for Chronic obstructive pulmonary disease. Patient journey includes prior evaluation, follow-up, medication review, and interval clinical monitoring. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+      },
+      {
+        "date": "2026-03-05",
+        "type": "Follow-up",
+        "title": "Chronic obstructive pulmonary disease",
+        "detail": "Review of Chronic obstructive pulmonary disease progress"
+      },
+      {
+        "date": "2026-02-05",
+        "type": "Follow-up",
+        "title": "Chronic obstructive pulmonary disease",
+        "detail": "Follow-up for Chronic obstructive pulmonary disease"
+      },
+      {
+        "date": "2026-01-05",
+        "type": "Outpatient",
+        "title": "Suspected Chronic obstructive pulmonary disease",
+        "detail": "Chronic cough and exertional breathlessness"
+      }
+    ],
+    "current_focus": "Chronic obstructive pulmonary disease - Review of Chronic obstructive pulmonary disease progress",
     "key_labs": [
-      "SpO2: 93 % (ref 95-100)"
+      "SpO2: 93 % (ref 95-100)",
+      "SpO2: 97 % (ref 95-100)",
+      "SpO2: 104 % (ref 95-100)"
     ],
     "active_medications": [
       "Tiotropium inhaler 18 mcg Once daily"
@@ -159,27 +389,76 @@
     "patient_name": "Ananya Rao",
     "generated_by": "groq:llama-3.3-70b-versatile",
     "journey_model": "llama-3.3-70b-versatile",
-    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.\n- Return only valid JSON with this shape:\n  {\"summary\":\"one paragraph\",\"claims\":[{\"sentence\":\"one sentence from the summary\",\"sources\":[\"patient:P001\",\"encounter:E001\"]}]}\n- Every claim source must use IDs from the supplied record: patient:{patient_id}, encounter:{encounter_id}, lab:{lab_id}, medication:{medication_id}, note:{note_id}.",
     "llm_error": null,
-    "summary": "Ananya Rao, a 29-year-old female, presented with palpitations and weight loss on 2026-03-06, and was diagnosed with Hyperthyroidism. Key lab results from the same day include a TSH level of 0.02 mIU/L and Free T4 level of 2.4 ng/dL, which are outside the normal reference ranges. She was started on Carbimazole 10mg twice daily. A prior progress note on 2026-02-20 documented symptoms of palpitations, heat intolerance, tremor, and unintentional weight loss, with a plan for endocrinology follow-up; please note that this information is part of synthetic dummy clinical data for testing purposes only.",
-    "timeline": [
+    "summary": "Ananya Rao, a 29-year-old female, presented with palpitations and weight loss, prompting an initial assessment and working diagnosis of suspected Hyperthyroidism on 2026-01-06. Subsequent follow-up visits on 2026-02-06 and 2026-03-06 confirmed the diagnosis of Hyperthyroidism, with lab results showing low TSH (0.02 mIU/L) and elevated Free T4 (2.4-2.69 ng/dL) levels. The patient was started on Carbimazole 10 mg twice daily from 2026-02-06. This information is based on synthetic dummy clinical data for pipeline testing purposes only, as noted in the clinical notes.",
+    "claims": [
       {
-        "date": "2026-03-06",
-        "type": "Outpatient",
-        "title": "Hyperthyroidism",
-        "detail": "Palpitations and weight loss"
+        "sentence": "Ananya Rao, a 29-year-old female, presented with palpitations and weight loss, prompting an initial assessment and working diagnosis of suspected Hyperthyroidism on 2026-01-06.",
+        "sources": [
+          "patient:P006",
+          "encounter:E006_1"
+        ]
       },
       {
-        "date": "2026-02-20",
-        "type": "Progress note",
-        "title": "Clinical note",
-        "detail": "Patient reports palpitations, heat intolerance, tremor, and unintentional weight loss. Thyroid labs reviewed and endocrinology follow-up advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+        "sentence": "Subsequent follow-up visits on 2026-02-06 and 2026-03-06 confirmed the diagnosis of Hyperthyroidism, with lab results showing low TSH (0.02 mIU/L) and elevated Free T4 (2.4-2.69 ng/dL) levels.",
+        "sources": [
+          "encounter:E006_2",
+          "encounter:E006_3",
+          "lab:L023",
+          "lab:L024",
+          "lab:L021",
+          "lab:L022"
+        ]
+      },
+      {
+        "sentence": "The patient was started on Carbimazole 10 mg twice daily from 2026-02-06.",
+        "sources": [
+          "medication:M006",
+          "encounter:E006_2"
+        ]
+      },
+      {
+        "sentence": "This information is based on synthetic dummy clinical data for pipeline testing purposes only, as noted in the clinical notes.",
+        "sources": [
+          "note:N018",
+          "note:N017",
+          "note:N016"
+        ]
       }
     ],
-    "current_focus": "Hyperthyroidism - Palpitations and weight loss",
+    "timeline": [
+      {
+        "date": "2026-03-20",
+        "type": "Progress note",
+        "title": "Clinical note",
+        "detail": "Subsequent review for Hyperthyroidism. Patient journey includes prior evaluation, follow-up, medication review, and interval clinical monitoring. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+      },
+      {
+        "date": "2026-03-06",
+        "type": "Follow-up",
+        "title": "Hyperthyroidism",
+        "detail": "Review of Hyperthyroidism progress"
+      },
+      {
+        "date": "2026-02-06",
+        "type": "Follow-up",
+        "title": "Hyperthyroidism",
+        "detail": "Follow-up for Hyperthyroidism"
+      },
+      {
+        "date": "2026-01-06",
+        "type": "Outpatient",
+        "title": "Suspected Hyperthyroidism",
+        "detail": "Palpitations and weight loss"
+      }
+    ],
+    "current_focus": "Hyperthyroidism - Review of Hyperthyroidism progress",
     "key_labs": [
       "TSH: 0.02 mIU/L (ref 0.4-4.0)",
-      "Free T4: 2.4 ng/dL (ref 0.8-1.8)"
+      "Free T4: 2.4 ng/dL (ref 0.8-1.8)",
+      "TSH: 0.02 mIU/L (ref 0.4-4.0)",
+      "Free T4: 2.5 ng/dL (ref 0.8-1.8)"
     ],
     "active_medications": [
       "Carbimazole 10 mg Twice daily"
@@ -191,25 +470,72 @@
     "patient_name": "Vikram Singh",
     "generated_by": "groq:llama-3.3-70b-versatile",
     "journey_model": "llama-3.3-70b-versatile",
-    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.\n- Return only valid JSON with this shape:\n  {\"summary\":\"one paragraph\",\"claims\":[{\"sentence\":\"one sentence from the summary\",\"sources\":[\"patient:P001\",\"encounter:E001\"]}]}\n- Every claim source must use IDs from the supplied record: patient:{patient_id}, encounter:{encounter_id}, lab:{lab_id}, medication:{medication_id}, note:{note_id}.",
     "llm_error": null,
-    "summary": "Vikram Singh, a 58-year-old male, presented with a chief complaint of headache and high blood pressure on 2026-03-07, during an outpatient visit, and was diagnosed with essential hypertension. His blood pressure was recorded as 158/96 mmHg on the same day. He was started on Telmisartan 40 mg once daily. A prior progress note on 2026-02-20 discussed salt reduction, home blood pressure logging, and initiation of antihypertensive medication, noting that this is synthetic dummy clinical data for testing purposes, with no real patient information present.",
-    "timeline": [
+    "summary": "Vikram Singh, a 58-year-old male, presented with headache and high blood pressure on 2026-01-07, with a working diagnosis of suspected Essential hypertension. He was subsequently diagnosed with Essential hypertension and started on Telmisartan 40 mg once daily on 2026-02-07. Follow-up encounters on 2026-02-07 and 2026-03-07 showed consistent blood pressure readings of 158/96 mmHg, with the patient's progress and medication plan reviewed. Please note that this is synthetic dummy clinical data for pipeline testing only, with no real patient information present.",
+    "claims": [
       {
-        "date": "2026-03-07",
-        "type": "Outpatient",
-        "title": "Essential hypertension",
-        "detail": "Headache and high blood pressure"
+        "sentence": "Vikram Singh, a 58-year-old male, presented with headache and high blood pressure on 2026-01-07, with a working diagnosis of suspected Essential hypertension.",
+        "sources": [
+          "patient:P007",
+          "encounter:E007_1"
+        ]
       },
       {
-        "date": "2026-02-20",
-        "type": "Progress note",
-        "title": "Clinical note",
-        "detail": "Patient seen for headache and repeated high blood pressure readings. Salt reduction and home blood pressure log discussed. Antihypertensive medication started. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+        "sentence": "He was subsequently diagnosed with Essential hypertension and started on Telmisartan 40 mg once daily on 2026-02-07.",
+        "sources": [
+          "encounter:E007_2",
+          "medication:M007"
+        ]
+      },
+      {
+        "sentence": "Follow-up encounters on 2026-02-07 and 2026-03-07 showed consistent blood pressure readings of 158/96 mmHg, with the patient's progress and medication plan reviewed.",
+        "sources": [
+          "encounter:E007_2",
+          "encounter:E007_3",
+          "lab:L026",
+          "lab:L027"
+        ]
+      },
+      {
+        "sentence": "Please note that this is synthetic dummy clinical data for pipeline testing only, with no real patient information present.",
+        "sources": [
+          "note:N019",
+          "note:N020",
+          "note:N021"
+        ]
       }
     ],
-    "current_focus": "Essential hypertension - Headache and high blood pressure",
+    "timeline": [
+      {
+        "date": "2026-03-20",
+        "type": "Progress note",
+        "title": "Clinical note",
+        "detail": "Subsequent review for Essential hypertension. Patient journey includes prior evaluation, follow-up, medication review, and interval clinical monitoring. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+      },
+      {
+        "date": "2026-03-07",
+        "type": "Follow-up",
+        "title": "Essential hypertension",
+        "detail": "Review of Essential hypertension progress"
+      },
+      {
+        "date": "2026-02-07",
+        "type": "Follow-up",
+        "title": "Essential hypertension",
+        "detail": "Follow-up for Essential hypertension"
+      },
+      {
+        "date": "2026-01-07",
+        "type": "Outpatient",
+        "title": "Suspected Essential hypertension",
+        "detail": "Headache and high blood pressure"
+      }
+    ],
+    "current_focus": "Essential hypertension - Review of Essential hypertension progress",
     "key_labs": [
+      "Blood pressure: 158/96 mmHg (ref < 120/80)",
+      "Blood pressure: 158/96 mmHg (ref < 120/80)",
       "Blood pressure: 158/96 mmHg (ref < 120/80)"
     ],
     "active_medications": [
@@ -222,26 +548,73 @@
     "patient_name": "Farah Ali",
     "generated_by": "groq:llama-3.3-70b-versatile",
     "journey_model": "llama-3.3-70b-versatile",
-    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.\n- Return only valid JSON with this shape:\n  {\"summary\":\"one paragraph\",\"claims\":[{\"sentence\":\"one sentence from the summary\",\"sources\":[\"patient:P001\",\"encounter:E001\"]}]}\n- Every claim source must use IDs from the supplied record: patient:{patient_id}, encounter:{encounter_id}, lab:{lab_id}, medication:{medication_id}, note:{note_id}.",
     "llm_error": null,
-    "summary": "Farah Ali, a 33-year-old female, presented with fatigue and pallor on 2026-03-08, and was diagnosed with iron deficiency anemia. Key lab results include a hemoglobin level of 9.8 g/dL and a ferritin level of 8 ng/mL, both below the reference range. She was started on ferrous sulfate 325 mg once daily. A prior progress note on 2026-02-20 documented similar symptoms, low lab values, and initiation of iron supplementation and dietary counseling, noting that this is synthetic dummy clinical data for testing purposes only.",
-    "timeline": [
+    "summary": "Farah Ali, a 33-year-old female patient, presented with fatigue and pallor on 2026-01-08, leading to a suspected diagnosis of Iron deficiency anemia. She was started on Ferrous sulfate 325 mg once daily on 2026-02-08. Follow-up encounters on 2026-02-08 and 2026-03-08 confirmed the diagnosis of Iron deficiency anemia, with lab results showing low hemoglobin (9.8 g/dL on 2026-03-08) and ferritin (8 ng/mL on 2026-03-08) levels. This is a review of synthetic dummy clinical data for pipeline testing only, with no real patient information present.",
+    "claims": [
       {
-        "date": "2026-03-08",
-        "type": "Outpatient",
-        "title": "Iron deficiency anemia",
-        "detail": "Fatigue and pallor"
+        "sentence": "Farah Ali, a 33-year-old female patient, presented with fatigue and pallor on 2026-01-08, leading to a suspected diagnosis of Iron deficiency anemia.",
+        "sources": [
+          "patient:P008",
+          "encounter:E008_1"
+        ]
       },
       {
-        "date": "2026-02-20",
-        "type": "Progress note",
-        "title": "Clinical note",
-        "detail": "Patient reports fatigue, dizziness, and pallor. Labs show low hemoglobin and ferritin. Iron supplementation started and dietary counseling provided. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+        "sentence": "She was started on Ferrous sulfate 325 mg once daily on 2026-02-08.",
+        "sources": [
+          "medication:M008",
+          "encounter:E008_2"
+        ]
+      },
+      {
+        "sentence": "Follow-up encounters on 2026-02-08 and 2026-03-08 confirmed the diagnosis of Iron deficiency anemia, with lab results showing low hemoglobin (9.8 g/dL on 2026-03-08) and ferritin (8 ng/mL on 2026-03-08) levels.",
+        "sources": [
+          "encounter:E008_2",
+          "encounter:E008_3",
+          "lab:L032",
+          "lab:L033"
+        ]
+      },
+      {
+        "sentence": "This is a review of synthetic dummy clinical data for pipeline testing only, with no real patient information present.",
+        "sources": [
+          "note:N022",
+          "note:N023",
+          "note:N024"
+        ]
       }
     ],
-    "current_focus": "Iron deficiency anemia - Fatigue and pallor",
+    "timeline": [
+      {
+        "date": "2026-03-20",
+        "type": "Progress note",
+        "title": "Clinical note",
+        "detail": "Subsequent review for Iron deficiency anemia. Patient journey includes prior evaluation, follow-up, medication review, and interval clinical monitoring. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+      },
+      {
+        "date": "2026-03-08",
+        "type": "Follow-up",
+        "title": "Iron deficiency anemia",
+        "detail": "Review of Iron deficiency anemia progress"
+      },
+      {
+        "date": "2026-02-08",
+        "type": "Follow-up",
+        "title": "Iron deficiency anemia",
+        "detail": "Follow-up for Iron deficiency anemia"
+      },
+      {
+        "date": "2026-01-08",
+        "type": "Outpatient",
+        "title": "Suspected Iron deficiency anemia",
+        "detail": "Fatigue and pallor"
+      }
+    ],
+    "current_focus": "Iron deficiency anemia - Review of Iron deficiency anemia progress",
     "key_labs": [
       "Hemoglobin: 9.8 g/dL (ref 12-16)",
+      "Ferritin: 8 ng/mL (ref 15-150)",
+      "Hemoglobin: 10.19 g/dL (ref 12-16)",
       "Ferritin: 8 ng/mL (ref 15-150)"
     ],
     "active_medications": [
@@ -254,27 +627,77 @@
     "patient_name": "Suresh Nair",
     "generated_by": "groq:llama-3.3-70b-versatile",
     "journey_model": "llama-3.3-70b-versatile",
-    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.\n- Return only valid JSON with this shape:\n  {\"summary\":\"one paragraph\",\"claims\":[{\"sentence\":\"one sentence from the summary\",\"sources\":[\"patient:P001\",\"encounter:E001\"]}]}\n- Every claim source must use IDs from the supplied record: patient:{patient_id}, encounter:{encounter_id}, lab:{lab_id}, medication:{medication_id}, note:{note_id}.",
     "llm_error": null,
-    "summary": "Suresh Nair, a 72-year-old male, presented on 2026-03-09 with reduced urine output and swelling, diagnosed with chronic kidney disease. Key lab results from the same day include an elevated creatinine level of 2.1 mg/dL and a decreased eGFR of 34 mL/min/1.73m2. He was started on Furosemide 20 mg once daily. A prior progress note on 2026-02-20 mentioned similar symptoms and advised nephrology review, noting elevated creatinine and reduced eGFR in this synthetic record.",
-    "timeline": [
+    "summary": "Suresh Nair, a 72-year-old male, presented with reduced urine output and swelling, leading to a suspected diagnosis of Chronic kidney disease on 2026-01-09. Subsequent follow-up visits on 2026-02-09 and 2026-03-09 confirmed the diagnosis of Chronic kidney disease, with elevated Creatinine levels (2.35, 2.18, and 2.1 mg/dL) and reduced eGFR values (38, 35, and 34 mL/min/1.73m2). The patient was prescribed Furosemide 20 mg once daily starting from 2026-02-09. This information is based on synthetic dummy clinical data for pipeline testing purposes only, as noted in the clinical notes.",
+    "claims": [
       {
-        "date": "2026-03-09",
-        "type": "Outpatient",
-        "title": "Chronic kidney disease",
-        "detail": "Reduced urine output and swelling"
+        "sentence": "Suresh Nair, a 72-year-old male, presented with reduced urine output and swelling, leading to a suspected diagnosis of Chronic kidney disease on 2026-01-09.",
+        "sources": [
+          "patient:P009",
+          "encounter:E009_1"
+        ]
       },
       {
-        "date": "2026-02-20",
-        "type": "Progress note",
-        "title": "Clinical note",
-        "detail": "Patient reports reduced urine output and ankle swelling. Creatinine is elevated in the dummy record and eGFR is reduced. Nephrology review advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+        "sentence": "Subsequent follow-up visits on 2026-02-09 and 2026-03-09 confirmed the diagnosis of Chronic kidney disease, with elevated Creatinine levels (2.35, 2.18, and 2.1 mg/dL) and reduced eGFR values (38, 35, and 34 mL/min/1.73m2).",
+        "sources": [
+          "encounter:E009_2",
+          "encounter:E009_3",
+          "lab:L038",
+          "lab:L039",
+          "lab:L036",
+          "lab:L037",
+          "lab:L034",
+          "lab:L035"
+        ]
+      },
+      {
+        "sentence": "The patient was prescribed Furosemide 20 mg once daily starting from 2026-02-09.",
+        "sources": [
+          "medication:M009"
+        ]
+      },
+      {
+        "sentence": "This information is based on synthetic dummy clinical data for pipeline testing purposes only, as noted in the clinical notes.",
+        "sources": [
+          "note:N027",
+          "note:N026",
+          "note:N025"
+        ]
       }
     ],
-    "current_focus": "Chronic kidney disease - Reduced urine output and swelling",
+    "timeline": [
+      {
+        "date": "2026-03-20",
+        "type": "Progress note",
+        "title": "Clinical note",
+        "detail": "Subsequent review for Chronic kidney disease. Patient journey includes prior evaluation, follow-up, medication review, and interval clinical monitoring. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+      },
+      {
+        "date": "2026-03-09",
+        "type": "Follow-up",
+        "title": "Chronic kidney disease",
+        "detail": "Review of Chronic kidney disease progress"
+      },
+      {
+        "date": "2026-02-09",
+        "type": "Follow-up",
+        "title": "Chronic kidney disease",
+        "detail": "Follow-up for Chronic kidney disease"
+      },
+      {
+        "date": "2026-01-09",
+        "type": "Outpatient",
+        "title": "Suspected Chronic kidney disease",
+        "detail": "Reduced urine output and swelling"
+      }
+    ],
+    "current_focus": "Chronic kidney disease - Review of Chronic kidney disease progress",
     "key_labs": [
       "Creatinine: 2.1 mg/dL (ref 0.7-1.3)",
-      "eGFR: 34 mL/min/1.73m2 (ref > 60)"
+      "eGFR: 34 mL/min/1.73m2 (ref > 60)",
+      "Creatinine: 2.18 mg/dL (ref 0.7-1.3)",
+      "eGFR: 35 mL/min/1.73m2 (ref > 60)"
     ],
     "active_medications": [
       "Furosemide 20 mg Once daily"
@@ -286,25 +709,70 @@
     "patient_name": "Pooja Menon",
     "generated_by": "groq:llama-3.3-70b-versatile",
     "journey_model": "llama-3.3-70b-versatile",
-    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.\n- Return only valid JSON with this shape:\n  {\"summary\":\"one paragraph\",\"claims\":[{\"sentence\":\"one sentence from the summary\",\"sources\":[\"patient:P001\",\"encounter:E001\"]}]}\n- Every claim source must use IDs from the supplied record: patient:{patient_id}, encounter:{encounter_id}, lab:{lab_id}, medication:{medication_id}, note:{note_id}.",
     "llm_error": null,
-    "summary": "Pooja Menon, a 26-year-old female, presented with missed periods and nausea on 2026-03-10, with a diagnosis of early pregnancy confirmed by a positive urine pregnancy test. She was prescribed 5mg of folic acid to be taken once daily, starting from the same date. A prior progress note on 2026-02-20 documented her symptoms, including breast tenderness, and advised antenatal counseling and obstetric follow-up, noting that this information is part of synthetic dummy clinical data for testing purposes only.",
-    "timeline": [
+    "summary": "Pooja Menon, a 26-year-old female, presented with missed periods and nausea on 2026-01-10, with a working diagnosis of suspected Early pregnancy, which was later confirmed as Early pregnancy in subsequent follow-up visits. Key lab results include positive urine pregnancy tests on 2026-01-10, 2026-02-10, and 2026-03-10. She was prescribed Folic acid 5 mg once daily starting from 2026-02-10. The patient's journey includes prior evaluation, follow-up, medication review, and interval clinical monitoring, as noted in the clinical notes, which are part of synthetic dummy clinical data for pipeline testing only.",
+    "claims": [
       {
-        "date": "2026-03-10",
-        "type": "Outpatient",
-        "title": "Early pregnancy",
-        "detail": "Missed periods and nausea"
+        "sentence": "Pooja Menon, a 26-year-old female, presented with missed periods and nausea on 2026-01-10, with a working diagnosis of suspected Early pregnancy, which was later confirmed as Early pregnancy in subsequent follow-up visits.",
+        "sources": [
+          "patient:P010",
+          "encounter:E010_1"
+        ]
       },
       {
-        "date": "2026-02-20",
-        "type": "Progress note",
-        "title": "Clinical note",
-        "detail": "Patient reports missed periods, nausea, and breast tenderness. Urine pregnancy test is positive. Antenatal counseling and obstetric follow-up advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+        "sentence": "Key lab results include positive urine pregnancy tests on 2026-01-10, 2026-02-10, and 2026-03-10.",
+        "sources": [
+          "lab:L040",
+          "lab:L041",
+          "lab:L042"
+        ]
+      },
+      {
+        "sentence": "She was prescribed Folic acid 5 mg once daily starting from 2026-02-10.",
+        "sources": [
+          "medication:M010"
+        ]
+      },
+      {
+        "sentence": "The patient's journey includes prior evaluation, follow-up, medication review, and interval clinical monitoring, as noted in the clinical notes, which are part of synthetic dummy clinical data for pipeline testing only.",
+        "sources": [
+          "note:N028",
+          "note:N029",
+          "note:N030"
+        ]
       }
     ],
-    "current_focus": "Early pregnancy - Missed periods and nausea",
+    "timeline": [
+      {
+        "date": "2026-03-20",
+        "type": "Progress note",
+        "title": "Clinical note",
+        "detail": "Subsequent review for Early pregnancy. Patient journey includes prior evaluation, follow-up, medication review, and interval clinical monitoring. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+      },
+      {
+        "date": "2026-03-10",
+        "type": "Follow-up",
+        "title": "Early pregnancy",
+        "detail": "Review of Early pregnancy progress"
+      },
+      {
+        "date": "2026-02-10",
+        "type": "Follow-up",
+        "title": "Early pregnancy",
+        "detail": "Follow-up for Early pregnancy"
+      },
+      {
+        "date": "2026-01-10",
+        "type": "Outpatient",
+        "title": "Suspected Early pregnancy",
+        "detail": "Missed periods and nausea"
+      }
+    ],
+    "current_focus": "Early pregnancy - Review of Early pregnancy progress",
     "key_labs": [
+      "Urine pregnancy test: Positive  (ref Negative)",
+      "Urine pregnancy test: Positive  (ref Negative)",
       "Urine pregnancy test: Positive  (ref Negative)"
     ],
     "active_medications": [
@@ -317,24 +785,69 @@
     "patient_name": "Aditya Verma",
     "generated_by": "groq:llama-3.3-70b-versatile",
     "journey_model": "llama-3.3-70b-versatile",
-    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.\n- Return only valid JSON with this shape:\n  {\"summary\":\"one paragraph\",\"claims\":[{\"sentence\":\"one sentence from the summary\",\"sources\":[\"patient:P001\",\"encounter:E001\"]}]}\n- Every claim source must use IDs from the supplied record: patient:{patient_id}, encounter:{encounter_id}, lab:{lab_id}, medication:{medication_id}, note:{note_id}.",
     "llm_error": null,
-    "summary": "Aditya Verma, a 47-year-old male, presented with epigastric pain and acidity on 2026-03-11, during an outpatient visit, and was diagnosed with Gastroesophageal reflux disease. He was started on Pantoprazole 40 mg once daily from the same date. Prior to this, on 2026-02-20, he reported symptoms of epigastric burning and sour regurgitation, particularly after spicy meals, as noted in a progress note, which also marked the initiation of lifestyle advice and proton pump inhibitor therapy. Please note that this information is based on synthetic dummy clinical data for testing purposes only.",
-    "timeline": [
+    "summary": "Aditya Verma, a 47-year-old male, presented with epigastric pain and acidity on 2026-01-11, with a working diagnosis of suspected Gastroesophageal reflux disease. He was started on Pantoprazole 40 mg once daily on 2026-02-11, and subsequent follow-up visits on 2026-02-11 and 2026-03-11 confirmed the diagnosis of Gastroesophageal reflux disease. This is synthetic dummy clinical data for pipeline testing only, with no real patient information present. The patient's journey includes prior evaluation, follow-up, medication review, and interval clinical monitoring, as documented in clinical notes.",
+    "claims": [
       {
-        "date": "2026-03-11",
-        "type": "Outpatient",
-        "title": "Gastroesophageal reflux disease",
-        "detail": "Epigastric pain and acidity"
+        "sentence": "Aditya Verma, a 47-year-old male, presented with epigastric pain and acidity on 2026-01-11, with a working diagnosis of suspected Gastroesophageal reflux disease.",
+        "sources": [
+          "patient:P011",
+          "encounter:E011_1"
+        ]
       },
       {
-        "date": "2026-02-20",
-        "type": "Progress note",
-        "title": "Clinical note",
-        "detail": "Patient reports epigastric burning, sour regurgitation, and symptoms after spicy meals. Lifestyle advice and proton pump inhibitor therapy started. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+        "sentence": "He was started on Pantoprazole 40 mg once daily on 2026-02-11, and subsequent follow-up visits on 2026-02-11 and 2026-03-11 confirmed the diagnosis of Gastroesophageal reflux disease.",
+        "sources": [
+          "medication:M011",
+          "encounter:E011_2",
+          "encounter:E011_3"
+        ]
+      },
+      {
+        "sentence": "This is synthetic dummy clinical data for pipeline testing only, with no real patient information present.",
+        "sources": [
+          "note:N031",
+          "note:N032",
+          "note:N033"
+        ]
+      },
+      {
+        "sentence": "The patient's journey includes prior evaluation, follow-up, medication review, and interval clinical monitoring, as documented in clinical notes.",
+        "sources": [
+          "note:N031",
+          "note:N032",
+          "note:N033"
+        ]
       }
     ],
-    "current_focus": "Gastroesophageal reflux disease - Epigastric pain and acidity",
+    "timeline": [
+      {
+        "date": "2026-03-20",
+        "type": "Progress note",
+        "title": "Clinical note",
+        "detail": "Subsequent review for Gastroesophageal reflux disease. Patient journey includes prior evaluation, follow-up, medication review, and interval clinical monitoring. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+      },
+      {
+        "date": "2026-03-11",
+        "type": "Follow-up",
+        "title": "Gastroesophageal reflux disease",
+        "detail": "Review of Gastroesophageal reflux disease progress"
+      },
+      {
+        "date": "2026-02-11",
+        "type": "Follow-up",
+        "title": "Gastroesophageal reflux disease",
+        "detail": "Follow-up for Gastroesophageal reflux disease"
+      },
+      {
+        "date": "2026-01-11",
+        "type": "Outpatient",
+        "title": "Suspected Gastroesophageal reflux disease",
+        "detail": "Epigastric pain and acidity"
+      }
+    ],
+    "current_focus": "Gastroesophageal reflux disease - Review of Gastroesophageal reflux disease progress",
     "key_labs": [],
     "active_medications": [
       "Pantoprazole 40 mg Once daily"
@@ -346,24 +859,66 @@
     "patient_name": "Leela Thomas",
     "generated_by": "groq:llama-3.3-70b-versatile",
     "journey_model": "llama-3.3-70b-versatile",
-    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.\n- Return only valid JSON with this shape:\n  {\"summary\":\"one paragraph\",\"claims\":[{\"sentence\":\"one sentence from the summary\",\"sources\":[\"patient:P001\",\"encounter:E001\"]}]}\n- Every claim source must use IDs from the supplied record: patient:{patient_id}, encounter:{encounter_id}, lab:{lab_id}, medication:{medication_id}, note:{note_id}.",
     "llm_error": null,
-    "summary": "Leela Thomas, a 64-year-old female, presented with knee pain and stiffness on 2026-03-12 during an outpatient visit, receiving a diagnosis of osteoarthritis of the knee. She was prescribed Paracetamol 650 mg as needed, starting on the same day. Prior to this, on 2026-02-20, she reported bilateral knee pain, morning stiffness, and difficulty climbing stairs in a progress note, where weight management and physiotherapy were discussed; please note this is based on synthetic dummy clinical data for testing purposes.",
-    "timeline": [
+    "summary": "Leela Thomas, a 64-year-old female, presented with knee pain and stiffness on 2026-01-12, with a working diagnosis of suspected Osteoarthritis of knee. She was subsequently followed up on 2026-02-12 and 2026-03-12, with the diagnosis confirmed as Osteoarthritis of knee. Her treatment plan included Paracetamol 650 mg as needed, started on 2026-02-12. This is a review of synthetic dummy clinical data for pipeline testing only, with no real patient information present.",
+    "claims": [
       {
-        "date": "2026-03-12",
-        "type": "Outpatient",
-        "title": "Osteoarthritis of knee",
-        "detail": "Knee pain and stiffness"
+        "sentence": "Leela Thomas, a 64-year-old female, presented with knee pain and stiffness on 2026-01-12, with a working diagnosis of suspected Osteoarthritis of knee.",
+        "sources": [
+          "patient:P012",
+          "encounter:E012_1"
+        ]
       },
       {
-        "date": "2026-02-20",
-        "type": "Progress note",
-        "title": "Clinical note",
-        "detail": "Patient reports bilateral knee pain, morning stiffness, and difficulty climbing stairs. Weight management and physiotherapy were discussed. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+        "sentence": "She was subsequently followed up on 2026-02-12 and 2026-03-12, with the diagnosis confirmed as Osteoarthritis of knee.",
+        "sources": [
+          "encounter:E012_2",
+          "encounter:E012_3"
+        ]
+      },
+      {
+        "sentence": "Her treatment plan included Paracetamol 650 mg as needed, started on 2026-02-12.",
+        "sources": [
+          "medication:M012"
+        ]
+      },
+      {
+        "sentence": "This is a review of synthetic dummy clinical data for pipeline testing only, with no real patient information present.",
+        "sources": [
+          "note:N036",
+          "note:N035",
+          "note:N034"
+        ]
       }
     ],
-    "current_focus": "Osteoarthritis of knee - Knee pain and stiffness",
+    "timeline": [
+      {
+        "date": "2026-03-20",
+        "type": "Progress note",
+        "title": "Clinical note",
+        "detail": "Subsequent review for Osteoarthritis of knee. Patient journey includes prior evaluation, follow-up, medication review, and interval clinical monitoring. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+      },
+      {
+        "date": "2026-03-12",
+        "type": "Follow-up",
+        "title": "Osteoarthritis of knee",
+        "detail": "Review of Osteoarthritis of knee progress"
+      },
+      {
+        "date": "2026-02-12",
+        "type": "Follow-up",
+        "title": "Osteoarthritis of knee",
+        "detail": "Follow-up for Osteoarthritis of knee"
+      },
+      {
+        "date": "2026-01-12",
+        "type": "Outpatient",
+        "title": "Suspected Osteoarthritis of knee",
+        "detail": "Knee pain and stiffness"
+      }
+    ],
+    "current_focus": "Osteoarthritis of knee - Review of Osteoarthritis of knee progress",
     "key_labs": [],
     "active_medications": [
       "Paracetamol 650 mg As needed"
@@ -375,27 +930,95 @@
     "patient_name": "Imran Sheikh",
     "generated_by": "groq:llama-3.3-70b-versatile",
     "journey_model": "llama-3.3-70b-versatile",
-    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.\n- Return only valid JSON with this shape:\n  {\"summary\":\"one paragraph\",\"claims\":[{\"sentence\":\"one sentence from the summary\",\"sources\":[\"patient:P001\",\"encounter:E001\"]}]}\n- Every claim source must use IDs from the supplied record: patient:{patient_id}, encounter:{encounter_id}, lab:{lab_id}, medication:{medication_id}, note:{note_id}.",
     "llm_error": null,
-    "summary": "Imran Sheikh, a 41-year-old male, presented with fever and chills on 2026-03-13, and was diagnosed with Malaria. Key lab results include a positive Malaria parasite smear and a platelet count of 118,000/uL, which is below the normal range. He was started on Artemether lumefantrine 20/120 mg as per schedule. A prior progress note on 2026-02-20 mentions the patient's symptoms and initiation of antimalarial treatment, noting that the peripheral smear was positive for malaria parasite, and it is essential to consider that this information is part of synthetic dummy clinical data for pipeline testing purposes only.",
-    "timeline": [
+    "summary": "{\"summary\":\"Imran Sheikh, a 41-year-old male, presented with fever and chills on 2026-01-13, with a working diagnosis of suspected Malaria, which was later confirmed by a positive malaria parasite smear. He was prescribed Artemether lumefantrine 20/120 mg as per schedule starting from 2026-02-13. Follow-up visits on 2026-02-13 and 2026-03-13 showed positive malaria parasite smears, with platelet counts of 122720/uL and 118000/uL, respectively. This is a review of synthetic dummy clinical data for pipeline testing only, with no real patient information present.\", \n\"claims\":[{\"sentence\":\"Imran Sheikh, a 41-year-old male, presented with fever and chills on 2026-01-13, with a working diagnosis of suspected Malaria, which was later confirmed by a positive malaria parasite smear.\", \n\"sources\":[\"patient:P013\", \"encounter:E013_1\", \"lab:L043\"]}, \n{\"sentence\":\"He was prescribed Artemether lumefantrine 20/120 mg as per schedule starting from 2026-02-13.\", \n\"sources\":[\"medication:M013\", \"encounter:E013_2\"]}, \n{\"sentence\":\"Follow-up visits on 2026-02-13 and 2026-03-13 showed positive malaria parasite smears, with platelet counts of 122720/uL and 118000/uL, respectively.\", \n\"sources\":[\"lab:L045\", \"lab:L046\", \"lab:L047\", \"lab:L048\", \"encounter:E013_2\", \"encounter:E013_3\"]}]",
+    "claims": [
       {
-        "date": "2026-03-13",
-        "type": "Outpatient",
-        "title": "Malaria",
-        "detail": "Fever with chills"
+        "sentence": "{\"summary\":\"Imran Sheikh, a 41-year-old male, presented with fever and chills on 2026-01-13, with a working diagnosis of suspected Malaria, which was later confirmed by a positive malaria parasite smear.",
+        "sources": [
+          "patient:P013",
+          "encounter:E013_3",
+          "encounter:E013_2",
+          "encounter:E013_1",
+          "lab:L047",
+          "lab:L045",
+          "lab:L043"
+        ]
       },
       {
-        "date": "2026-02-20",
-        "type": "Progress note",
-        "title": "Clinical note",
-        "detail": "Patient reports fever with chills and body ache. Peripheral smear is positive for malaria parasite in dummy data. Antimalarial treatment started. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+        "sentence": "He was prescribed Artemether lumefantrine 20/120 mg as per schedule starting from 2026-02-13.",
+        "sources": [
+          "encounter:E013_2",
+          "medication:M013"
+        ]
+      },
+      {
+        "sentence": "Follow-up visits on 2026-02-13 and 2026-03-13 showed positive malaria parasite smears, with platelet counts of 122720/uL and 118000/uL, respectively.",
+        "sources": [
+          "encounter:E013_3",
+          "encounter:E013_2",
+          "lab:L047",
+          "lab:L048",
+          "lab:L045",
+          "lab:L046",
+          "lab:L043",
+          "note:N039",
+          "note:N038",
+          "note:N037"
+        ]
+      },
+      {
+        "sentence": "This is a review of synthetic dummy clinical data for pipeline testing only, with no real patient information present.\", \"claims\":[{\"sentence\":\"Imran Sheikh, a 41-year-old male, presented with fever and chills on 2026-01-13, with a working diagnosis of suspected Malaria, which was later confirmed by a positive malaria parasite smear.\", \"sources\":[\"patient:P013\", \"encounter:E013_1\", \"lab:L043\"]}, {\"sentence\":\"He was prescribed Artemether lumefantrine 20/120 mg as per schedule starting from 2026-02-13.\", \"sources\":[\"medication:M013\", \"encounter:E013_2\"]}, {\"sentence\":\"Follow-up visits on 2026-02-13 and 2026-03-13 showed positive malaria parasite smears, with platelet counts of 122720/uL and 118000/uL, respectively.\", \"sources\":[\"lab:L045\", \"lab:L046\", \"lab:L047\", \"lab:L048\", \"encounter:E013_2\", \"encounter:E013_3\"]}]",
+        "sources": [
+          "patient:P013",
+          "encounter:E013_3",
+          "encounter:E013_2",
+          "encounter:E013_1",
+          "lab:L047",
+          "lab:L048",
+          "lab:L045",
+          "lab:L046",
+          "lab:L043",
+          "medication:M013",
+          "note:N039",
+          "note:N038",
+          "note:N037"
+        ]
       }
     ],
-    "current_focus": "Malaria - Fever with chills",
+    "timeline": [
+      {
+        "date": "2026-03-20",
+        "type": "Progress note",
+        "title": "Clinical note",
+        "detail": "Subsequent review for Malaria. Patient journey includes prior evaluation, follow-up, medication review, and interval clinical monitoring. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+      },
+      {
+        "date": "2026-03-13",
+        "type": "Follow-up",
+        "title": "Malaria",
+        "detail": "Review of Malaria progress"
+      },
+      {
+        "date": "2026-02-13",
+        "type": "Follow-up",
+        "title": "Malaria",
+        "detail": "Follow-up for Malaria"
+      },
+      {
+        "date": "2026-01-13",
+        "type": "Outpatient",
+        "title": "Suspected Malaria",
+        "detail": "Fever with chills"
+      }
+    ],
+    "current_focus": "Malaria - Review of Malaria progress",
     "key_labs": [
       "Malaria parasite smear: Positive  (ref Negative)",
-      "Platelets: 118000 /uL (ref 150000-450000)"
+      "Platelets: 118000 /uL (ref 150000-450000)",
+      "Malaria parasite smear: Positive  (ref Negative)",
+      "Platelets: 122720 /uL (ref 150000-450000)"
     ],
     "active_medications": [
       "Artemether lumefantrine 20/120 mg As per schedule"
@@ -407,24 +1030,88 @@
     "patient_name": "Tanya Roy",
     "generated_by": "groq:llama-3.3-70b-versatile",
     "journey_model": "llama-3.3-70b-versatile",
-    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.\n- Return only valid JSON with this shape:\n  {\"summary\":\"one paragraph\",\"claims\":[{\"sentence\":\"one sentence from the summary\",\"sources\":[\"patient:P001\",\"encounter:E001\"]}]}\n- Every claim source must use IDs from the supplied record: patient:{patient_id}, encounter:{encounter_id}, lab:{lab_id}, medication:{medication_id}, note:{note_id}.",
     "llm_error": null,
-    "summary": "Tanya Roy, a 36-year-old female, presented with low mood and poor sleep as her chief complaint during an outpatient visit on 2026-03-14, resulting in a diagnosis of depressive symptoms. She was started on Sertraline 25 mg once daily from the same date. Prior to this, a progress note on 2026-02-20 documented her persistent symptoms, including reduced interest and fatigue, with a mention of safety screening and advice for mental health follow-up, noting that this information is part of synthetic dummy clinical data for testing purposes.",
-    "timeline": [
+    "summary": "{\"summary\":\"Tanya Roy, a 36-year-old female patient, presented with low mood and poor sleep on 2026-01-14, with a working diagnosis of suspected Depressive symptoms. She was subsequently prescribed Sertraline 25 mg once daily on 2026-02-14. Follow-up encounters on 2026-02-14 and 2026-03-14 confirmed the diagnosis of Depressive symptoms, with the patient's progress and medication plan reviewed. This information is based on synthetic dummy clinical data for pipeline testing only, with no real patient information present. \",\"claims\":[{\"sentence\":\"Tanya Roy, a 36-year-old female patient, presented with low mood and poor sleep on 2026-01-14, with a working diagnosis of suspected Depressive symptoms.\",\"sources\":[\"patient:P014\",\"encounter:E014_1\"]},{\"sentence\":\"She was subsequently prescribed Sertraline 25 mg once daily on 2026-02-14.\",\"sources\":[\"medication:M014\",\"encounter:E014_2\"]},{\"sentence\":\"Follow-up encounters on 2026-02-14 and 2026-03-14 confirmed the diagnosis of Depressive symptoms, with the patient's progress and medication plan reviewed.\",\"sources\":[\"encounter:E014_2\",\"encounter:E014_3\",\"note:N041\",\"note:N042\"]}]\"}",
+    "claims": [
       {
-        "date": "2026-03-14",
-        "type": "Outpatient",
-        "title": "Depressive symptoms",
-        "detail": "Low mood and poor sleep"
+        "sentence": "{\"summary\":\"Tanya Roy, a 36-year-old female patient, presented with low mood and poor sleep on 2026-01-14, with a working diagnosis of suspected Depressive symptoms.",
+        "sources": [
+          "patient:P014",
+          "encounter:E014_3",
+          "encounter:E014_2",
+          "encounter:E014_1",
+          "note:N042",
+          "note:N041",
+          "note:N040"
+        ]
       },
       {
-        "date": "2026-02-20",
-        "type": "Progress note",
-        "title": "Clinical note",
-        "detail": "Patient reports persistent low mood, poor sleep, reduced interest, and fatigue. Safety screening documented in dummy record. Mental health follow-up advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+        "sentence": "She was subsequently prescribed Sertraline 25 mg once daily on 2026-02-14.",
+        "sources": [
+          "encounter:E014_2",
+          "medication:M014"
+        ]
+      },
+      {
+        "sentence": "Follow-up encounters on 2026-02-14 and 2026-03-14 confirmed the diagnosis of Depressive symptoms, with the patient's progress and medication plan reviewed.",
+        "sources": [
+          "encounter:E014_3",
+          "encounter:E014_2",
+          "note:N042",
+          "note:N041",
+          "note:N040"
+        ]
+      },
+      {
+        "sentence": "This information is based on synthetic dummy clinical data for pipeline testing only, with no real patient information present.",
+        "sources": [
+          "note:N042",
+          "note:N041",
+          "note:N040"
+        ]
+      },
+      {
+        "sentence": "\",\"claims\":[{\"sentence\":\"Tanya Roy, a 36-year-old female patient, presented with low mood and poor sleep on 2026-01-14, with a working diagnosis of suspected Depressive symptoms.\",\"sources\":[\"patient:P014\",\"encounter:E014_1\"]},{\"sentence\":\"She was subsequently prescribed Sertraline 25 mg once daily on 2026-02-14.\",\"sources\":[\"medication:M014\",\"encounter:E014_2\"]},{\"sentence\":\"Follow-up encounters on 2026-02-14 and 2026-03-14 confirmed the diagnosis of Depressive symptoms, with the patient's progress and medication plan reviewed.\",\"sources\":[\"encounter:E014_2\",\"encounter:E014_3\",\"note:N041\",\"note:N042\"]}]\"}",
+        "sources": [
+          "patient:P014",
+          "encounter:E014_3",
+          "encounter:E014_2",
+          "encounter:E014_1",
+          "medication:M014",
+          "note:N042",
+          "note:N041",
+          "note:N040"
+        ]
       }
     ],
-    "current_focus": "Depressive symptoms - Low mood and poor sleep",
+    "timeline": [
+      {
+        "date": "2026-03-20",
+        "type": "Progress note",
+        "title": "Clinical note",
+        "detail": "Subsequent review for Depressive symptoms. Patient journey includes prior evaluation, follow-up, medication review, and interval clinical monitoring. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+      },
+      {
+        "date": "2026-03-14",
+        "type": "Follow-up",
+        "title": "Depressive symptoms",
+        "detail": "Review of Depressive symptoms progress"
+      },
+      {
+        "date": "2026-02-14",
+        "type": "Follow-up",
+        "title": "Depressive symptoms",
+        "detail": "Follow-up for Depressive symptoms"
+      },
+      {
+        "date": "2026-01-14",
+        "type": "Outpatient",
+        "title": "Suspected Depressive symptoms",
+        "detail": "Low mood and poor sleep"
+      }
+    ],
+    "current_focus": "Depressive symptoms - Review of Depressive symptoms progress",
     "key_labs": [],
     "active_medications": [
       "Sertraline 25 mg Once daily"
@@ -436,26 +1123,78 @@
     "patient_name": "Manoj Gupta",
     "generated_by": "groq:llama-3.3-70b-versatile",
     "journey_model": "llama-3.3-70b-versatile",
-    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.\n- Return only valid JSON with this shape:\n  {\"summary\":\"one paragraph\",\"claims\":[{\"sentence\":\"one sentence from the summary\",\"sources\":[\"patient:P001\",\"encounter:E001\"]}]}\n- Every claim source must use IDs from the supplied record: patient:{patient_id}, encounter:{encounter_id}, lab:{lab_id}, medication:{medication_id}, note:{note_id}.",
     "llm_error": null,
-    "summary": "Manoj Gupta, a 55-year-old male, presented with right upper abdominal pain, particularly after fatty meals, as noted in a progress note on 2026-02-20. He was diagnosed with gallstone disease during an outpatient encounter on 2026-03-15. On the same day, his total bilirubin level was within the normal range at 1.0 mg/dL. He was prescribed Drotaverine 80 mg as needed, starting on 2026-03-15. Please note that the ultrasound findings and this entire record are part of synthetic dummy clinical data for testing purposes only.",
-    "timeline": [
+    "summary": "Manoj Gupta, a 55-year-old male, presented with right upper abdominal pain on 2026-01-15, leading to a working diagnosis of suspected Gallstone disease. Subsequent follow-up encounters on 2026-02-15 and 2026-03-15 confirmed the diagnosis of Gallstone disease. Total bilirubin lab tests were conducted on each encounter date with values of 1.12 mg/dL, 1.04 mg/dL, and 1 mg/dL, respectively. The patient was prescribed Drotaverine 80 mg as needed, starting from 2026-02-15. Clinical notes from 2026-01-20, 2026-02-20, and 2026-03-20 document the patient's journey, including initial assessment, follow-up, and progress reviews, noting this is synthetic dummy clinical data for pipeline testing only.",
+    "claims": [
       {
-        "date": "2026-03-15",
-        "type": "Outpatient",
-        "title": "Gallstone disease",
-        "detail": "Right upper abdominal pain"
+        "sentence": "Manoj Gupta, a 55-year-old male, presented with right upper abdominal pain on 2026-01-15, leading to a working diagnosis of suspected Gallstone disease.",
+        "sources": [
+          "patient:P015",
+          "encounter:E015_1"
+        ]
       },
       {
-        "date": "2026-02-20",
-        "type": "Progress note",
-        "title": "Clinical note",
-        "detail": "Patient reports right upper abdominal pain after fatty meals. Ultrasound note mentions gallstones in dummy data. Surgical review advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+        "sentence": "Subsequent follow-up encounters on 2026-02-15 and 2026-03-15 confirmed the diagnosis of Gallstone disease.",
+        "sources": [
+          "encounter:E015_2",
+          "encounter:E015_3"
+        ]
+      },
+      {
+        "sentence": "Total bilirubin lab tests were conducted on each encounter date with values of 1.12 mg/dL, 1.04 mg/dL, and 1 mg/dL, respectively.",
+        "sources": [
+          "lab:L049",
+          "lab:L050",
+          "lab:L051"
+        ]
+      },
+      {
+        "sentence": "The patient was prescribed Drotaverine 80 mg as needed, starting from 2026-02-15.",
+        "sources": [
+          "medication:M015"
+        ]
+      },
+      {
+        "sentence": "Clinical notes from 2026-01-20, 2026-02-20, and 2026-03-20 document the patient's journey, including initial assessment, follow-up, and progress reviews, noting this is synthetic dummy clinical data for pipeline testing only.",
+        "sources": [
+          "note:N043",
+          "note:N044",
+          "note:N045"
+        ]
       }
     ],
-    "current_focus": "Gallstone disease - Right upper abdominal pain",
+    "timeline": [
+      {
+        "date": "2026-03-20",
+        "type": "Progress note",
+        "title": "Clinical note",
+        "detail": "Subsequent review for Gallstone disease. Patient journey includes prior evaluation, follow-up, medication review, and interval clinical monitoring. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+      },
+      {
+        "date": "2026-03-15",
+        "type": "Follow-up",
+        "title": "Gallstone disease",
+        "detail": "Review of Gallstone disease progress"
+      },
+      {
+        "date": "2026-02-15",
+        "type": "Follow-up",
+        "title": "Gallstone disease",
+        "detail": "Follow-up for Gallstone disease"
+      },
+      {
+        "date": "2026-01-15",
+        "type": "Outpatient",
+        "title": "Suspected Gallstone disease",
+        "detail": "Right upper abdominal pain"
+      }
+    ],
+    "current_focus": "Gallstone disease - Review of Gallstone disease progress",
     "key_labs": [
-      "Total bilirubin: 1.0 mg/dL (ref 0.1-1.2)"
+      "Total bilirubin: 1 mg/dL (ref 0.1-1.2)",
+      "Total bilirubin: 1.04 mg/dL (ref 0.1-1.2)",
+      "Total bilirubin: 1.12 mg/dL (ref 0.1-1.2)"
     ],
     "active_medications": [
       "Drotaverine 80 mg As needed"
@@ -467,24 +1206,66 @@
     "patient_name": "Sneha Kapoor",
     "generated_by": "groq:llama-3.3-70b-versatile",
     "journey_model": "llama-3.3-70b-versatile",
-    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.\n- Return only valid JSON with this shape:\n  {\"summary\":\"one paragraph\",\"claims\":[{\"sentence\":\"one sentence from the summary\",\"sources\":[\"patient:P001\",\"encounter:E001\"]}]}\n- Every claim source must use IDs from the supplied record: patient:{patient_id}, encounter:{encounter_id}, lab:{lab_id}, medication:{medication_id}, note:{note_id}.",
     "llm_error": null,
-    "summary": "Sneha Kapoor, a 31-year-old female, presented with migraine headaches as her chief complaint during an outpatient visit on 2026-03-16, resulting in a diagnosis of Migraine. She was prescribed Sumatriptan 50 mg to be taken as needed, starting on the same day. Prior to this, on 2026-02-20, a progress note documented her symptoms of unilateral throbbing headache, nausea, and light sensitivity, with discussion on trigger diary and acute migraine medication. Note that this information is based on synthetic dummy clinical data for testing purposes only.",
-    "timeline": [
+    "summary": "Sneha Kapoor, a 31-year-old female, presented with Migraine headaches on 2026-01-16, and was diagnosed with suspected Migraine. She was subsequently followed up on 2026-02-16 and 2026-03-16, with a confirmed diagnosis of Migraine. Her medication plan includes Sumatriptan 50 mg as needed, started on 2026-02-16. This is a review of synthetic dummy clinical data for pipeline testing only, with no real patient information present.",
+    "claims": [
       {
-        "date": "2026-03-16",
-        "type": "Outpatient",
-        "title": "Migraine",
-        "detail": "Migraine headaches"
+        "sentence": "Sneha Kapoor, a 31-year-old female, presented with Migraine headaches on 2026-01-16, and was diagnosed with suspected Migraine.",
+        "sources": [
+          "patient:P016",
+          "encounter:E016_1"
+        ]
       },
       {
-        "date": "2026-02-20",
-        "type": "Progress note",
-        "title": "Clinical note",
-        "detail": "Patient reports unilateral throbbing headache with nausea and light sensitivity. Trigger diary and acute migraine medication discussed. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+        "sentence": "She was subsequently followed up on 2026-02-16 and 2026-03-16, with a confirmed diagnosis of Migraine.",
+        "sources": [
+          "encounter:E016_2",
+          "encounter:E016_3"
+        ]
+      },
+      {
+        "sentence": "Her medication plan includes Sumatriptan 50 mg as needed, started on 2026-02-16.",
+        "sources": [
+          "medication:M016"
+        ]
+      },
+      {
+        "sentence": "This is a review of synthetic dummy clinical data for pipeline testing only, with no real patient information present.",
+        "sources": [
+          "note:N046",
+          "note:N047",
+          "note:N048"
+        ]
       }
     ],
-    "current_focus": "Migraine - Migraine headaches",
+    "timeline": [
+      {
+        "date": "2026-03-20",
+        "type": "Progress note",
+        "title": "Clinical note",
+        "detail": "Subsequent review for Migraine. Patient journey includes prior evaluation, follow-up, medication review, and interval clinical monitoring. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+      },
+      {
+        "date": "2026-03-16",
+        "type": "Follow-up",
+        "title": "Migraine",
+        "detail": "Review of Migraine progress"
+      },
+      {
+        "date": "2026-02-16",
+        "type": "Follow-up",
+        "title": "Migraine",
+        "detail": "Follow-up for Migraine"
+      },
+      {
+        "date": "2026-01-16",
+        "type": "Outpatient",
+        "title": "Suspected Migraine",
+        "detail": "Migraine headaches"
+      }
+    ],
+    "current_focus": "Migraine - Review of Migraine progress",
     "key_labs": [],
     "active_medications": [
       "Sumatriptan 50 mg As needed"
@@ -496,26 +1277,73 @@
     "patient_name": "Harish Kulkarni",
     "generated_by": "groq:llama-3.3-70b-versatile",
     "journey_model": "llama-3.3-70b-versatile",
-    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.\n- Return only valid JSON with this shape:\n  {\"summary\":\"one paragraph\",\"claims\":[{\"sentence\":\"one sentence from the summary\",\"sources\":[\"patient:P001\",\"encounter:E001\"]}]}\n- Every claim source must use IDs from the supplied record: patient:{patient_id}, encounter:{encounter_id}, lab:{lab_id}, medication:{medication_id}, note:{note_id}.",
     "llm_error": null,
-    "summary": "Harish Kulkarni, a 69-year-old male, presented with memory difficulty as his chief complaint during an outpatient visit on 2026-03-17, resulting in a diagnosis of mild cognitive impairment. On the same day, his Vitamin B12 level was found to be 420 pg/mL, within the normal range of 200-900 pg/mL. He was started on Donepezil 5 mg once daily. A prior progress note from 2026-02-20 documented the patient's and family's reports of recent memory difficulty, with cognitive screening performed, and neurology follow-up advised, noting that this information is part of synthetic dummy clinical data for testing purposes only.",
-    "timeline": [
+    "summary": "Harish Kulkarni, a 69-year-old male, presented with memory difficulty on 2026-01-17, with a working diagnosis of suspected Mild cognitive impairment. He was subsequently diagnosed with Mild cognitive impairment and started on Donepezil 5 mg once daily on 2026-02-17. Follow-up visits on 2026-02-17 and 2026-03-17 showed continued diagnosis of Mild cognitive impairment, with Vitamin B12 lab results within the reference range. This is a review of synthetic dummy clinical data for pipeline testing only, with no real patient information present.",
+    "claims": [
       {
-        "date": "2026-03-17",
-        "type": "Outpatient",
-        "title": "Mild cognitive impairment",
-        "detail": "Memory difficulty"
+        "sentence": "Harish Kulkarni, a 69-year-old male, presented with memory difficulty on 2026-01-17, with a working diagnosis of suspected Mild cognitive impairment.",
+        "sources": [
+          "patient:P017",
+          "encounter:E017_1"
+        ]
       },
       {
-        "date": "2026-02-20",
-        "type": "Progress note",
-        "title": "Clinical note",
-        "detail": "Patient and family report recent memory difficulty and missed appointments. Cognitive screening performed in dummy record. Neurology follow-up advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+        "sentence": "He was subsequently diagnosed with Mild cognitive impairment and started on Donepezil 5 mg once daily on 2026-02-17.",
+        "sources": [
+          "encounter:E017_2",
+          "medication:M017"
+        ]
+      },
+      {
+        "sentence": "Follow-up visits on 2026-02-17 and 2026-03-17 showed continued diagnosis of Mild cognitive impairment, with Vitamin B12 lab results within the reference range.",
+        "sources": [
+          "encounter:E017_2",
+          "encounter:E017_3",
+          "lab:L053",
+          "lab:L054"
+        ]
+      },
+      {
+        "sentence": "This is a review of synthetic dummy clinical data for pipeline testing only, with no real patient information present.",
+        "sources": [
+          "note:N049",
+          "note:N050",
+          "note:N051"
+        ]
       }
     ],
-    "current_focus": "Mild cognitive impairment - Memory difficulty",
+    "timeline": [
+      {
+        "date": "2026-03-20",
+        "type": "Progress note",
+        "title": "Clinical note",
+        "detail": "Subsequent review for Mild cognitive impairment. Patient journey includes prior evaluation, follow-up, medication review, and interval clinical monitoring. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+      },
+      {
+        "date": "2026-03-17",
+        "type": "Follow-up",
+        "title": "Mild cognitive impairment",
+        "detail": "Review of Mild cognitive impairment progress"
+      },
+      {
+        "date": "2026-02-17",
+        "type": "Follow-up",
+        "title": "Mild cognitive impairment",
+        "detail": "Follow-up for Mild cognitive impairment"
+      },
+      {
+        "date": "2026-01-17",
+        "type": "Outpatient",
+        "title": "Suspected Mild cognitive impairment",
+        "detail": "Memory difficulty"
+      }
+    ],
+    "current_focus": "Mild cognitive impairment - Review of Mild cognitive impairment progress",
     "key_labs": [
-      "Vitamin B12: 420 pg/mL (ref 200-900)"
+      "Vitamin B12: 420 pg/mL (ref 200-900)",
+      "Vitamin B12: 437 pg/mL (ref 200-900)",
+      "Vitamin B12: 470 pg/mL (ref 200-900)"
     ],
     "active_medications": [
       "Donepezil 5 mg Once daily"
@@ -527,27 +1355,82 @@
     "patient_name": "Ritu Bansal",
     "generated_by": "groq:llama-3.3-70b-versatile",
     "journey_model": "llama-3.3-70b-versatile",
-    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.\n- Return only valid JSON with this shape:\n  {\"summary\":\"one paragraph\",\"claims\":[{\"sentence\":\"one sentence from the summary\",\"sources\":[\"patient:P001\",\"encounter:E001\"]}]}\n- Every claim source must use IDs from the supplied record: patient:{patient_id}, encounter:{encounter_id}, lab:{lab_id}, medication:{medication_id}, note:{note_id}.",
     "llm_error": null,
-    "summary": "Ritu Bansal, a 49-year-old female, presented with joint pain and swelling on 2026-03-18, and was diagnosed with Rheumatoid arthritis. Key lab results from the same day include a positive Rheumatoid factor and an elevated ESR of 42 mm/hr. She was started on Methotrexate 7.5 mg weekly. A progress note from 2026-02-20 documents her symptoms of small joint pain, morning stiffness, and swelling in both hands, with a positive Rheumatoid factor noted in this synthetic dummy data, which is for testing purposes only and does not represent real patient information.",
-    "timeline": [
+    "summary": "Ritu Bansal, a 49-year-old female patient, presented with joint pain and swelling, and was diagnosed with suspected Rheumatoid arthritis on 2026-01-18. She was subsequently followed up on 2026-02-18 and 2026-03-18, with a confirmed diagnosis of Rheumatoid arthritis. Key lab results include positive Rheumatoid factor and elevated ESR levels. The patient was started on Methotrexate 7.5 mg Weekly on 2026-02-18. This is a review of synthetic dummy clinical data for pipeline testing only, with no real patient information present.",
+    "claims": [
       {
-        "date": "2026-03-18",
-        "type": "Outpatient",
-        "title": "Rheumatoid arthritis",
-        "detail": "Joint pain and swelling"
+        "sentence": "Ritu Bansal, a 49-year-old female patient, presented with joint pain and swelling, and was diagnosed with suspected Rheumatoid arthritis on 2026-01-18.",
+        "sources": [
+          "patient:P018",
+          "encounter:E018_1"
+        ]
       },
       {
-        "date": "2026-02-20",
-        "type": "Progress note",
-        "title": "Clinical note",
-        "detail": "Patient reports small joint pain, morning stiffness, and swelling in both hands. Rheumatoid factor positive in dummy data. Rheumatology review advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+        "sentence": "She was subsequently followed up on 2026-02-18 and 2026-03-18, with a confirmed diagnosis of Rheumatoid arthritis.",
+        "sources": [
+          "encounter:E018_2",
+          "encounter:E018_3"
+        ]
+      },
+      {
+        "sentence": "Key lab results include positive Rheumatoid factor and elevated ESR levels.",
+        "sources": [
+          "lab:L059",
+          "lab:L060",
+          "lab:L057",
+          "lab:L058",
+          "lab:L055",
+          "lab:L056"
+        ]
+      },
+      {
+        "sentence": "The patient was started on Methotrexate 7.5 mg Weekly on 2026-02-18.",
+        "sources": [
+          "medication:M018"
+        ]
+      },
+      {
+        "sentence": "This is a review of synthetic dummy clinical data for pipeline testing only, with no real patient information present.",
+        "sources": [
+          "note:N054",
+          "note:N053",
+          "note:N052"
+        ]
       }
     ],
-    "current_focus": "Rheumatoid arthritis - Joint pain and swelling",
+    "timeline": [
+      {
+        "date": "2026-03-20",
+        "type": "Progress note",
+        "title": "Clinical note",
+        "detail": "Subsequent review for Rheumatoid arthritis. Patient journey includes prior evaluation, follow-up, medication review, and interval clinical monitoring. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+      },
+      {
+        "date": "2026-03-18",
+        "type": "Follow-up",
+        "title": "Rheumatoid arthritis",
+        "detail": "Review of Rheumatoid arthritis progress"
+      },
+      {
+        "date": "2026-02-18",
+        "type": "Follow-up",
+        "title": "Rheumatoid arthritis",
+        "detail": "Follow-up for Rheumatoid arthritis"
+      },
+      {
+        "date": "2026-01-18",
+        "type": "Outpatient",
+        "title": "Suspected Rheumatoid arthritis",
+        "detail": "Joint pain and swelling"
+      }
+    ],
+    "current_focus": "Rheumatoid arthritis - Review of Rheumatoid arthritis progress",
     "key_labs": [
       "Rheumatoid factor: Positive  (ref Negative)",
-      "ESR: 42 mm/hr (ref 0-20)"
+      "ESR: 42 mm/hr (ref 0-20)",
+      "Rheumatoid factor: Positive  (ref Negative)",
+      "ESR: 44 mm/hr (ref 0-20)"
     ],
     "active_medications": [
       "Methotrexate 7.5 mg Weekly"
@@ -559,25 +1442,57 @@
     "patient_name": "Dev Malhotra",
     "generated_by": "groq:llama-3.3-70b-versatile",
     "journey_model": "llama-3.3-70b-versatile",
-    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.\n- Return only valid JSON with this shape:\n  {\"summary\":\"one paragraph\",\"claims\":[{\"sentence\":\"one sentence from the summary\",\"sources\":[\"patient:P001\",\"encounter:E001\"]}]}\n- Every claim source must use IDs from the supplied record: patient:{patient_id}, encounter:{encounter_id}, lab:{lab_id}, medication:{medication_id}, note:{note_id}.",
     "llm_error": null,
-    "summary": "Dev Malhotra, a 23-year-old male, presented to the outpatient clinic on 2026-03-19 with a chief complaint of fever and sore throat, diagnosed with viral upper respiratory infection. A COVID antigen test on the same day was negative. He was prescribed Cetirizine 10 mg once daily, starting on 2026-03-19. Notably, a progress note from 2026-02-20, which is prior to the encounter and may not reflect the current visit, mentions symptomatic care and includes a negative COVID antigen test result, but it is essential to consider that this information is part of synthetic dummy clinical data for pipeline testing purposes only.",
-    "timeline": [
+    "summary": "Dev Malhotra, a 23-year-old male, presented with fever and sore throat on 2026-01-19, with a working diagnosis of suspected Viral upper respiratory infection, and subsequent encounters on 2026-02-19 and 2026-03-19 for follow-up of Viral upper respiratory infection, with COVID antigen tests negative on all occasions, and was prescribed Cetirizine 10 mg once daily from 2026-02-19, as per the synthetic dummy clinical data for pipeline testing purposes.",
+    "claims": [
       {
-        "date": "2026-03-19",
-        "type": "Outpatient",
-        "title": "Viral upper respiratory infection",
-        "detail": "Fever and sore throat"
-      },
-      {
-        "date": "2026-02-20",
-        "type": "Progress note",
-        "title": "Clinical note",
-        "detail": "Patient reports fever, sore throat, runny nose, and mild cough. COVID antigen test is negative in dummy data. Symptomatic care advised. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+        "sentence": "Dev Malhotra, a 23-year-old male, presented with fever and sore throat on 2026-01-19, with a working diagnosis of suspected Viral upper respiratory infection, and subsequent encounters on 2026-02-19 and 2026-03-19 for follow-up of Viral upper respiratory infection, with COVID antigen tests negative on all occasions, and was prescribed Cetirizine 10 mg once daily from 2026-02-19, as per the synthetic dummy clinical data for pipeline testing purposes.",
+        "sources": [
+          "patient:P019",
+          "encounter:E019_1",
+          "encounter:E019_2",
+          "encounter:E019_3",
+          "lab:L061",
+          "lab:L062",
+          "lab:L063",
+          "medication:M019",
+          "note:N055",
+          "note:N056",
+          "note:N057"
+        ]
       }
     ],
-    "current_focus": "Viral upper respiratory infection - Fever and sore throat",
+    "timeline": [
+      {
+        "date": "2026-03-20",
+        "type": "Progress note",
+        "title": "Clinical note",
+        "detail": "Subsequent review for Viral upper respiratory infection. Patient journey includes prior evaluation, follow-up, medication review, and interval clinical monitoring. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+      },
+      {
+        "date": "2026-03-19",
+        "type": "Follow-up",
+        "title": "Viral upper respiratory infection",
+        "detail": "Review of Viral upper respiratory infection progress"
+      },
+      {
+        "date": "2026-02-19",
+        "type": "Follow-up",
+        "title": "Viral upper respiratory infection",
+        "detail": "Follow-up for Viral upper respiratory infection"
+      },
+      {
+        "date": "2026-01-19",
+        "type": "Outpatient",
+        "title": "Suspected Viral upper respiratory infection",
+        "detail": "Fever and sore throat"
+      }
+    ],
+    "current_focus": "Viral upper respiratory infection - Review of Viral upper respiratory infection progress",
     "key_labs": [
+      "COVID antigen: Negative  (ref Negative)",
+      "COVID antigen: Negative  (ref Negative)",
       "COVID antigen: Negative  (ref Negative)"
     ],
     "active_medications": [
@@ -590,26 +1505,78 @@
     "patient_name": "Asha Reddy",
     "generated_by": "groq:llama-3.3-70b-versatile",
     "journey_model": "llama-3.3-70b-versatile",
-    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.",
+    "system_prompt": "You are a clinical documentation assistant inside a prototype clinical AI system.\n\nTask:\nCreate a concise patient journey summary for a doctor reviewing a synthetic local HIS record.\n\nRules:\n- Use only the supplied patient record.\n- Do not diagnose beyond diagnoses already present in the record.\n- Do not recommend treatment, medication changes, triage, or follow-up actions.\n- Do not invent missing dates, labs, medications, symptoms, or outcomes.\n- Mention that this is dummy/synthetic data only when clinically relevant.\n- Write in 1 short paragraph, suitable for a doctor-facing patient overview.\n- Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.\n- Return only valid JSON with this shape:\n  {\"summary\":\"one paragraph\",\"claims\":[{\"sentence\":\"one sentence from the summary\",\"sources\":[\"patient:P001\",\"encounter:E001\"]}]}\n- Every claim source must use IDs from the supplied record: patient:{patient_id}, encounter:{encounter_id}, lab:{lab_id}, medication:{medication_id}, note:{note_id}.",
     "llm_error": null,
-    "summary": "Asha Reddy, a 57-year-old female, presented with tingling feet and numbness on 2026-03-20, and was diagnosed with Peripheral neuropathy. Her Vitamin B12 level was 180 pg/mL, which is below the reference range, on the same day. She was started on Pregabalin 75 mg at night. A prior progress note on 2026-02-20 documented her symptoms of tingling, numbness, and burning sensation at night, with a mention of low Vitamin B12, noting this is synthetic dummy clinical data for testing purposes only.",
+    "summary": "Asha Reddy, a 57-year-old female, presented with tingling feet and numbness on 2026-01-20, with a working diagnosis of suspected Peripheral neuropathy. She was subsequently diagnosed with Peripheral neuropathy and has been followed up on 2026-02-20 and 2026-03-20. Her Vitamin B12 levels have been monitored, with values of 202 pg/mL on 2026-01-20, 187 pg/mL on 2026-02-20, and 180 pg/mL on 2026-03-20. She was started on Pregabalin 75 mg at night on 2026-02-20. This is a review of synthetic dummy clinical data for pipeline testing only, with no real patient information present.",
+    "claims": [
+      {
+        "sentence": "Asha Reddy, a 57-year-old female, presented with tingling feet and numbness on 2026-01-20, with a working diagnosis of suspected Peripheral neuropathy.",
+        "sources": [
+          "patient:P020",
+          "encounter:E020_1"
+        ]
+      },
+      {
+        "sentence": "She was subsequently diagnosed with Peripheral neuropathy and has been followed up on 2026-02-20 and 2026-03-20.",
+        "sources": [
+          "encounter:E020_2",
+          "encounter:E020_3"
+        ]
+      },
+      {
+        "sentence": "Her Vitamin B12 levels have been monitored, with values of 202 pg/mL on 2026-01-20, 187 pg/mL on 2026-02-20, and 180 pg/mL on 2026-03-20.",
+        "sources": [
+          "lab:L064",
+          "lab:L065",
+          "lab:L066"
+        ]
+      },
+      {
+        "sentence": "She was started on Pregabalin 75 mg at night on 2026-02-20.",
+        "sources": [
+          "medication:M020"
+        ]
+      },
+      {
+        "sentence": "This is a review of synthetic dummy clinical data for pipeline testing only, with no real patient information present.",
+        "sources": [
+          "note:N058",
+          "note:N059",
+          "note:N060"
+        ]
+      }
+    ],
     "timeline": [
       {
         "date": "2026-03-20",
-        "type": "Outpatient",
+        "type": "Follow-up",
         "title": "Peripheral neuropathy",
-        "detail": "Tingling feet and numbness"
+        "detail": "Review of Peripheral neuropathy progress"
+      },
+      {
+        "date": "2026-03-20",
+        "type": "Progress note",
+        "title": "Clinical note",
+        "detail": "Subsequent review for Peripheral neuropathy. Patient journey includes prior evaluation, follow-up, medication review, and interval clinical monitoring. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
       },
       {
         "date": "2026-02-20",
-        "type": "Progress note",
-        "title": "Clinical note",
-        "detail": "Patient reports tingling feet, numbness, and burning sensation at night. Vitamin B12 is low in dummy data. Neuropathy assessment documented. This is synthetic dummy clinical data for pipeline testing only. No real patient information is present."
+        "type": "Follow-up",
+        "title": "Peripheral neuropathy",
+        "detail": "Follow-up for Peripheral neuropathy"
+      },
+      {
+        "date": "2026-01-20",
+        "type": "Outpatient",
+        "title": "Suspected Peripheral neuropathy",
+        "detail": "Tingling feet and numbness"
       }
     ],
-    "current_focus": "Peripheral neuropathy - Tingling feet and numbness",
+    "current_focus": "Peripheral neuropathy - Review of Peripheral neuropathy progress",
     "key_labs": [
-      "Vitamin B12: 180 pg/mL (ref 200-900)"
+      "Vitamin B12: 180 pg/mL (ref 200-900)",
+      "Vitamin B12: 187 pg/mL (ref 200-900)",
+      "Vitamin B12: 202 pg/mL (ref 200-900)"
     ],
     "active_medications": [
       "Pregabalin 75 mg At night"

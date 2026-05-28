@@ -25,7 +25,7 @@ Seed the local HIS database:
 python scripts\seed_data.py
 ```
 
-Generate a larger deterministic dummy dataset:
+Generate a larger deterministic longitudinal dummy dataset. It keeps the same 20 patients and creates 3 encounters, 3 clinical notes, and repeated labs where relevant for each patient journey:
 
 ```powershell
 python scripts\generate_dummy_data.py
