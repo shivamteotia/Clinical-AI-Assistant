@@ -272,6 +272,20 @@ textarea:focus {
   gap: 12px;
 }
 
+.journey-status-stack {
+  display: grid;
+  gap: 6px;
+  justify-items: end;
+}
+
+.journey-meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
 .journey-header h3 {
   margin: 0;
   font-size: 17px;

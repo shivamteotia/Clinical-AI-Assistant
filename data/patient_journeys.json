@@ -78,7 +78,16 @@
     "active_medications": [
       "Metformin 500 mg Twice daily"
     ],
-    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care."
+    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care.",
+    "source_system": "dummy_his",
+    "source_record_id": "P001",
+    "source_record_hash": "f66704fc54b1153b3ae62099a70f623317dd4dea01cfce865269bb8d43d20312",
+    "source_record_version": "f66704fc54b1",
+    "source_record_updated_at": "2026-03-20",
+    "current_source_record_hash": "f66704fc54b1153b3ae62099a70f623317dd4dea01cfce865269bb8d43d20312",
+    "current_source_record_version": "f66704fc54b1",
+    "is_stale": false,
+    "generated_at": "2026-05-28T00:00:00Z"
   },
   {
     "patient_id": "P002",
@@ -150,7 +159,16 @@
     "active_medications": [
       "Salbutamol inhaler 100 mcg As needed"
     ],
-    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care."
+    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care.",
+    "source_system": "dummy_his",
+    "source_record_id": "P002",
+    "source_record_hash": "b2e1f19098472e103490c9465ec7de34be5c163406d09f62e9a1b6a018df8d28",
+    "source_record_version": "b2e1f1909847",
+    "source_record_updated_at": "2026-03-20",
+    "current_source_record_hash": "b2e1f19098472e103490c9465ec7de34be5c163406d09f62e9a1b6a018df8d28",
+    "current_source_record_version": "b2e1f1909847",
+    "is_stale": false,
+    "generated_at": "2026-05-28T00:00:00Z"
   },
   {
     "patient_id": "P003",
@@ -225,7 +243,16 @@
     "active_medications": [
       "Amlodipine 5 mg Once daily"
     ],
-    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care."
+    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care.",
+    "source_system": "dummy_his",
+    "source_record_id": "P003",
+    "source_record_hash": "c69bfd49a453151c14a2a533aa3daecb2bb14512bf0196d0243b2bb1d426fbfb",
+    "source_record_version": "c69bfd49a453",
+    "source_record_updated_at": "2026-03-20",
+    "current_source_record_hash": "c69bfd49a453151c14a2a533aa3daecb2bb14512bf0196d0243b2bb1d426fbfb",
+    "current_source_record_version": "c69bfd49a453",
+    "is_stale": false,
+    "generated_at": "2026-05-28T00:00:00Z"
   },
   {
     "patient_id": "P004",
@@ -312,7 +339,16 @@
     "active_medications": [
       "Nitrofurantoin 100 mg Twice daily"
     ],
-    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care."
+    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care.",
+    "source_system": "dummy_his",
+    "source_record_id": "P004",
+    "source_record_hash": "1ac448d79b8096c05321a4b3576b40b84aa5c0d5441f088159f8dd277cee9995",
+    "source_record_version": "1ac448d79b80",
+    "source_record_updated_at": "2026-03-20",
+    "current_source_record_hash": "1ac448d79b8096c05321a4b3576b40b84aa5c0d5441f088159f8dd277cee9995",
+    "current_source_record_version": "1ac448d79b80",
+    "is_stale": false,
+    "generated_at": "2026-05-28T00:00:00Z"
   },
   {
     "patient_id": "P005",
@@ -382,7 +418,16 @@
     "active_medications": [
       "Tiotropium inhaler 18 mcg Once daily"
     ],
-    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care."
+    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care.",
+    "source_system": "dummy_his",
+    "source_record_id": "P005",
+    "source_record_hash": "10b0fa816c177c94e7d997da740f0618ac86a9e0c0f3a8d89f4fc99fa13a2d2c",
+    "source_record_version": "10b0fa816c17",
+    "source_record_updated_at": "2026-03-20",
+    "current_source_record_hash": "10b0fa816c177c94e7d997da740f0618ac86a9e0c0f3a8d89f4fc99fa13a2d2c",
+    "current_source_record_version": "10b0fa816c17",
+    "is_stale": false,
+    "generated_at": "2026-05-28T00:00:00Z"
   },
   {
     "patient_id": "P006",
@@ -463,7 +508,16 @@
     "active_medications": [
       "Carbimazole 10 mg Twice daily"
     ],
-    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care."
+    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care.",
+    "source_system": "dummy_his",
+    "source_record_id": "P006",
+    "source_record_hash": "e165b17aa4212a64690ef811eedc6f4a5e1d9b8996fcfd677fbdd65b3351f281",
+    "source_record_version": "e165b17aa421",
+    "source_record_updated_at": "2026-03-20",
+    "current_source_record_hash": "e165b17aa4212a64690ef811eedc6f4a5e1d9b8996fcfd677fbdd65b3351f281",
+    "current_source_record_version": "e165b17aa421",
+    "is_stale": false,
+    "generated_at": "2026-05-28T00:00:00Z"
   },
   {
     "patient_id": "P007",
@@ -541,7 +595,16 @@
     "active_medications": [
       "Telmisartan 40 mg Once daily"
     ],
-    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care."
+    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care.",
+    "source_system": "dummy_his",
+    "source_record_id": "P007",
+    "source_record_hash": "9a3fdcbf2a3f5d3611650dd4c5a6902ae1d3b59024f5f3fff82807475977844f",
+    "source_record_version": "9a3fdcbf2a3f",
+    "source_record_updated_at": "2026-03-20",
+    "current_source_record_hash": "9a3fdcbf2a3f5d3611650dd4c5a6902ae1d3b59024f5f3fff82807475977844f",
+    "current_source_record_version": "9a3fdcbf2a3f",
+    "is_stale": false,
+    "generated_at": "2026-05-28T00:00:00Z"
   },
   {
     "patient_id": "P008",
@@ -620,7 +683,16 @@
     "active_medications": [
       "Ferrous sulfate 325 mg Once daily"
     ],
-    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care."
+    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care.",
+    "source_system": "dummy_his",
+    "source_record_id": "P008",
+    "source_record_hash": "2b749acb77ba6a7fe65ec8ff271dc6287ce697082e7493749cc58e963ccd933e",
+    "source_record_version": "2b749acb77ba",
+    "source_record_updated_at": "2026-03-20",
+    "current_source_record_hash": "2b749acb77ba6a7fe65ec8ff271dc6287ce697082e7493749cc58e963ccd933e",
+    "current_source_record_version": "2b749acb77ba",
+    "is_stale": false,
+    "generated_at": "2026-05-28T00:00:00Z"
   },
   {
     "patient_id": "P009",
@@ -702,7 +774,16 @@
     "active_medications": [
       "Furosemide 20 mg Once daily"
     ],
-    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care."
+    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care.",
+    "source_system": "dummy_his",
+    "source_record_id": "P009",
+    "source_record_hash": "ceb9843828f17fcb7071bcea4a0ed69e135d7d7ce24b51ede51431e8a518b281",
+    "source_record_version": "ceb9843828f1",
+    "source_record_updated_at": "2026-03-20",
+    "current_source_record_hash": "ceb9843828f17fcb7071bcea4a0ed69e135d7d7ce24b51ede51431e8a518b281",
+    "current_source_record_version": "ceb9843828f1",
+    "is_stale": false,
+    "generated_at": "2026-05-28T00:00:00Z"
   },
   {
     "patient_id": "P010",
@@ -778,7 +859,16 @@
     "active_medications": [
       "Folic acid 5 mg Once daily"
     ],
-    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care."
+    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care.",
+    "source_system": "dummy_his",
+    "source_record_id": "P010",
+    "source_record_hash": "fcd485167650c62e1f8bacd572b3220de687b8b2b48fecd8d32648ee29a3aa94",
+    "source_record_version": "fcd485167650",
+    "source_record_updated_at": "2026-03-20",
+    "current_source_record_hash": "fcd485167650c62e1f8bacd572b3220de687b8b2b48fecd8d32648ee29a3aa94",
+    "current_source_record_version": "fcd485167650",
+    "is_stale": false,
+    "generated_at": "2026-05-28T00:00:00Z"
   },
   {
     "patient_id": "P011",
@@ -852,7 +942,16 @@
     "active_medications": [
       "Pantoprazole 40 mg Once daily"
     ],
-    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care."
+    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care.",
+    "source_system": "dummy_his",
+    "source_record_id": "P011",
+    "source_record_hash": "07841df85fe2391dd061d89e7a75e942fdc6921366638c37817d190bc4d24a9b",
+    "source_record_version": "07841df85fe2",
+    "source_record_updated_at": "2026-03-20",
+    "current_source_record_hash": "07841df85fe2391dd061d89e7a75e942fdc6921366638c37817d190bc4d24a9b",
+    "current_source_record_version": "07841df85fe2",
+    "is_stale": false,
+    "generated_at": "2026-05-28T00:00:00Z"
   },
   {
     "patient_id": "P012",
@@ -923,7 +1022,16 @@
     "active_medications": [
       "Paracetamol 650 mg As needed"
     ],
-    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care."
+    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care.",
+    "source_system": "dummy_his",
+    "source_record_id": "P012",
+    "source_record_hash": "beedd9c09a88a7b234c5077745133fac3dae21da8867b71ff66ecb70d0e01b69",
+    "source_record_version": "beedd9c09a88",
+    "source_record_updated_at": "2026-03-20",
+    "current_source_record_hash": "beedd9c09a88a7b234c5077745133fac3dae21da8867b71ff66ecb70d0e01b69",
+    "current_source_record_version": "beedd9c09a88",
+    "is_stale": false,
+    "generated_at": "2026-05-28T00:00:00Z"
   },
   {
     "patient_id": "P013",
@@ -1023,7 +1131,16 @@
     "active_medications": [
       "Artemether lumefantrine 20/120 mg As per schedule"
     ],
-    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care."
+    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care.",
+    "source_system": "dummy_his",
+    "source_record_id": "P013",
+    "source_record_hash": "eb8b6bd5da5ffa5d6b608e38b3eed719e153705c0293c1604eeda46cd3b06108",
+    "source_record_version": "eb8b6bd5da5f",
+    "source_record_updated_at": "2026-03-20",
+    "current_source_record_hash": "eb8b6bd5da5ffa5d6b608e38b3eed719e153705c0293c1604eeda46cd3b06108",
+    "current_source_record_version": "eb8b6bd5da5f",
+    "is_stale": false,
+    "generated_at": "2026-05-28T00:00:00Z"
   },
   {
     "patient_id": "P014",
@@ -1116,7 +1233,16 @@
     "active_medications": [
       "Sertraline 25 mg Once daily"
     ],
-    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care."
+    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care.",
+    "source_system": "dummy_his",
+    "source_record_id": "P014",
+    "source_record_hash": "8c45e1bf7ba3bdc1a945a6c7454994f2c52af735090843e491830c747056a810",
+    "source_record_version": "8c45e1bf7ba3",
+    "source_record_updated_at": "2026-03-20",
+    "current_source_record_hash": "8c45e1bf7ba3bdc1a945a6c7454994f2c52af735090843e491830c747056a810",
+    "current_source_record_version": "8c45e1bf7ba3",
+    "is_stale": false,
+    "generated_at": "2026-05-28T00:00:00Z"
   },
   {
     "patient_id": "P015",
@@ -1199,7 +1325,16 @@
     "active_medications": [
       "Drotaverine 80 mg As needed"
     ],
-    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care."
+    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care.",
+    "source_system": "dummy_his",
+    "source_record_id": "P015",
+    "source_record_hash": "88cc110d4fee29c9c94d5d2a24228257c782f9a9cc638bdae515ebbcfc0c51b0",
+    "source_record_version": "88cc110d4fee",
+    "source_record_updated_at": "2026-03-20",
+    "current_source_record_hash": "88cc110d4fee29c9c94d5d2a24228257c782f9a9cc638bdae515ebbcfc0c51b0",
+    "current_source_record_version": "88cc110d4fee",
+    "is_stale": false,
+    "generated_at": "2026-05-28T00:00:00Z"
   },
   {
     "patient_id": "P016",
@@ -1270,7 +1405,16 @@
     "active_medications": [
       "Sumatriptan 50 mg As needed"
     ],
-    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care."
+    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care.",
+    "source_system": "dummy_his",
+    "source_record_id": "P016",
+    "source_record_hash": "fbbb27356e34d97adeb5f922ebe4d4730c54179c1100cf6c9ea347ca075642ac",
+    "source_record_version": "fbbb27356e34",
+    "source_record_updated_at": "2026-03-20",
+    "current_source_record_hash": "fbbb27356e34d97adeb5f922ebe4d4730c54179c1100cf6c9ea347ca075642ac",
+    "current_source_record_version": "fbbb27356e34",
+    "is_stale": false,
+    "generated_at": "2026-05-28T00:00:00Z"
   },
   {
     "patient_id": "P017",
@@ -1348,7 +1492,16 @@
     "active_medications": [
       "Donepezil 5 mg Once daily"
     ],
-    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care."
+    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care.",
+    "source_system": "dummy_his",
+    "source_record_id": "P017",
+    "source_record_hash": "742f2771fd9bf2af2f1b6912040674f825027008e345b5167c95e806e375421a",
+    "source_record_version": "742f2771fd9b",
+    "source_record_updated_at": "2026-03-20",
+    "current_source_record_hash": "742f2771fd9bf2af2f1b6912040674f825027008e345b5167c95e806e375421a",
+    "current_source_record_version": "742f2771fd9b",
+    "is_stale": false,
+    "generated_at": "2026-05-28T00:00:00Z"
   },
   {
     "patient_id": "P018",
@@ -1435,7 +1588,16 @@
     "active_medications": [
       "Methotrexate 7.5 mg Weekly"
     ],
-    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care."
+    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care.",
+    "source_system": "dummy_his",
+    "source_record_id": "P018",
+    "source_record_hash": "9ef4bc6805b14f2cefd6eab94bf7f482ca075f3958e0077af41cbc4cbecc0a0c",
+    "source_record_version": "9ef4bc6805b1",
+    "source_record_updated_at": "2026-03-20",
+    "current_source_record_hash": "9ef4bc6805b14f2cefd6eab94bf7f482ca075f3958e0077af41cbc4cbecc0a0c",
+    "current_source_record_version": "9ef4bc6805b1",
+    "is_stale": false,
+    "generated_at": "2026-05-28T00:00:00Z"
   },
   {
     "patient_id": "P019",
@@ -1498,7 +1660,16 @@
     "active_medications": [
       "Cetirizine 10 mg Once daily"
     ],
-    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care."
+    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care.",
+    "source_system": "dummy_his",
+    "source_record_id": "P019",
+    "source_record_hash": "52b9c9c1522ef08fe2becc102a1f6b42472228a7e96f9afcdccd4725b915c9ce",
+    "source_record_version": "52b9c9c1522e",
+    "source_record_updated_at": "2026-03-20",
+    "current_source_record_hash": "52b9c9c1522ef08fe2becc102a1f6b42472228a7e96f9afcdccd4725b915c9ce",
+    "current_source_record_version": "52b9c9c1522e",
+    "is_stale": false,
+    "generated_at": "2026-05-28T00:00:00Z"
   },
   {
     "patient_id": "P020",
@@ -1581,6 +1752,15 @@
     "active_medications": [
       "Pregabalin 75 mg At night"
     ],
-    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care."
+    "safety_notice": "Prototype clinical AI response using dummy local HIS data. Not for diagnosis, treatment, or real patient care.",
+    "source_system": "dummy_his",
+    "source_record_id": "P020",
+    "source_record_hash": "dd9472043ff79fb55277fe616fe2363fd909983f158c8fdd7e40d4d7b4a3a181",
+    "source_record_version": "dd9472043ff7",
+    "source_record_updated_at": "2026-03-20",
+    "current_source_record_hash": "dd9472043ff79fb55277fe616fe2363fd909983f158c8fdd7e40d4d7b4a3a181",
+    "current_source_record_version": "dd9472043ff7",
+    "is_stale": false,
+    "generated_at": "2026-05-28T00:00:00Z"
   }
 ]

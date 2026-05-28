@@ -1,4 +1,4 @@
-﻿const state = {
+const state = {
   patients: [],
   selectedPatientId: null,
   mode: "fast",
@@ -160,7 +160,14 @@ function renderJourney(journey) {
         <p class="eyebrow">Holistic Patient View</p>
         <h3>${escapeHtml(journey.current_focus || "Clinical journey")}</h3>
       </div>
-      <span class="status-pill muted-pill">${escapeHtml(journey.generated_by || "stored")}</span>
+      <div class="journey-status-stack">
+        <span class="status-pill ${journey.is_stale ? "offline" : "ready"}">${journey.is_stale ? "Stale" : "Current"}</span>
+        <span class="status-pill muted-pill">${escapeHtml(journey.generated_by || "stored")}</span>
+      </div>
+    </div>
+    <div class="journey-meta-line">
+      <span>Generated: ${escapeHtml(journey.generated_at || "unknown")}</span>
+      <span>Record: ${escapeHtml(journey.source_record_version || "unknown")}</span>
     </div>
     <p>${escapeHtml(journey.summary)}</p>
     ${renderGroundedClaims(journey.claims)}

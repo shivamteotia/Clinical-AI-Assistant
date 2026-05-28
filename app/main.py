@@ -5,7 +5,8 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from app.api.his import get_patient, get_patient_record, list_patients
+from app.api.canonical_his import get_canonical_patient_record
+from app.api.his import get_patient, list_patients
 from app.rag.answering import answer_question
 from app.rag.chunking import load_patient_chunks
 from app.rag.loaders import load_patient_documents, serialize_documents
@@ -74,7 +75,7 @@ def patient(patient_id: str) -> dict:
 
 @app.get("/patients/{patient_id}/record")
 def patient_record(patient_id: str) -> dict:
-    result = get_patient_record(patient_id)
+    result = get_canonical_patient_record(patient_id)
     if result is None:
         raise HTTPException(status_code=404, detail="Patient not found")
     return result

@@ -1,11 +1,13 @@
 import json
 import time
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-from app.api.his import get_patient_record, list_patients
+from app.api.canonical_his import get_canonical_patient_record
+from app.api.his import list_patients
 from app.rag.config import get_patient_journey_llm_settings
 from app.rag.safety import SAFETY_NOTICE
 
@@ -69,13 +71,13 @@ def upsert_patient_journey(journey: dict) -> None:
 
 
 def get_patient_journey(patient_id: str) -> dict | None:
-    record = get_patient_record(patient_id)
+    record = get_canonical_patient_record(patient_id)
     if record is None:
         return None
 
     journeys = load_patient_journeys()
     journey = journeys.get(patient_id) or build_patient_journey(record, generated_by="local_fallback")
-    return _with_grounded_claims(journey, record)
+    return _finalize_journey(journey, record)
 
 
 def inspect_patient_journey_pipeline(
@@ -83,7 +85,7 @@ def inspect_patient_journey_pipeline(
     provider: str | None = None,
     model: str | None = None,
 ) -> dict | None:
-    record = get_patient_record(patient_id)
+    record = get_canonical_patient_record(patient_id)
     if record is None:
         return None
 
@@ -94,7 +96,7 @@ def inspect_patient_journey_pipeline(
     stored_journey = load_patient_journeys().get(patient_id)
     formatted_prompt = _format_record_for_llm(record)
     llm_payload = build_journey_llm_payload(record, resolved_provider, resolved_model)
-    endpoint_output = _with_grounded_claims(
+    endpoint_output = _finalize_journey(
         stored_journey or build_patient_journey(record, generated_by="local_fallback"),
         record,
     )
@@ -148,7 +150,7 @@ def inspect_patient_journey_pipeline(
                 "Stored Journey JSON",
                 "app.rag.patient_journey.load_patient_journeys",
                 {"patient_id": patient_id},
-                _with_grounded_claims(stored_journey, record) if stored_journey else {},
+                _finalize_journey(stored_journey, record) if stored_journey else {},
                 "Precomputed journey currently stored for the doctor page.",
             ),
             _inspection_stage(
@@ -169,7 +171,7 @@ def generate_and_store_patient_journey(
     provider: str | None = None,
     require_llm: bool = False,
 ) -> dict | None:
-    record = get_patient_record(patient_id)
+    record = get_canonical_patient_record(patient_id)
     if record is None:
         return None
 
@@ -194,7 +196,7 @@ def build_all_patient_journeys(
     journeys = []
     patients = list_patients()
     for index, patient in enumerate(patients):
-        record = get_patient_record(patient["patient_id"])
+        record = get_canonical_patient_record(patient["patient_id"])
         if record is None:
             continue
         journeys.append(
@@ -238,15 +240,26 @@ def build_patient_journey(
 
     patient = record["patient"]
     latest_encounter = record["encounters"][0] if record["encounters"] else None
+    source_metadata = record.get("record_metadata", {})
+    generated_at = datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     return {
         "patient_id": patient["patient_id"],
         "patient_name": patient["name"],
+        "generated_at": generated_at,
         "generated_by": generated_by,
         "journey_model": model if generated_by != "local_fallback" else None,
         "system_prompt": PATIENT_JOURNEY_SYSTEM_PROMPT if generated_by != "local_fallback" else None,
         "llm_error": llm_error,
         "summary": llm_summary,
         "claims": _normalize_claims(claims, record, llm_summary),
+        "source_system": source_metadata.get("source_system"),
+        "source_record_id": source_metadata.get("source_record_id"),
+        "source_record_hash": source_metadata.get("record_hash"),
+        "source_record_version": source_metadata.get("record_version"),
+        "source_record_updated_at": source_metadata.get("last_updated"),
+        "current_source_record_hash": source_metadata.get("record_hash"),
+        "current_source_record_version": source_metadata.get("record_version"),
+        "is_stale": False,
         "timeline": _timeline(record),
         "current_focus": _current_focus(latest_encounter),
         "key_labs": _key_labs(record),
@@ -483,6 +496,28 @@ def _extract_json_object(text: str) -> str:
     if start != -1 and end != -1 and end > start:
         return text[start:end + 1]
     return text
+
+
+def _finalize_journey(journey: dict | None, record: dict) -> dict | None:
+    grounded = _with_grounded_claims(journey, record)
+    if grounded is None:
+        return None
+    return _with_record_freshness(grounded, record)
+
+
+def _with_record_freshness(journey: dict, record: dict) -> dict:
+    metadata = record.get("record_metadata", {})
+    current_hash = metadata.get("record_hash")
+    current_version = metadata.get("record_version")
+    source_hash = journey.get("source_record_hash")
+    augmented = dict(journey)
+    augmented.setdefault("source_system", metadata.get("source_system"))
+    augmented.setdefault("source_record_id", metadata.get("source_record_id"))
+    augmented.setdefault("source_record_updated_at", metadata.get("last_updated"))
+    augmented["current_source_record_hash"] = current_hash
+    augmented["current_source_record_version"] = current_version
+    augmented["is_stale"] = source_hash != current_hash
+    return augmented
 
 
 def _with_grounded_claims(journey: dict | None, record: dict) -> dict | None:

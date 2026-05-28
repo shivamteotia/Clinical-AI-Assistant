@@ -42,6 +42,8 @@ class ApiTests(unittest.TestCase):
         self.assertTrue(record["labs"])
         self.assertTrue(record["medications"])
         self.assertTrue(record["clinical_notes"])
+        self.assertEqual(record["record_metadata"]["source_system"], "dummy_his")
+        self.assertIn("record_hash", record["record_metadata"])
 
     def test_patient_journey_endpoint_returns_summary(self) -> None:
         response = self.client.get("/patients/P001/journey")
@@ -52,6 +54,9 @@ class ApiTests(unittest.TestCase):
         self.assertIn("summary", journey)
         self.assertIn("claims", journey)
         self.assertTrue(journey["claims"])
+        self.assertFalse(journey["is_stale"])
+        self.assertEqual(journey["source_record_hash"], journey["current_source_record_hash"])
+        self.assertIn("generated_at", journey)
         self.assertTrue(journey["timeline"])
 
     def test_patient_journey_inspection_endpoint_returns_pipeline_stages(self) -> None:

@@ -192,6 +192,8 @@ To generate with local Ollama instead:
 python scripts\generate_patient_journeys.py --ollama --model phi3
 ```
 
+Patient records are exposed through a canonical dummy HIS adapter. `GET /patients/{patient_id}/record` includes `record_metadata` with `source_system`, `source_record_id`, `record_hash`, `record_version`, and `last_updated`. Journey responses store the source record hash and return `is_stale` by comparing the stored hash with the current canonical record hash.
+
 The app reads `data\patient_journeys.json` when a doctor selects a patient from the dropdown. This keeps the doctor-facing page fast: patient selection renders the stored holistic view immediately instead of waiting for an LLM call. Journey responses include source-grounded `claims`, so each summary sentence can show the HIS row, encounter, lab, medication, or note IDs that support it. `POST /patients/{patient_id}/journey/generate` remains available for admin/background refresh workflows, not as a normal doctor interaction. Use `--require-llm` for production-style generation so local fallback summaries are not saved by accident.
 
 Inspect the internal journey pipeline for one patient without calling the LLM:
