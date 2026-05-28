@@ -1,4 +1,5 @@
 # Clinical AI System - V1 Local HIS
+<img width="1868" height="873" alt="image" src="https://github.com/user-attachments/assets/7ab172f1-11d8-467e-a60d-543ce200f541" />
 
 This is the first local prototype for the Clinical AI pipeline.
 
