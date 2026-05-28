@@ -16,6 +16,13 @@ DATA_DIR = BASE_DIR / "data"
 JOURNEY_PATH = DATA_DIR / "patient_journeys.json"
 DEFAULT_JOURNEY_MODEL = "phi3"
 DEFAULT_GROQ_MODEL = "llama-3.3-70b-versatile"
+CONTEXT_STRATEGY = "canonical_patient_context.v1"
+MAX_CONTEXT_ITEMS = {
+    "encounters": 5,
+    "labs": 8,
+    "medications": 8,
+    "clinical_notes": 5,
+}
 PATIENT_JOURNEY_SYSTEM_PROMPT = """
 You are a clinical documentation assistant inside a prototype clinical AI system.
 
@@ -94,6 +101,7 @@ def inspect_patient_journey_pipeline(
     resolved_model = model or settings.model
     patient = record["patient"]
     stored_journey = load_patient_journeys().get(patient_id)
+    context_packet = build_patient_journey_context(record)
     formatted_prompt = _format_record_for_llm(record)
     llm_payload = build_journey_llm_payload(record, resolved_provider, resolved_model)
     endpoint_output = _finalize_journey(
@@ -129,11 +137,18 @@ def inspect_patient_journey_pipeline(
                 "Instruction sent as the LLM system message.",
             ),
             _inspection_stage(
+                "Packed LLM Context",
+                "app.rag.patient_journey.build_patient_journey_context",
+                {"record": _shape_of(record)},
+                context_packet,
+                "Controlled clinical packet sent to the journey-generation LLM.",
+            ),
+            _inspection_stage(
                 "Formatted User Prompt",
                 "app.rag.patient_journey._format_record_for_llm",
-                {"record": _shape_of(record)},
+                {"context_packet": _shape_of(context_packet)},
                 formatted_prompt,
-                "HIS record JSON converted into the LLM user message.",
+                "Context packet serialized into the LLM user message.",
             ),
             _inspection_stage(
                 "LLM Request Payload",
@@ -252,6 +267,8 @@ def build_patient_journey(
         "llm_error": llm_error,
         "summary": llm_summary,
         "claims": _normalize_claims(claims, record, llm_summary),
+        "context_strategy": CONTEXT_STRATEGY,
+        "context_metadata": build_patient_journey_context(record)["context_metadata"],
         "source_system": source_metadata.get("source_system"),
         "source_record_id": source_metadata.get("source_record_id"),
         "source_record_hash": source_metadata.get("record_hash"),
@@ -455,11 +472,63 @@ def _shape_of(value) -> str:
     return type(value).__name__
 
 
+def build_patient_journey_context(record: dict) -> dict:
+    packet = {
+        "context_strategy": CONTEXT_STRATEGY,
+        "patient": record["patient"],
+        "record_metadata": record.get("record_metadata", {}),
+        "encounters": _limit_context_items(record.get("encounters", []), "encounters"),
+        "labs": _limit_context_items(record.get("labs", []), "labs"),
+        "medications": _limit_context_items(record.get("medications", []), "medications"),
+        "clinical_notes": _limit_context_items(record.get("clinical_notes", []), "clinical_notes"),
+    }
+    packet["context_metadata"] = _context_metadata(record, packet)
+    return packet
+
+
+def _limit_context_items(items: list[dict], section: str) -> list[dict]:
+    return items[:MAX_CONTEXT_ITEMS[section]]
+
+
+def _context_metadata(record: dict, packet: dict) -> dict:
+    included_counts = {
+        "encounters": len(packet["encounters"]),
+        "labs": len(packet["labs"]),
+        "medications": len(packet["medications"]),
+        "clinical_notes": len(packet["clinical_notes"]),
+    }
+    total_counts = {
+        "encounters": len(record.get("encounters", [])),
+        "labs": len(record.get("labs", [])),
+        "medications": len(record.get("medications", [])),
+        "clinical_notes": len(record.get("clinical_notes", [])),
+    }
+    omitted_counts = {
+        section: max(total_counts[section] - included_counts[section], 0)
+        for section in total_counts
+    }
+    payload_without_metadata = {key: value for key, value in packet.items() if key != "context_metadata"}
+    serialized = json.dumps(payload_without_metadata, ensure_ascii=True, indent=2)
+    return {
+        "included_counts": included_counts,
+        "total_counts": total_counts,
+        "omitted_counts": omitted_counts,
+        "input_char_count": len(serialized),
+        "estimated_input_tokens": estimate_tokens(serialized),
+        "reserved_output_tokens": 550,
+    }
+
+
+def estimate_tokens(text: str) -> int:
+    return max(1, (len(text) + 3) // 4)
+
+
 def _format_record_for_llm(record: dict) -> str:
+    context_packet = build_patient_journey_context(record)
     return "\n".join(
         [
-            "Patient record JSON:",
-            json.dumps(record, ensure_ascii=True, indent=2),
+            "Patient journey context packet JSON:",
+            json.dumps(context_packet, ensure_ascii=True, indent=2),
         ]
     )
 

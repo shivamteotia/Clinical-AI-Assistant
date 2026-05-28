@@ -69,7 +69,8 @@ class ApiTests(unittest.TestCase):
         self.assertGreaterEqual(len(inspection["stages"]), 7)
         self.assertEqual(inspection["stages"][0]["title"], "HIS Patient Row")
         self.assertEqual(inspection["stages"][1]["title"], "HIS Full Record")
-        self.assertEqual(inspection["stages"][4]["title"], "LLM Request Payload")
+        self.assertEqual(inspection["stages"][3]["title"], "Packed LLM Context")
+        self.assertEqual(inspection["stages"][5]["title"], "LLM Request Payload")
 
     def test_patient_journey_generation_endpoint_stores_summary(self) -> None:
         original_journeys = JOURNEY_PATH.read_bytes() if JOURNEY_PATH.exists() else None

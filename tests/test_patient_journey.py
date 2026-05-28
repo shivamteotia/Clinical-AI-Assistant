@@ -9,6 +9,7 @@ from app.rag.patient_journey import (
     PATIENT_JOURNEY_SYSTEM_PROMPT,
     build_all_patient_journeys,
     build_groq_journey_payload,
+    build_patient_journey_context,
     build_patient_journey,
     get_patient_journey,
 )
@@ -108,6 +109,53 @@ class PatientJourneyTests(unittest.TestCase):
         finally:
             patient_journey._try_llm_summary = original
 
+    def test_context_packer_tracks_included_and_omitted_items(self) -> None:
+        record = {
+            "patient": {"patient_id": "PX01", "name": "Test Patient"},
+            "record_metadata": {"record_hash": "abc", "record_version": "abc"},
+            "encounters": [
+                {
+                    "encounter_id": f"EX{index}",
+                    "date": f"2026-01-{index:02d}",
+                    "visit_type": "Follow-up",
+                    "chief_complaint": "Review",
+                    "diagnosis": "Test diagnosis",
+                }
+                for index in range(1, 8)
+            ],
+            "labs": [
+                {
+                    "lab_id": f"LX{index}",
+                    "date": f"2026-01-{index:02d}",
+                    "test_name": "Hemoglobin",
+                    "value": str(index),
+                    "unit": "g/dL",
+                    "reference_range": "12-16",
+                }
+                for index in range(1, 11)
+            ],
+            "medications": [],
+            "clinical_notes": [
+                {
+                    "note_id": f"NX{index}",
+                    "date": f"2026-01-{index:02d}",
+                    "note_type": "Progress note",
+                    "note_text": "Synthetic note.",
+                }
+                for index in range(1, 8)
+            ],
+        }
+
+        context = build_patient_journey_context(record)
+        metadata = context["context_metadata"]
+
+        self.assertEqual(context["context_strategy"], "canonical_patient_context.v1")
+        self.assertEqual(metadata["included_counts"]["encounters"], 5)
+        self.assertEqual(metadata["included_counts"]["labs"], 8)
+        self.assertEqual(metadata["included_counts"]["clinical_notes"], 5)
+        self.assertEqual(metadata["omitted_counts"]["encounters"], 2)
+        self.assertEqual(metadata["omitted_counts"]["labs"], 2)
+        self.assertGreater(metadata["estimated_input_tokens"], 0)
     def test_groq_summary_uses_chat_completions_payload(self) -> None:
         captured = {}
 
@@ -179,6 +227,7 @@ class PatientJourneyTests(unittest.TestCase):
         self.assertEqual(payload["max_tokens"], 550)
         self.assertEqual(payload["messages"][0]["content"], PATIENT_JOURNEY_SYSTEM_PROMPT)
         self.assertIn("Return only valid JSON", payload["messages"][0]["content"])
+        self.assertIn("Patient journey context packet JSON", payload["messages"][1]["content"])
         self.assertIn('"patient_id": "PX01"', payload["messages"][1]["content"])
 
     def test_plain_journey_gets_fallback_source_grounding(self) -> None:

@@ -7,11 +7,13 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BASE_DIR))
 
-from app.api.his import get_patient, get_patient_record
+from app.api.canonical_his import get_canonical_patient_record
+from app.api.his import get_patient
 from app.rag.config import get_patient_journey_llm_settings
 from app.rag.patient_journey import (
     PATIENT_JOURNEY_SYSTEM_PROMPT,
     build_journey_llm_payload,
+    build_patient_journey_context,
     build_patient_journey,
     get_patient_journey,
     load_patient_journeys,
@@ -51,7 +53,7 @@ def main() -> None:
     if patient is None:
         raise SystemExit(f"Patient not found: {patient_id}")
 
-    record = get_patient_record(patient_id)
+    record = get_canonical_patient_record(patient_id)
     stored_journeys = load_patient_journeys()
     stored_journey = stored_journeys.get(patient_id)
 
@@ -80,19 +82,29 @@ def main() -> None:
         note="This is the system instruction sent to the journey-generation LLM.",
     )
 
-    user_prompt = _format_record_for_llm(record)
+    context_packet = build_patient_journey_context(record)
     print_stage(
         4,
+        "Packed LLM Context",
+        context_packet,
+        source="app.rag.patient_journey.build_patient_journey_context",
+        input_value={"record": shape_of(record)},
+        note="Controlled clinical packet sent to the journey-generation LLM.",
+    )
+
+    user_prompt = _format_record_for_llm(record)
+    print_stage(
+        5,
         "Formatted User Prompt",
         user_prompt,
         source="app.rag.patient_journey._format_record_for_llm",
-        input_value={"record": shape_of(record)},
-        note="This string contains the HIS record JSON that becomes the LLM user message.",
+        input_value={"context_packet": shape_of(context_packet)},
+        note="Context packet serialized into the LLM user message.",
     )
 
     llm_payload = build_llm_payload(provider, model, record)
     print_stage(
-        5,
+        6,
         "LLM Request Payload",
         redact(llm_payload),
         source="scripts.inspect_patient_journey_pipeline.build_llm_payload",
@@ -103,7 +115,7 @@ def main() -> None:
     if args.call_llm:
         llm_result = _try_llm_summary(record, model=model, provider=provider)
         print_stage(
-            6,
+            7,
             "LLM Raw Summary Result",
             dataclass_to_dict(llm_result),
             source="app.rag.patient_journey._try_llm_summary",
@@ -120,7 +132,7 @@ def main() -> None:
     else:
         fallback_summary = _fallback_summary(record)
         print_stage(
-            6,
+            7,
             "LLM Raw Summary Result",
             {
                 "dry_run": True,
@@ -136,7 +148,7 @@ def main() -> None:
         generated_journey = build_patient_journey(record, use_llm=False)
 
     print_stage(
-        7,
+        8,
         "Journey Object Built By App",
         generated_journey,
         source="app.rag.patient_journey.build_patient_journey",
@@ -144,7 +156,7 @@ def main() -> None:
         note="This is the app's normalized journey JSON shape before/without persistence.",
     )
     print_stage(
-        8,
+        9,
         "Stored Journey From data/patient_journeys.json",
         stored_journey or {},
         source="app.rag.patient_journey.load_patient_journeys",
@@ -152,7 +164,7 @@ def main() -> None:
         note="This is what the doctor page currently renders for the selected patient.",
     )
     print_stage(
-        9,
+        10,
         "Doctor UI Endpoint Output",
         get_patient_journey(patient_id),
         source=f"GET /patients/{patient_id}/journey",
