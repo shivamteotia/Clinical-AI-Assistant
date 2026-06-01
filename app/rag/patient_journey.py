@@ -9,6 +9,7 @@ from urllib.request import Request, urlopen
 from app.api.canonical_his import get_canonical_patient_record
 from app.api.his import list_patients
 from app.rag.config import get_patient_journey_llm_settings
+from app.rag.episodes import EPISODE_STRATEGY, build_patient_episodes, compact_episode_timeline
 from app.rag.safety import SAFETY_NOTICE
 
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -16,8 +17,9 @@ DATA_DIR = BASE_DIR / "data"
 JOURNEY_PATH = DATA_DIR / "patient_journeys.json"
 DEFAULT_JOURNEY_MODEL = "phi3"
 DEFAULT_GROQ_MODEL = "llama-3.3-70b-versatile"
-CONTEXT_STRATEGY = "canonical_patient_context.v1"
+CONTEXT_STRATEGY = "episodic_patient_context.v1"
 MAX_CONTEXT_ITEMS = {
+    "episodes": 5,
     "encounters": 5,
     "labs": 8,
     "medications": 8,
@@ -39,7 +41,7 @@ Rules:
 - Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.
 - Return only valid JSON with this shape:
   {"summary":"one paragraph","claims":[{"sentence":"one sentence from the summary","sources":["patient:P001","encounter:E001"]}]}
-- Every claim source must use IDs from the supplied record: patient:{patient_id}, encounter:{encounter_id}, lab:{lab_id}, medication:{medication_id}, note:{note_id}.
+- Every claim source must use IDs from the supplied record: patient:{patient_id}, episode:{episode_id}, encounter:{encounter_id}, lab:{lab_id}, medication:{medication_id}, note:{note_id}.
 """.strip()
 
 
@@ -101,6 +103,7 @@ def inspect_patient_journey_pipeline(
     resolved_model = model or settings.model
     patient = record["patient"]
     stored_journey = load_patient_journeys().get(patient_id)
+    episode_packet = build_patient_episodes(record)
     context_packet = build_patient_journey_context(record)
     formatted_prompt = _format_record_for_llm(record)
     llm_payload = build_journey_llm_payload(record, resolved_provider, resolved_model)
@@ -130,6 +133,13 @@ def inspect_patient_journey_pipeline(
                 "Structured patient data plus unstructured clinical note text.",
             ),
             _inspection_stage(
+                "Episode Builder Output",
+                "app.rag.episodes.build_patient_episodes",
+                {"record": _shape_of(record)},
+                episode_packet,
+                "Chronological clinical episodes built from encounters, labs, medications, and notes.",
+            ),
+            _inspection_stage(
                 "System Prompt",
                 "app.rag.patient_journey.PATIENT_JOURNEY_SYSTEM_PROMPT",
                 None,
@@ -137,11 +147,11 @@ def inspect_patient_journey_pipeline(
                 "Instruction sent as the LLM system message.",
             ),
             _inspection_stage(
-                "Packed LLM Context",
+                "Episode-Packed LLM Context",
                 "app.rag.patient_journey.build_patient_journey_context",
-                {"record": _shape_of(record)},
+                {"record": _shape_of(record), "episode_packet": _shape_of(episode_packet)},
                 context_packet,
-                "Controlled clinical packet sent to the journey-generation LLM.",
+                "Episode-organized clinical packet sent to the journey-generation LLM.",
             ),
             _inspection_stage(
                 "Formatted User Prompt",
@@ -473,16 +483,16 @@ def _shape_of(value) -> str:
 
 
 def build_patient_journey_context(record: dict) -> dict:
+    episode_packet = build_patient_episodes(record)
     packet = {
         "context_strategy": CONTEXT_STRATEGY,
+        "episode_strategy": EPISODE_STRATEGY,
         "patient": record["patient"],
         "record_metadata": record.get("record_metadata", {}),
-        "encounters": _limit_context_items(record.get("encounters", []), "encounters"),
-        "labs": _limit_context_items(record.get("labs", []), "labs"),
-        "medications": _limit_context_items(record.get("medications", []), "medications"),
-        "clinical_notes": _limit_context_items(record.get("clinical_notes", []), "clinical_notes"),
+        "episodes": _limit_context_items(episode_packet["episodes"], "episodes"),
+        "episode_timeline": compact_episode_timeline(record),
     }
-    packet["context_metadata"] = _context_metadata(record, packet)
+    packet["context_metadata"] = _context_metadata(record, packet, episode_packet)
     return packet
 
 
@@ -490,14 +500,16 @@ def _limit_context_items(items: list[dict], section: str) -> list[dict]:
     return items[:MAX_CONTEXT_ITEMS[section]]
 
 
-def _context_metadata(record: dict, packet: dict) -> dict:
+def _context_metadata(record: dict, packet: dict, episode_packet: dict) -> dict:
     included_counts = {
-        "encounters": len(packet["encounters"]),
-        "labs": len(packet["labs"]),
-        "medications": len(packet["medications"]),
-        "clinical_notes": len(packet["clinical_notes"]),
+        "episodes": len(packet["episodes"]),
+        "encounters": sum(len(episode["encounters"]) for episode in packet["episodes"]),
+        "labs": sum(len(episode["labs"]) for episode in packet["episodes"]),
+        "medications": sum(len(episode["medications"]) for episode in packet["episodes"]),
+        "clinical_notes": sum(len(episode["clinical_notes"]) for episode in packet["episodes"]),
     }
     total_counts = {
+        "episodes": episode_packet["episode_count"],
         "encounters": len(record.get("encounters", [])),
         "labs": len(record.get("labs", [])),
         "medications": len(record.get("medications", [])),
@@ -712,6 +724,7 @@ def _infer_sources_for_sentence(record: dict, sentence: str) -> list[str]:
 
 def _source_catalog(record: dict) -> set[str]:
     sources = {f"patient:{record['patient']['patient_id']}"}
+    sources.update(f"episode:{episode['episode_id']}" for episode in build_patient_episodes(record)["episodes"])
     sources.update(f"encounter:{row['encounter_id']}" for row in record["encounters"])
     sources.update(f"lab:{row['lab_id']}" for row in record["labs"])
     sources.update(f"medication:{row['medication_id']}" for row in record["medications"])

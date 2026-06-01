@@ -68,6 +68,26 @@ http://127.0.0.1:8000/docs
 - `POST /rag/search`
 - `POST /rag/ask`
 - `POST /rag/ask-llm`
+- `GET /audit/events`
+
+
+## Audit Logging
+
+The API writes append-only audit events to `data\audit_logs.jsonl` for the main clinical and AI workflow actions:
+
+- patient record viewed
+- patient journey viewed or regenerated
+- journey inspection opened
+- vector index rebuilt
+- RAG search or answer requested
+
+Audit events include actor, timestamp, patient ID when relevant, and safe metadata such as model name, stale/current status, record version, result counts, and section counts. They intentionally do not store raw clinical notes, prompts, API keys, summaries, or generated answers. For local testing, override the log path with `CLINICAL_AI_AUDIT_LOG_PATH`.
+
+Inspect recent audit events:
+
+```powershell
+Invoke-RestMethod "http://127.0.0.1:8000/audit/events?limit=50"
+```
 
 ## Load Patient Data For RAG
 
@@ -195,7 +215,7 @@ python scripts\generate_patient_journeys.py --ollama --model phi3
 
 Patient records are exposed through a canonical dummy HIS adapter. `GET /patients/{patient_id}/record` includes `record_metadata` with `source_system`, `source_record_id`, `record_hash`, `record_version`, and `last_updated`. Journey responses store the source record hash and return `is_stale` by comparing the stored hash with the current canonical record hash.
 
-Journey generation uses a context packer before calling the LLM. The packer emits `context_strategy`, included/total/omitted section counts, input character count, estimated input tokens, and reserved output tokens so context-window usage is visible in `/inspect` and stored journey metadata.
+Journey generation uses an episode-aware context packer before calling the LLM. The episode builder groups each patient record into chronological episodes from encounter dates, then attaches same-date labs, medication starts, and clinical notes. The packed context uses `episodic_patient_context.v1` plus `encounter_date_episodes.v1`, and emits included/total/omitted counts, input character count, estimated input tokens, and reserved output tokens so context-window usage is visible in `/inspect` and stored journey metadata.
 
 The app reads `data\patient_journeys.json` when a doctor selects a patient from the dropdown. This keeps the doctor-facing page fast: patient selection renders the stored holistic view immediately instead of waiting for an LLM call. Journey responses include source-grounded `claims`, so each summary sentence can show the HIS row, encounter, lab, medication, or note IDs that support it. `POST /patients/{patient_id}/journey/generate` remains available for admin/background refresh workflows, not as a normal doctor interaction. Use `--require-llm` for production-style generation so local fallback summaries are not saved by accident.
 
@@ -205,7 +225,7 @@ Inspect the internal journey pipeline for one patient without calling the LLM:
 python scripts\inspect_patient_journey_pipeline.py P006
 ```
 
-This prints each step's source function or endpoint, input, output type, output shape, and data. To also inspect the live provider response without saving anything:
+This prints each step's source function or endpoint, input, output type, output shape, and data, including the episode-builder output before the LLM context is packed. To also inspect the live provider response without saving anything:
 
 ```powershell
 python scripts\inspect_patient_journey_pipeline.py P006 --call-llm

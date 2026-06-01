@@ -6,3 +6,4 @@ __pycache__/
 chroma_db/
 his.db
 vector_store.db
+data/audit_logs.jsonl

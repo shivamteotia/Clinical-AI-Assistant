@@ -149,12 +149,16 @@ class PatientJourneyTests(unittest.TestCase):
         context = build_patient_journey_context(record)
         metadata = context["context_metadata"]
 
-        self.assertEqual(context["context_strategy"], "canonical_patient_context.v1")
+        self.assertEqual(context["context_strategy"], "episodic_patient_context.v1")
+        self.assertEqual(context["episode_strategy"], "encounter_date_episodes.v1")
+        self.assertIn("episodes", context)
+        self.assertEqual(metadata["included_counts"]["episodes"], 5)
         self.assertEqual(metadata["included_counts"]["encounters"], 5)
-        self.assertEqual(metadata["included_counts"]["labs"], 8)
+        self.assertEqual(metadata["included_counts"]["labs"], 5)
         self.assertEqual(metadata["included_counts"]["clinical_notes"], 5)
+        self.assertEqual(metadata["omitted_counts"]["episodes"], 5)
         self.assertEqual(metadata["omitted_counts"]["encounters"], 2)
-        self.assertEqual(metadata["omitted_counts"]["labs"], 2)
+        self.assertEqual(metadata["omitted_counts"]["labs"], 5)
         self.assertGreater(metadata["estimated_input_tokens"], 0)
     def test_groq_summary_uses_chat_completions_payload(self) -> None:
         captured = {}
