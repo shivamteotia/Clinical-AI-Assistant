@@ -1,6 +1,7 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -15,6 +16,12 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = PROJECT_ROOT / "data"
 QUEUE_PATH = DATA_DIR / "journey_refresh_queue.jsonl"
 
+
+def get_refresh_queue_path() -> Path:
+    configured_path = os.getenv("CLINICAL_AI_JOURNEY_REFRESH_QUEUE_PATH")
+    if configured_path:
+        return Path(configured_path)
+    return QUEUE_PATH
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
@@ -37,8 +44,9 @@ def append_refresh_queue_event(
         "created_at": utc_now(),
         "metadata": metadata or {},
     }
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
-    with QUEUE_PATH.open("a", encoding="utf-8") as file:
+    queue_path = get_refresh_queue_path()
+    queue_path.parent.mkdir(parents=True, exist_ok=True)
+    with queue_path.open("a", encoding="utf-8") as file:
         file.write(json.dumps(event, sort_keys=True) + "\n")
     return event
 
@@ -213,3 +221,4 @@ def refresh_stale_patient_journeys(
         "refreshed": refreshed,
         "failed": failed,
     }
+

@@ -1,12 +1,12 @@
+﻿import os
+import tempfile
 import unittest
-import os
 from contextlib import redirect_stdout
 from io import StringIO
 
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.rag.patient_journey import JOURNEY_PATH
 from scripts.seed_data import main as seed_data
 
 
@@ -17,6 +17,12 @@ class ApiTests(unittest.TestCase):
         with redirect_stdout(StringIO()):
             seed_data()
         cls.client = TestClient(app)
+
+    def test_admin_frontend_serves_html(self) -> None:
+        response = self.client.get("/admin")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Admin Console", response.text)
 
     def test_health_endpoint(self) -> None:
         response = self.client.get("/health")
@@ -74,17 +80,15 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(inspection["stages"][6]["title"], "LLM Request Payload")
 
     def test_patient_journey_generation_endpoint_stores_summary(self) -> None:
-        original_journeys = JOURNEY_PATH.read_bytes() if JOURNEY_PATH.exists() else None
-        try:
-            response = self.client.post(
-                "/patients/P001/journey/generate",
-                json={"use_llm": False, "model": "phi3", "require_llm": False},
-            )
-        finally:
-            if original_journeys is None:
-                JOURNEY_PATH.unlink(missing_ok=True)
-            else:
-                JOURNEY_PATH.write_bytes(original_journeys)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            os.environ["CLINICAL_AI_JOURNEY_PATH"] = os.path.join(temp_dir, "patient_journeys.json")
+            try:
+                response = self.client.post(
+                    "/patients/P001/journey/generate",
+                    json={"use_llm": False, "model": "phi3", "require_llm": False},
+                )
+            finally:
+                os.environ.pop("CLINICAL_AI_JOURNEY_PATH", None)
 
         self.assertEqual(response.status_code, 200)
         journey = response.json()

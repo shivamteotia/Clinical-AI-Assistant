@@ -1,4 +1,4 @@
-from pathlib import Path
+﻿from pathlib import Path
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, Request
 from fastapi.responses import FileResponse
@@ -7,7 +7,9 @@ from pydantic import BaseModel, Field
 
 from app.api.canonical_his import get_canonical_patient_record
 from app.api.his import get_patient, list_patients
+from app.auth import actor_from_request, get_auth_settings, require_admin, require_doctor
 from app.audit import read_audit_events, write_audit_event
+from app.rag.config import get_patient_journey_llm_settings, get_vector_store_settings
 from app.rag.answering import answer_question
 from app.rag.chunking import load_patient_chunks
 from app.rag.loaders import load_patient_documents, serialize_documents
@@ -47,16 +49,13 @@ class JourneyGenerationRequest(BaseModel):
     provider: str | None = None
     require_llm: bool = False
 
+
 class JourneyRefreshRequest(BaseModel):
     use_llm: bool = True
     model: str | None = Field(default=None, min_length=1)
     provider: str | None = None
     require_llm: bool = False
     background: bool = False
-
-
-def _actor_from_request(request: Request) -> str:
-    return request.headers.get("x-user-id") or "local_doctor"
 
 
 @app.get("/")
@@ -69,13 +68,60 @@ def inspector_frontend() -> FileResponse:
     return FileResponse(STATIC_DIR / "inspect.html")
 
 
+@app.get("/admin")
+def admin_frontend() -> FileResponse:
+    return FileResponse(STATIC_DIR / "admin.html")
+
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
+@app.get("/admin/status")
+def admin_status(request: Request) -> dict:
+    require_admin(request)
+    auth_settings = get_auth_settings()
+    vector_settings = get_vector_store_settings()
+    journey_llm_settings = get_patient_journey_llm_settings()
+    vector_status = vector_store_status()
+    stale = list_stale_patient_journeys()
+    recent_runs = read_journey_runs(limit=25)
+    recent_audit_events = read_audit_events(limit=25)
+    return {
+        "auth": {
+            "enabled": auth_settings.enabled,
+            "doctor_key_configured": bool(auth_settings.doctor_api_key),
+            "admin_key_configured": bool(auth_settings.admin_api_key),
+        },
+        "vector_store": {
+            "configured_provider": vector_settings.provider,
+            "active_provider": vector_status.get("provider"),
+            "status": vector_status.get("status"),
+            "connected": vector_status.get("connected"),
+            "collection": vector_status.get("collection") or vector_settings.qdrant_collection,
+            "chunk_count": vector_status.get("chunk_count"),
+            "qdrant_url_configured": bool(vector_settings.qdrant_url),
+            "qdrant_api_key_configured": bool(vector_settings.qdrant_api_key),
+        },
+        "journey_llm": {
+            "provider": journey_llm_settings.provider,
+            "model": journey_llm_settings.model,
+            "groq_api_key_configured": bool(journey_llm_settings.groq_api_key),
+        },
+        "journeys": {
+            "stale_count": len(stale),
+            "recent_run_count": len(recent_runs),
+            "latest_run_status": recent_runs[0].get("status") if recent_runs else None,
+            "latest_run_patient_id": recent_runs[0].get("patient_id") if recent_runs else None,
+        },
+        "audit": {
+            "recent_event_count": len(recent_audit_events),
+            "latest_event_type": recent_audit_events[0].get("event_type") if recent_audit_events else None,
+        },
+    }
 @app.get("/audit/events")
-def audit_events(limit: int = Query(default=100, ge=1, le=500)) -> list[dict]:
+def audit_events(request: Request, limit: int = Query(default=100, ge=1, le=500)) -> list[dict]:
+    require_admin(request)
     return read_audit_events(limit=limit)
 
 
@@ -84,40 +130,48 @@ def rag_status() -> dict:
     return vector_store_status()
 
 
-
-
 @app.get("/journeys/runs")
-def journey_runs(limit: int = Query(default=100, ge=1, le=500)) -> list[dict]:
+def journey_runs(request: Request, limit: int = Query(default=100, ge=1, le=500)) -> list[dict]:
+    require_admin(request)
     return read_journey_runs(limit=limit)
 
 
 @app.get("/patients/{patient_id}/journey/runs")
-def patient_journey_runs(patient_id: str, limit: int = Query(default=50, ge=1, le=500)) -> list[dict]:
+def patient_journey_runs(patient_id: str, request: Request, limit: int = Query(default=50, ge=1, le=500)) -> list[dict]:
+    require_admin(request)
     if get_patient(patient_id) is None:
         raise HTTPException(status_code=404, detail="Patient not found")
     return read_journey_runs(limit=limit, patient_id=patient_id)
+
+
 @app.get("/journeys/stale")
-def stale_journeys() -> dict:
+def stale_journeys(request: Request) -> dict:
+    require_admin(request)
     stale = list_stale_patient_journeys()
     return {"stale_count": len(stale), "stale": stale}
 
 
 @app.post("/journeys/refresh-stale")
 def refresh_stale_journeys(request: JourneyRefreshRequest, http_request: Request) -> dict:
+    require_admin(http_request)
     return refresh_stale_patient_journeys(
-        actor=_actor_from_request(http_request),
+        actor=actor_from_request(http_request),
         use_llm=request.use_llm,
         provider=request.provider,
         model=request.model,
         require_llm=request.require_llm,
     )
+
+
 @app.get("/patients")
-def patients() -> list[dict]:
+def patients(request: Request) -> list[dict]:
+    require_doctor(request)
     return list_patients()
 
 
 @app.get("/patients/{patient_id}")
-def patient(patient_id: str) -> dict:
+def patient(patient_id: str, request: Request) -> dict:
+    require_doctor(request)
     result = get_patient(patient_id)
     if result is None:
         raise HTTPException(status_code=404, detail="Patient not found")
@@ -126,13 +180,14 @@ def patient(patient_id: str) -> dict:
 
 @app.get("/patients/{patient_id}/record")
 def patient_record(patient_id: str, request: Request) -> dict:
+    require_doctor(request)
     result = get_canonical_patient_record(patient_id)
     if result is None:
         raise HTTPException(status_code=404, detail="Patient not found")
     metadata = result.get("record_metadata", {})
     write_audit_event(
         "patient_record_viewed",
-        actor=_actor_from_request(request),
+        actor=actor_from_request(request),
         patient_id=patient_id,
         metadata={
             "source_system": metadata.get("source_system"),
@@ -152,12 +207,13 @@ def patient_record(patient_id: str, request: Request) -> dict:
 
 @app.get("/patients/{patient_id}/journey")
 def patient_journey(patient_id: str, request: Request) -> dict:
+    require_doctor(request)
     result = get_patient_journey(patient_id)
     if result is None:
         raise HTTPException(status_code=404, detail="Patient not found")
     write_audit_event(
         "patient_journey_viewed",
-        actor=_actor_from_request(request),
+        actor=actor_from_request(request),
         patient_id=patient_id,
         metadata={
             "generated_by": result.get("generated_by"),
@@ -173,12 +229,13 @@ def patient_journey(patient_id: str, request: Request) -> dict:
 
 @app.get("/patients/{patient_id}/journey/inspect")
 def patient_journey_inspection(patient_id: str, request: Request) -> dict:
+    require_admin(request)
     result = inspect_patient_journey_pipeline(patient_id)
     if result is None:
         raise HTTPException(status_code=404, detail="Patient not found")
     write_audit_event(
         "patient_journey_pipeline_inspected",
-        actor=_actor_from_request(request),
+        actor=actor_from_request(request),
         patient_id=patient_id,
         metadata={"dry_run": result.get("dry_run"), "stage_count": len(result.get("stages", []))},
     )
@@ -191,6 +248,7 @@ def generate_patient_journey(
     request: JourneyGenerationRequest,
     http_request: Request,
 ) -> dict:
+    require_admin(http_request)
     result = generate_and_store_patient_journey(
         patient_id,
         use_llm=request.use_llm,
@@ -202,7 +260,7 @@ def generate_patient_journey(
         raise HTTPException(status_code=404, detail="Patient not found")
     write_audit_event(
         "patient_journey_regenerated",
-        actor=_actor_from_request(http_request),
+        actor=actor_from_request(http_request),
         patient_id=patient_id,
         metadata={
             "requested_provider": request.provider,
@@ -216,7 +274,6 @@ def generate_patient_journey(
     return result
 
 
-
 @app.post("/patients/{patient_id}/journey/refresh")
 def refresh_patient_journey_endpoint(
     patient_id: str,
@@ -224,7 +281,8 @@ def refresh_patient_journey_endpoint(
     http_request: Request,
     background_tasks: BackgroundTasks,
 ) -> dict:
-    actor = _actor_from_request(http_request)
+    require_admin(http_request)
+    actor = actor_from_request(http_request)
     if request.background:
         queued = queue_patient_journey_refresh(
             patient_id,
@@ -267,24 +325,29 @@ def refresh_patient_journey_endpoint(
     if result is None:
         raise HTTPException(status_code=404, detail="Patient not found")
     return result
+
+
 @app.get("/rag/documents")
-def rag_documents() -> list[dict]:
+def rag_documents(request: Request) -> list[dict]:
+    require_admin(request)
     documents = load_patient_documents()
     return serialize_documents(documents)
 
 
 @app.get("/rag/chunks")
-def rag_chunks() -> list[dict]:
+def rag_chunks(request: Request) -> list[dict]:
+    require_admin(request)
     chunks = load_patient_chunks()
     return serialize_documents(chunks)
 
 
 @app.post("/rag/index")
 def rag_index(request: Request) -> dict[str, int | str]:
+    require_admin(request)
     result = rebuild_vector_store()
     write_audit_event(
         "vector_index_rebuilt",
-        actor=_actor_from_request(request),
+        actor=actor_from_request(request),
         metadata={
             "provider": result.get("provider"),
             "status": result.get("status"),
@@ -296,10 +359,11 @@ def rag_index(request: Request) -> dict[str, int | str]:
 
 @app.post("/rag/search")
 def rag_search(request: SearchRequest, http_request: Request) -> list[dict]:
+    require_doctor(http_request)
     result = search_patient_chunks(request.query, request.k)
     write_audit_event(
         "rag_search_performed",
-        actor=_actor_from_request(http_request),
+        actor=actor_from_request(http_request),
         metadata={"k": request.k, "result_count": len(result), "query_length": len(request.query)},
     )
     return result
@@ -307,10 +371,11 @@ def rag_search(request: SearchRequest, http_request: Request) -> list[dict]:
 
 @app.post("/rag/ask")
 def rag_ask(request: SearchRequest, http_request: Request) -> dict:
+    require_doctor(http_request)
     result = answer_question(request.query, request.k)
     write_audit_event(
         "rag_answer_requested",
-        actor=_actor_from_request(http_request),
+        actor=actor_from_request(http_request),
         metadata={
             "mode": "rules",
             "k": request.k,
@@ -323,10 +388,11 @@ def rag_ask(request: SearchRequest, http_request: Request) -> dict:
 
 @app.post("/rag/ask-llm")
 def rag_ask_llm(request: SearchRequest, http_request: Request) -> dict:
+    require_doctor(http_request)
     result = answer_with_local_llm(request.query, request.k)
     write_audit_event(
         "rag_answer_requested",
-        actor=_actor_from_request(http_request),
+        actor=actor_from_request(http_request),
         metadata={
             "mode": "llm",
             "k": request.k,
@@ -339,12 +405,13 @@ def rag_ask_llm(request: SearchRequest, http_request: Request) -> dict:
 
 @app.post("/patients/{patient_id}/ask")
 def patient_ask(patient_id: str, request: SearchRequest, http_request: Request) -> dict:
+    require_doctor(http_request)
     if get_patient(patient_id) is None:
         raise HTTPException(status_code=404, detail="Patient not found")
     result = answer_question(request.query, request.k, patient_id=patient_id)
     write_audit_event(
         "patient_rag_answer_requested",
-        actor=_actor_from_request(http_request),
+        actor=actor_from_request(http_request),
         patient_id=patient_id,
         metadata={
             "mode": "rules",
@@ -358,12 +425,13 @@ def patient_ask(patient_id: str, request: SearchRequest, http_request: Request) 
 
 @app.post("/patients/{patient_id}/ask-llm")
 def patient_ask_llm(patient_id: str, request: SearchRequest, http_request: Request) -> dict:
+    require_doctor(http_request)
     if get_patient(patient_id) is None:
         raise HTTPException(status_code=404, detail="Patient not found")
     result = answer_with_local_llm(request.query, request.k, patient_id=patient_id)
     write_audit_event(
         "patient_rag_answer_requested",
-        actor=_actor_from_request(http_request),
+        actor=actor_from_request(http_request),
         patient_id=patient_id,
         metadata={
             "mode": "llm",
@@ -373,3 +441,6 @@ def patient_ask_llm(patient_id: str, request: SearchRequest, http_request: Reque
         },
     )
     return result
+
+
+

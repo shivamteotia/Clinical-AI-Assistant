@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -16,11 +16,20 @@
           </div>
           <div class="status-stack">
             <span id="healthBadge" class="status-pill">Checking</span>
+            <a class="text-link" href="/admin">Admin console</a>
             <a class="text-link" href="/">Doctor view</a>
           </div>
         </div>
 
         <div class="toolbar">
+          <label class="search-box">
+            <span>Admin API key</span>
+            <input id="apiKeyInput" type="password" autocomplete="off" placeholder="Only needed when auth is enabled" />
+          </label>
+          <label class="search-box">
+            <span>User ID</span>
+            <input id="userIdInput" type="text" autocomplete="off" value="admin" />
+          </label>
           <label class="search-box">
             <span>Select patient</span>
             <select id="patientSelect"></select>

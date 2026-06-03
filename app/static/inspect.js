@@ -1,10 +1,14 @@
-const state = {
+﻿const state = {
   patients: [],
   selectedPatientId: null,
+  apiKey: sessionStorage.getItem("clinical_admin_api_key") || "",
+  userId: sessionStorage.getItem("clinical_admin_user_id") || "admin",
 };
 
 const els = {
   healthBadge: document.querySelector("#healthBadge"),
+  apiKeyInput: document.querySelector("#apiKeyInput"),
+  userIdInput: document.querySelector("#userIdInput"),
   patientSelect: document.querySelector("#patientSelect"),
   selectedPatientCard: document.querySelector("#selectedPatientCard"),
   inspectTitle: document.querySelector("#inspectTitle"),
@@ -12,10 +16,15 @@ const els = {
   inspectContent: document.querySelector("#inspectContent"),
 };
 
+els.apiKeyInput.value = state.apiKey;
+els.userIdInput.value = state.userId;
+
 async function api(path) {
-  const response = await fetch(path, {
-    headers: { "Content-Type": "application/json" },
-  });
+  const headers = { "Content-Type": "application/json" };
+  if (state.apiKey) headers["X-API-Key"] = state.apiKey;
+  if (state.userId) headers["X-User-Id"] = state.userId;
+
+  const response = await fetch(path, { headers });
   if (!response.ok) {
     const text = await response.text();
     throw new Error(text || `Request failed: ${response.status}`);
@@ -37,22 +46,34 @@ function formatData(value) {
   return JSON.stringify(value, null, 2);
 }
 
+function authChanged() {
+  state.apiKey = els.apiKeyInput.value.trim();
+  state.userId = els.userIdInput.value.trim() || "admin";
+  sessionStorage.setItem("clinical_admin_api_key", state.apiKey);
+  sessionStorage.setItem("clinical_admin_user_id", state.userId);
+}
+
 async function loadHealth() {
   try {
     await api("/health");
     els.healthBadge.textContent = "Online";
     els.healthBadge.classList.remove("offline");
+    els.healthBadge.classList.add("ready");
   } catch {
     els.healthBadge.textContent = "Offline";
     els.healthBadge.classList.add("offline");
+    els.healthBadge.classList.remove("ready");
   }
 }
 
 async function loadPatients() {
   state.patients = await api("/patients");
   renderPatients();
-  if (state.patients.length > 0) {
-    selectPatient(state.patients[0].patient_id);
+  const requestedPatientId = new URLSearchParams(window.location.search).get("patient");
+  const requestedPatient = state.patients.find((patient) => patient.patient_id === requestedPatientId);
+  const initialPatientId = requestedPatient?.patient_id || state.patients[0]?.patient_id;
+  if (initialPatientId) {
+    selectPatient(initialPatientId);
   }
 }
 
@@ -149,6 +170,14 @@ function metaBlock(label, value) {
   `;
 }
 
+els.apiKeyInput.addEventListener("change", () => {
+  authChanged();
+  if (state.selectedPatientId) selectPatient(state.selectedPatientId);
+});
+els.userIdInput.addEventListener("change", () => {
+  authChanged();
+  if (state.selectedPatientId) selectPatient(state.selectedPatientId);
+});
 els.patientSelect.addEventListener("change", (event) => selectPatient(event.target.value));
 
 loadHealth();

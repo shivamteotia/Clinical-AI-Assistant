@@ -22,16 +22,18 @@ class JourneyRefreshTests(unittest.TestCase):
         cls.client = TestClient(app)
 
     def setUp(self) -> None:
-        self.original_journeys = JOURNEY_PATH.read_bytes() if JOURNEY_PATH.exists() else None
         self.temp_dir = tempfile.TemporaryDirectory()
+        temp_journey_path = Path(self.temp_dir.name) / "patient_journeys.json"
+        if JOURNEY_PATH.exists():
+            temp_journey_path.write_bytes(JOURNEY_PATH.read_bytes())
+        os.environ["CLINICAL_AI_JOURNEY_PATH"] = str(temp_journey_path)
         os.environ["CLINICAL_AI_AUDIT_LOG_PATH"] = str(Path(self.temp_dir.name) / "audit.jsonl")
+        os.environ["CLINICAL_AI_JOURNEY_REFRESH_QUEUE_PATH"] = str(Path(self.temp_dir.name) / "journey_refresh_queue.jsonl")
 
     def tearDown(self) -> None:
-        if self.original_journeys is None:
-            JOURNEY_PATH.unlink(missing_ok=True)
-        else:
-            JOURNEY_PATH.write_bytes(self.original_journeys)
+        os.environ.pop("CLINICAL_AI_JOURNEY_PATH", None)
         os.environ.pop("CLINICAL_AI_AUDIT_LOG_PATH", None)
+        os.environ.pop("CLINICAL_AI_JOURNEY_REFRESH_QUEUE_PATH", None)
         self.temp_dir.cleanup()
 
     def test_stale_listing_and_refresh_endpoint_updates_patient_journey(self) -> None:

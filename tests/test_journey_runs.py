@@ -10,11 +10,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.rag import patient_journey
 from app.rag.journey_runs import read_journey_runs
-from app.rag.patient_journey import (
-    JOURNEY_PATH,
-    JourneySummaryResult,
-    generate_and_store_patient_journey,
-)
+from app.rag.patient_journey import JourneySummaryResult, generate_and_store_patient_journey
 from scripts.seed_data import main as seed_data
 
 
@@ -27,15 +23,12 @@ class JourneyRunTests(unittest.TestCase):
         cls.client = TestClient(app)
 
     def setUp(self) -> None:
-        self.original_journeys = JOURNEY_PATH.read_bytes() if JOURNEY_PATH.exists() else None
         self.temp_dir = tempfile.TemporaryDirectory()
+        os.environ["CLINICAL_AI_JOURNEY_PATH"] = str(Path(self.temp_dir.name) / "patient_journeys.json")
         os.environ["CLINICAL_AI_JOURNEY_RUN_LOG_PATH"] = str(Path(self.temp_dir.name) / "journey_runs.jsonl")
 
     def tearDown(self) -> None:
-        if self.original_journeys is None:
-            JOURNEY_PATH.unlink(missing_ok=True)
-        else:
-            JOURNEY_PATH.write_bytes(self.original_journeys)
+        os.environ.pop("CLINICAL_AI_JOURNEY_PATH", None)
         os.environ.pop("CLINICAL_AI_JOURNEY_RUN_LOG_PATH", None)
         self.temp_dir.cleanup()
 

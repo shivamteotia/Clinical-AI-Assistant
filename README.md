@@ -1,4 +1,4 @@
-# Clinical AI System - V1 Local HIS
+﻿# Clinical AI System - V1 Local HIS
 <img width="1868" height="873" alt="image" src="https://github.com/user-attachments/assets/7ab172f1-11d8-467e-a60d-543ce200f541" />
 
 This is the first local prototype for the Clinical AI pipeline.
@@ -43,6 +43,12 @@ Open:
 
 ```text
 http://127.0.0.1:8000/
+```
+
+Admin console:
+
+```text
+http://127.0.0.1:8000/admin
 ```
 
 API docs:
@@ -94,8 +100,35 @@ docker compose --profile local-qdrant up --build app qdrant
 
 The application image does not include `.env`, local databases, virtual environments, or runtime JSONL logs.
 
+
+## API Authentication
+
+The app supports simple API-key role separation through request headers:
+
+```text
+X-API-Key: your_key
+X-User-Id: doctor_or_admin_id
+```
+
+Set these in `.env` to enable auth:
+
+```text
+CLINICAL_AI_DOCTOR_API_KEY=replace_with_doctor_api_key
+CLINICAL_AI_ADMIN_API_KEY=replace_with_admin_api_key
+```
+
+If both keys are unset, local development remains open. When keys are configured:
+
+- doctor/admin keys can view patient lists, records, journeys, and ask RAG questions
+- only the admin key can view audit events, journey run logs, refresh/regenerate journeys, inspect the journey pipeline, and rebuild the vector index
+- `/health`, `/`, `/inspect`, and static assets remain public
+
 ## Current Endpoints
 
+- `GET /`
+- `GET /inspect`
+- `GET /admin`
+- `GET /admin/status`
 - `GET /health`
 - `GET /patients`
 - `GET /patients/{patient_id}`
@@ -118,6 +151,33 @@ The application image does not include `.env`, local databases, virtual environm
 - `GET /patients/{patient_id}/journey/runs`
 - `POST /journeys/refresh-stale`
 
+
+
+## Admin Console
+
+Open the operator dashboard at:
+
+```text
+http://127.0.0.1:8000/admin
+```
+
+The admin console shows API health, vector store status, stale journeys, recent journey generation runs, and audit events. It also provides controls to rebuild the vector index, refresh stale journeys, and refresh a selected patient's precomputed holistic journey. If API-key auth is enabled, paste the admin key into the console's `Admin API key` field; it is stored only in browser session storage.
+
+The safe admin status endpoint is `GET /admin/status`. It returns operational flags such as auth enabled/configured, vector provider/status, LLM provider/model, stale journey count, recent run count, and recent audit count. It does not return API key values, prompts, patient notes, summaries, or generated answers.
+
+
+## Runtime State Paths
+
+The app writes operational state under `data/` by default. For tests, containers, or alternate deployments, these paths can be overridden without changing code:
+
+```text
+CLINICAL_AI_AUDIT_LOG_PATH=data/audit_logs.jsonl
+CLINICAL_AI_JOURNEY_PATH=data/patient_journeys.json
+CLINICAL_AI_JOURNEY_RUN_LOG_PATH=data/journey_runs.jsonl
+CLINICAL_AI_JOURNEY_REFRESH_QUEUE_PATH=data/journey_refresh_queue.jsonl
+```
+
+Automated tests use temporary journey and queue paths so local precomputed patient journeys are not rewritten by test runs.
 
 ## Audit Logging
 
@@ -357,3 +417,6 @@ POST /rag/ask-llm
 ```
 
 This endpoint retrieves patient chunks first, then asks the local Ollama model to answer only from that retrieved context.
+
+
+

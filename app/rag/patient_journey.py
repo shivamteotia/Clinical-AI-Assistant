@@ -1,4 +1,5 @@
-import json
+﻿import json
+import os
 import time
 from time import perf_counter
 from dataclasses import dataclass
@@ -56,19 +57,27 @@ class JourneySummaryResult:
     error: str | None = None
 
 
+def get_journey_path() -> Path:
+    configured_path = os.getenv("CLINICAL_AI_JOURNEY_PATH")
+    if configured_path:
+        return Path(configured_path)
+    return JOURNEY_PATH
+
 def load_patient_journeys() -> dict[str, dict]:
-    if not JOURNEY_PATH.exists():
+    journey_path = get_journey_path()
+    if not journey_path.exists():
         return {}
 
-    with open(JOURNEY_PATH, "r", encoding="utf-8") as file:
+    with open(journey_path, "r", encoding="utf-8") as file:
         journeys = json.load(file)
 
     return {journey["patient_id"]: journey for journey in journeys}
 
 
 def save_patient_journeys(journeys: list[dict]) -> None:
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
-    with open(JOURNEY_PATH, "w", encoding="utf-8") as file:
+    journey_path = get_journey_path()
+    journey_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(journey_path, "w", encoding="utf-8") as file:
         json.dump(journeys, file, indent=2)
         file.write("\n")
 
@@ -898,3 +907,4 @@ def _active_medications(record: dict) -> list[str]:
         f"{row['drug_name']} {row['dose']} {row['frequency']}"
         for row in record["medications"][:4]
     ]
+
