@@ -1,0 +1,11 @@
+﻿.git
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.env
+chroma_db
+*.db
+data/audit_logs.jsonl
+data/journey_refresh_queue.jsonl
+data/journey_runs.jsonl

@@ -1,0 +1,37 @@
+﻿services:
+  app:
+    build:
+      context: .
+    image: clinical-ai-system:local
+    container_name: clinical-ai-system-app
+    env_file:
+      - .env
+    environment:
+      VECTOR_STORE_PROVIDER: ${VECTOR_STORE_PROVIDER:-qdrant}
+      QDRANT_COLLECTION: ${QDRANT_COLLECTION:-clinical_patient_chunks}
+      PATIENT_JOURNEY_LLM_PROVIDER: ${PATIENT_JOURNEY_LLM_PROVIDER:-groq}
+      PATIENT_JOURNEY_MODEL: ${PATIENT_JOURNEY_MODEL:-llama-3.3-70b-versatile}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  qdrant:
+    image: qdrant/qdrant:v1.12.4
+    profiles:
+      - local-qdrant
+    container_name: clinical-ai-system-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+
+volumes:
+  qdrant_storage:

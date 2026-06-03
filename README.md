@@ -51,6 +51,49 @@ API docs:
 http://127.0.0.1:8000/docs
 ```
 
+
+## Run With Docker
+
+Create a local `.env` file first. Keep real credentials out of Git:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Default Docker run uses the FastAPI app container and your configured Qdrant Cloud credentials:
+
+```powershell
+docker compose up --build app
+```
+
+Open:
+
+```text
+http://127.0.0.1:8000/
+```
+
+The compose setup mounts local runtime state into the container:
+
+- `./data:/app/data` for stored journeys, audit logs, refresh queue logs, and run logs
+- the dummy HIS SQLite database is seeded inside the image during build
+
+To try a local Qdrant container instead of Qdrant Cloud, set this in `.env`:
+
+```text
+VECTOR_STORE_PROVIDER=qdrant
+QDRANT_URL=http://qdrant:6333
+QDRANT_API_KEY=
+QDRANT_COLLECTION=clinical_patient_chunks
+```
+
+Then run:
+
+```powershell
+docker compose --profile local-qdrant up --build app qdrant
+```
+
+The application image does not include `.env`, local databases, virtual environments, or runtime JSONL logs.
+
 ## Current Endpoints
 
 - `GET /health`
