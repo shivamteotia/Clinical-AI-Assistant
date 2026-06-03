@@ -1,5 +1,6 @@
 import json
 import time
+from time import perf_counter
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -10,6 +11,7 @@ from app.api.canonical_his import get_canonical_patient_record
 from app.api.his import list_patients
 from app.rag.config import get_patient_journey_llm_settings
 from app.rag.episodes import EPISODE_STRATEGY, build_patient_episodes, compact_episode_timeline
+from app.rag.journey_runs import latest_journey_run, write_journey_run
 from app.rag.safety import SAFETY_NOTICE
 
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -195,18 +197,54 @@ def generate_and_store_patient_journey(
     model: str | None = None,
     provider: str | None = None,
     require_llm: bool = False,
+    trigger: str = "generation",
+    refresh_id: str | None = None,
 ) -> dict | None:
     record = get_canonical_patient_record(patient_id)
     if record is None:
         return None
 
-    journey = build_patient_journey(
+    started = perf_counter()
+    context_packet = build_patient_journey_context(record)
+    resolved_provider, resolved_model = _resolved_run_provider_model(use_llm, provider, model)
+    try:
+        journey = build_patient_journey(
+            record,
+            use_llm=use_llm,
+            model=model,
+            provider=provider,
+            require_llm=require_llm,
+        )
+    except Exception as error:
+        _write_generation_run(
+            record,
+            context_packet,
+            started,
+            status="failed",
+            provider=resolved_provider,
+            model=resolved_model,
+            use_llm=use_llm,
+            require_llm=require_llm,
+            trigger=trigger,
+            refresh_id=refresh_id,
+            error=error,
+        )
+        raise
+
+    run = _write_generation_run(
         record,
+        context_packet,
+        started,
+        status="completed",
+        provider=resolved_provider,
+        model=resolved_model,
         use_llm=use_llm,
-        model=model,
-        provider=provider,
         require_llm=require_llm,
+        trigger=trigger,
+        refresh_id=refresh_id,
+        generated_by=journey.get("generated_by"),
     )
+    journey["latest_run"] = run
     upsert_patient_journey(journey)
     return journey
 
@@ -224,15 +262,44 @@ def build_all_patient_journeys(
         record = get_canonical_patient_record(patient["patient_id"])
         if record is None:
             continue
-        journeys.append(
-            build_patient_journey(
+        started = perf_counter()
+        context_packet = build_patient_journey_context(record)
+        resolved_provider, resolved_model = _resolved_run_provider_model(use_llm, provider, model)
+        try:
+            journey = build_patient_journey(
                 record,
                 use_llm=use_llm,
                 model=model,
                 provider=provider,
                 require_llm=require_llm,
             )
+        except Exception as error:
+            _write_generation_run(
+                record,
+                context_packet,
+                started,
+                status="failed",
+                provider=resolved_provider,
+                model=resolved_model,
+                use_llm=use_llm,
+                require_llm=require_llm,
+                trigger="batch_generation",
+                error=error,
+            )
+            raise
+        journey["latest_run"] = _write_generation_run(
+            record,
+            context_packet,
+            started,
+            status="completed",
+            provider=resolved_provider,
+            model=resolved_model,
+            use_llm=use_llm,
+            require_llm=require_llm,
+            trigger="batch_generation",
+            generated_by=journey.get("generated_by"),
         )
+        journeys.append(journey)
         if use_llm and request_delay_seconds > 0 and index < len(patients) - 1:
             time.sleep(request_delay_seconds)
     return journeys
@@ -294,6 +361,49 @@ def build_patient_journey(
         "safety_notice": SAFETY_NOTICE,
     }
 
+
+def _resolved_run_provider_model(use_llm: bool, provider: str | None, model: str | None) -> tuple[str, str | None]:
+    if not use_llm:
+        return "local", None
+    settings = get_patient_journey_llm_settings()
+    return (provider or settings.provider).lower(), model or settings.model
+
+
+def _write_generation_run(
+    record: dict,
+    context_packet: dict,
+    started: float,
+    *,
+    status: str,
+    provider: str | None,
+    model: str | None,
+    use_llm: bool,
+    require_llm: bool,
+    trigger: str,
+    refresh_id: str | None = None,
+    generated_by: str | None = None,
+    error: Exception | None = None,
+) -> dict:
+    metadata = record.get("record_metadata", {})
+    context_metadata = context_packet.get("context_metadata", {})
+    return write_journey_run(
+        patient_id=record["patient"]["patient_id"],
+        status=status,
+        provider=provider,
+        model=model,
+        use_llm=use_llm,
+        require_llm=require_llm,
+        context_strategy=context_packet.get("context_strategy"),
+        source_record_version=metadata.get("record_version"),
+        input_char_count=context_metadata.get("input_char_count"),
+        estimated_input_tokens=context_metadata.get("estimated_input_tokens"),
+        duration_ms=max(0, int((perf_counter() - started) * 1000)),
+        generated_by=generated_by,
+        trigger=trigger,
+        refresh_id=refresh_id,
+        error_type=error.__class__.__name__ if error else None,
+        error=str(error) if error else None,
+    )
 
 def _try_llm_summary(
     record: dict,
@@ -583,7 +693,9 @@ def _finalize_journey(journey: dict | None, record: dict) -> dict | None:
     grounded = _with_grounded_claims(journey, record)
     if grounded is None:
         return None
-    return _with_record_freshness(grounded, record)
+    fresh = _with_record_freshness(grounded, record)
+    fresh["latest_run"] = latest_journey_run(record["patient"]["patient_id"])
+    return fresh
 
 
 def _with_record_freshness(journey: dict, record: dict) -> dict:

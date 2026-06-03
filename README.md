@@ -71,6 +71,8 @@ http://127.0.0.1:8000/docs
 - `POST /rag/ask-llm`
 - `GET /audit/events`
 - `GET /journeys/stale`
+- `GET /journeys/runs`
+- `GET /patients/{patient_id}/journey/runs`
 - `POST /journeys/refresh-stale`
 
 
@@ -231,6 +233,8 @@ python scripts\refresh_stale_journeys.py --provider groq --model llama-3.3-70b-v
 ```
 
 The refresh workflow writes safe queue events to `data\journey_refresh_queue.jsonl` and audit events for refresh requested, completed, and failed states. The queue log is local and ignored by Git.
+
+Journey generation also writes local observability events to `data\journey_runs.jsonl`. Each run records patient ID, provider, model, trigger, status, context strategy, source record version, estimated input tokens, duration, generated_by, and error metadata when applicable. The run log is local and ignored by Git. Inspect it through `GET /journeys/runs` or `GET /patients/{patient_id}/journey/runs`.
 Inspect the internal journey pipeline for one patient without calling the LLM:
 
 ```powershell

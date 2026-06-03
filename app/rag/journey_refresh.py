@@ -95,8 +95,9 @@ def refresh_patient_journey(
     model: str | None = None,
     require_llm: bool = False,
     reason: str = "manual",
+    queued_event: dict[str, Any] | None = None,
 ) -> dict[str, Any] | None:
-    queued = queue_patient_journey_refresh(
+    queued = queued_event or queue_patient_journey_refresh(
         patient_id,
         actor=actor,
         reason=reason,
@@ -117,6 +118,8 @@ def refresh_patient_journey(
             provider=provider,
             model=model,
             require_llm=require_llm,
+            trigger="refresh",
+            refresh_id=queued["refresh_id"],
         )
     except Exception as error:
         failure = append_refresh_queue_event(
@@ -149,6 +152,7 @@ def refresh_patient_journey(
             "journey_model": journey.get("journey_model") if journey else None,
             "source_record_version": journey.get("source_record_version") if journey else None,
             "context_strategy": journey.get("context_strategy") if journey else None,
+            "run_id": journey.get("latest_run", {}).get("run_id") if journey else None,
         },
     )
     write_audit_event(

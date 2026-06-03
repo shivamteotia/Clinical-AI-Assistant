@@ -12,6 +12,7 @@ from app.rag.answering import answer_question
 from app.rag.chunking import load_patient_chunks
 from app.rag.loaders import load_patient_documents, serialize_documents
 from app.rag.llm import answer_with_local_llm
+from app.rag.journey_runs import read_journey_runs
 from app.rag.journey_refresh import (
     list_stale_patient_journeys,
     queue_patient_journey_refresh,
@@ -84,6 +85,17 @@ def rag_status() -> dict:
 
 
 
+
+@app.get("/journeys/runs")
+def journey_runs(limit: int = Query(default=100, ge=1, le=500)) -> list[dict]:
+    return read_journey_runs(limit=limit)
+
+
+@app.get("/patients/{patient_id}/journey/runs")
+def patient_journey_runs(patient_id: str, limit: int = Query(default=50, ge=1, le=500)) -> list[dict]:
+    if get_patient(patient_id) is None:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    return read_journey_runs(limit=limit, patient_id=patient_id)
 @app.get("/journeys/stale")
 def stale_journeys() -> dict:
     stale = list_stale_patient_journeys()
@@ -236,6 +248,7 @@ def refresh_patient_journey_endpoint(
             model=request.model,
             require_llm=request.require_llm,
             reason="manual_background",
+            queued_event=queued,
         )
         return {"status": "queued", **queued}
 

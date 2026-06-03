@@ -181,6 +181,14 @@ function renderJourney(journey) {
   `;
 }
 
+
+function renderLatestRunMeta(run) {
+  if (!run) return "";
+  return `
+      <span>Run: ${escapeHtml(run.status)} / ${escapeHtml(run.trigger || "generation")}</span>
+      <span>Tokens est: ${escapeHtml(run.estimated_input_tokens || "unknown")}</span>
+      <span>Duration: ${escapeHtml(run.duration_ms ?? "unknown")} ms</span>`;
+}
 function renderGroundedClaims(claims) {
   if (!claims || claims.length === 0) return "";
   return `
