@@ -329,6 +329,11 @@ python scripts\evaluate_rag.py --rebuild
 
 The evaluation checks whether expected patient IDs and key terms appear for known dummy-data questions.
 
+
+## Continuous Integration
+
+GitHub Actions runs the CI workflow on pushes and pull requests to `master`. The workflow installs Python 3.12 dependencies, seeds the dummy HIS database, runs the unittest suite, and scans tracked files for common Groq/Qdrant secret-like patterns.
+
 ## Run Tests
 
 Run the automated API, RAG, and safety tests:

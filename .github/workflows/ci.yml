@@ -1,0 +1,56 @@
+﻿name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Seed dummy HIS database
+        run: python scripts/seed_data.py
+
+      - name: Run unit tests
+        env:
+          VECTOR_STORE_PROVIDER: sqlite
+          PATIENT_JOURNEY_LLM_PROVIDER: ollama
+          PATIENT_JOURNEY_MODEL: phi3
+        run: python -m unittest discover
+
+      - name: Secret pattern scan
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RInE 'gsk_|eyJ|qdrant\.io' \
+            --exclude='.env' \
+            --exclude='audit_logs.jsonl' \
+            --exclude='journey_refresh_queue.jsonl' \
+            --exclude='journey_runs.jsonl' \
+            .; then
+            echo 'Potential secret-like value found in tracked files.'
+            exit 1
+          fi
