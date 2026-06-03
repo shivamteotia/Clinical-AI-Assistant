@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -12,6 +12,12 @@ from app.rag.answering import answer_question
 from app.rag.chunking import load_patient_chunks
 from app.rag.loaders import load_patient_documents, serialize_documents
 from app.rag.llm import answer_with_local_llm
+from app.rag.journey_refresh import (
+    list_stale_patient_journeys,
+    queue_patient_journey_refresh,
+    refresh_patient_journey,
+    refresh_stale_patient_journeys,
+)
 from app.rag.patient_journey import (
     DEFAULT_JOURNEY_MODEL,
     generate_and_store_patient_journey,
@@ -39,6 +45,13 @@ class JourneyGenerationRequest(BaseModel):
     model: str | None = Field(default=DEFAULT_JOURNEY_MODEL, min_length=1)
     provider: str | None = None
     require_llm: bool = False
+
+class JourneyRefreshRequest(BaseModel):
+    use_llm: bool = True
+    model: str | None = Field(default=None, min_length=1)
+    provider: str | None = None
+    require_llm: bool = False
+    background: bool = False
 
 
 def _actor_from_request(request: Request) -> str:
@@ -70,6 +83,22 @@ def rag_status() -> dict:
     return vector_store_status()
 
 
+
+@app.get("/journeys/stale")
+def stale_journeys() -> dict:
+    stale = list_stale_patient_journeys()
+    return {"stale_count": len(stale), "stale": stale}
+
+
+@app.post("/journeys/refresh-stale")
+def refresh_stale_journeys(request: JourneyRefreshRequest, http_request: Request) -> dict:
+    return refresh_stale_patient_journeys(
+        actor=_actor_from_request(http_request),
+        use_llm=request.use_llm,
+        provider=request.provider,
+        model=request.model,
+        require_llm=request.require_llm,
+    )
 @app.get("/patients")
 def patients() -> list[dict]:
     return list_patients()
@@ -175,6 +204,56 @@ def generate_patient_journey(
     return result
 
 
+
+@app.post("/patients/{patient_id}/journey/refresh")
+def refresh_patient_journey_endpoint(
+    patient_id: str,
+    request: JourneyRefreshRequest,
+    http_request: Request,
+    background_tasks: BackgroundTasks,
+) -> dict:
+    actor = _actor_from_request(http_request)
+    if request.background:
+        queued = queue_patient_journey_refresh(
+            patient_id,
+            actor=actor,
+            reason="manual_background",
+            metadata={
+                "use_llm": request.use_llm,
+                "provider": request.provider,
+                "model": request.model,
+                "require_llm": request.require_llm,
+            },
+        )
+        if queued is None:
+            raise HTTPException(status_code=404, detail="Patient not found")
+        background_tasks.add_task(
+            refresh_patient_journey,
+            patient_id,
+            actor=actor,
+            use_llm=request.use_llm,
+            provider=request.provider,
+            model=request.model,
+            require_llm=request.require_llm,
+            reason="manual_background",
+        )
+        return {"status": "queued", **queued}
+
+    try:
+        result = refresh_patient_journey(
+            patient_id,
+            actor=actor,
+            use_llm=request.use_llm,
+            provider=request.provider,
+            model=request.model,
+            require_llm=request.require_llm,
+            reason="manual",
+        )
+    except RuntimeError as error:
+        raise HTTPException(status_code=502, detail=str(error)) from error
+    if result is None:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    return result
 @app.get("/rag/documents")
 def rag_documents() -> list[dict]:
     documents = load_patient_documents()

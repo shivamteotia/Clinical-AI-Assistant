@@ -232,6 +232,29 @@ function section(title, rows, renderRow) {
   `;
 }
 
+
+async function refreshSelectedJourney() {
+  if (!state.selectedPatientId) return;
+  const button = document.querySelector("#refreshJourneyBtn");
+  if (button) setLoading(button, "Refreshing...", true);
+  try {
+    const result = await api(`/patients/${encodeURIComponent(state.selectedPatientId)}/journey/refresh`, {
+      method: "POST",
+      body: JSON.stringify({ use_llm: true, require_llm: false, background: false }),
+    });
+    if (result.journey) {
+      renderJourney(result.journey);
+    }
+  } catch (error) {
+    const container = document.querySelector("#journeyContent");
+    if (container) {
+      container.insertAdjacentHTML("afterbegin", `<div class="journey-error">Refresh failed. ${escapeHtml(error.message)}</div>`);
+    }
+  } finally {
+    const currentButton = document.querySelector("#refreshJourneyBtn");
+    if (currentButton) setLoading(currentButton, "Refresh", false);
+  }
+}
 async function rebuildIndex() {
   setLoading(els.rebuildIndexBtn, "Rebuilding...", true);
   try {
@@ -246,6 +269,9 @@ async function rebuildIndex() {
 
 els.patientSelect.addEventListener("change", (event) => selectPatient(event.target.value));
 els.rebuildIndexBtn.addEventListener("click", rebuildIndex);
+els.recordContent.addEventListener("click", (event) => {
+  if (event.target?.id === "refreshJourneyBtn") refreshSelectedJourney();
+});
 
 loadHealth();
 loadVectorStatus();

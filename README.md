@@ -59,6 +59,7 @@ http://127.0.0.1:8000/docs
 - `GET /patients/{patient_id}/record`
 - `GET /patients/{patient_id}/journey`
 - `POST /patients/{patient_id}/journey/generate`
+- `POST /patients/{patient_id}/journey/refresh`
 - `POST /patients/{patient_id}/ask`
 - `POST /patients/{patient_id}/ask-llm`
 - `GET /rag/documents`
@@ -69,6 +70,8 @@ http://127.0.0.1:8000/docs
 - `POST /rag/ask`
 - `POST /rag/ask-llm`
 - `GET /audit/events`
+- `GET /journeys/stale`
+- `POST /journeys/refresh-stale`
 
 
 ## Audit Logging
@@ -217,8 +220,17 @@ Patient records are exposed through a canonical dummy HIS adapter. `GET /patient
 
 Journey generation uses an episode-aware context packer before calling the LLM. The episode builder groups each patient record into chronological episodes from encounter dates, then attaches same-date labs, medication starts, and clinical notes. The packed context uses `episodic_patient_context.v1` plus `encounter_date_episodes.v1`, and emits included/total/omitted counts, input character count, estimated input tokens, and reserved output tokens so context-window usage is visible in `/inspect` and stored journey metadata.
 
-The app reads `data\patient_journeys.json` when a doctor selects a patient from the dropdown. This keeps the doctor-facing page fast: patient selection renders the stored holistic view immediately instead of waiting for an LLM call. Journey responses include source-grounded `claims`, so each summary sentence can show the HIS row, encounter, lab, medication, or note IDs that support it. `POST /patients/{patient_id}/journey/generate` remains available for admin/background refresh workflows, not as a normal doctor interaction. Use `--require-llm` for production-style generation so local fallback summaries are not saved by accident.
+The app reads `data\patient_journeys.json` when a doctor selects a patient from the dropdown. This keeps the doctor-facing page fast: patient selection renders the stored holistic view immediately instead of waiting for an LLM call. Journey responses include source-grounded `claims`, so each summary sentence can show the HIS row, episode, encounter, lab, medication, or note IDs that support it. `POST /patients/{patient_id}/journey/generate` remains available for admin generation workflows. `POST /patients/{patient_id}/journey/refresh` and `POST /journeys/refresh-stale` are the operational refresh paths for stale summaries. Use `--require-llm` for production-style generation so local fallback summaries are not saved by accident.
 
+
+Refresh stale journeys after canonical HIS records change:
+
+```powershell
+python scripts\refresh_stale_journeys.py --dry-run
+python scripts\refresh_stale_journeys.py --provider groq --model llama-3.3-70b-versatile --require-llm
+```
+
+The refresh workflow writes safe queue events to `data\journey_refresh_queue.jsonl` and audit events for refresh requested, completed, and failed states. The queue log is local and ignored by Git.
 Inspect the internal journey pipeline for one patient without calling the LLM:
 
 ```powershell
