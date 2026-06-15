@@ -1,4 +1,4 @@
-﻿const state = {
+const state = {
   patients: [],
   selectedPatientId: null,
   apiKey: sessionStorage.getItem("clinical_admin_api_key") || "",
@@ -15,6 +15,9 @@ const els = {
   refreshDashboardBtn: document.querySelector("#refreshDashboardBtn"),
   rebuildIndexBtn: document.querySelector("#rebuildIndexBtn"),
   refreshStaleBtn: document.querySelector("#refreshStaleBtn"),
+  scanHisBtn: document.querySelector("#scanHisBtn"),
+  queueHisBtn: document.querySelector("#queueHisBtn"),
+  processQueueBtn: document.querySelector("#processQueueBtn"),
   refreshJourneyBtn: document.querySelector("#refreshJourneyBtn"),
   inspectPatientBtn: document.querySelector("#inspectPatientBtn"),
   dashboardMeta: document.querySelector("#dashboardMeta"),
@@ -25,10 +28,16 @@ const els = {
   systemSnapshot: document.querySelector("#systemSnapshot"),
   patientOpsMeta: document.querySelector("#patientOpsMeta"),
   patientOpsContent: document.querySelector("#patientOpsContent"),
+  hisSyncMeta: document.querySelector("#hisSyncMeta"),
+  hisSyncList: document.querySelector("#hisSyncList"),
+  queueMeta: document.querySelector("#queueMeta"),
+  queueList: document.querySelector("#queueList"),
   staleMeta: document.querySelector("#staleMeta"),
   staleList: document.querySelector("#staleList"),
   runsMeta: document.querySelector("#runsMeta"),
   runsList: document.querySelector("#runsList"),
+  feedbackMeta: document.querySelector("#feedbackMeta"),
+  feedbackList: document.querySelector("#feedbackList"),
   auditMeta: document.querySelector("#auditMeta"),
   auditList: document.querySelector("#auditList"),
 };
@@ -223,6 +232,86 @@ async function loadSelectedPatientOps() {
   }
 }
 
+async function loadHisSyncStatus() {
+  try {
+    const result = await api("/his/sync/status");
+    els.hisSyncMeta.textContent = `${result.action_required_count || 0} action needed`;
+    const rows = result.items || [];
+    if (rows.length === 0) {
+      els.hisSyncList.classList.add("empty-state");
+      els.hisSyncList.textContent = "No new or changed HIS patient records found.";
+      return;
+    }
+    els.hisSyncList.classList.remove("empty-state");
+    els.hisSyncList.innerHTML = rows.map((item) => `
+      <div class="admin-table-row">
+        <strong>${escapeHtml(item.patient_id)}</strong>
+        <span>${escapeHtml(item.patient_name || "patient")}</span>
+        <span>${escapeHtml(item.change_type || "change")}</span>
+        <span>Record: ${escapeHtml(item.record_version || "unknown")}</span>
+        <span>Updated: ${escapeHtml(item.last_updated || "unknown")}</span>
+      </div>
+    `).join("");
+  } catch (error) {
+    els.hisSyncList.innerHTML = `<div class="admin-table-row empty-state">Could not scan HIS changes. ${escapeHtml(error.message)}</div>`;
+  }
+}
+
+async function queueHisUpdates() {
+  setLoading(els.queueHisBtn, "Queuing...", true);
+  try {
+    await api("/his/sync", {
+      method: "POST",
+      body: JSON.stringify({ use_llm: true, require_llm: false, process: false }),
+    });
+    await Promise.all([loadHisSyncStatus(), loadJourneyQueue(), loadAuditEvents()]);
+  } catch (error) {
+    els.hisSyncList.innerHTML = `<div class="admin-table-row empty-state">Queue HIS updates failed. ${escapeHtml(error.message)}</div>`;
+  } finally {
+    setLoading(els.queueHisBtn, "Queue HIS Updates", false);
+  }
+}
+async function loadJourneyQueue() {
+  if (!els.queueList || !els.queueMeta) return;
+  try {
+    const result = await api("/journeys/queue?limit=20");
+    els.queueMeta.textContent = `${result.pending_count || 0} pending`;
+    const rows = result.pending || [];
+    if (rows.length === 0) {
+      els.queueList.classList.add("empty-state");
+      els.queueList.textContent = "No pending journey refresh jobs.";
+      return;
+    }
+    els.queueList.classList.remove("empty-state");
+    els.queueList.innerHTML = rows.map((item) => `
+      <div class="admin-table-row">
+        <strong>${escapeHtml(item.patient_id || "unknown")}</strong>
+        <span>${escapeHtml(item.reason || "queued")}</span>
+        <span>${escapeHtml(item.actor || "system")}</span>
+        <span>${escapeHtml(compactDate(item.created_at))}</span>
+        <span>${escapeHtml(item.refresh_id || "no refresh id")}</span>
+      </div>
+    `).join("");
+  } catch (error) {
+    els.queueList.innerHTML = `<div class="admin-table-row empty-state">Could not load journey queue. ${escapeHtml(error.message)}</div>`;
+  }
+}
+
+async function processJourneyQueue() {
+  if (!els.processQueueBtn || !els.queueList) return;
+  setLoading(els.processQueueBtn, "Processing...", true);
+  try {
+    await api("/journeys/process-queue", {
+      method: "POST",
+      body: JSON.stringify({ use_llm: true, require_llm: false, limit: 10 }),
+    });
+    await Promise.all([loadJourneyQueue(), loadJourneyRuns(), loadAuditEvents(), loadSelectedPatientOps()]);
+  } catch (error) {
+    els.queueList.innerHTML = `<div class="admin-table-row empty-state">Process queue failed. ${escapeHtml(error.message)}</div>`;
+  } finally {
+    setLoading(els.processQueueBtn, "Process Queue", false);
+  }
+}
 async function loadStaleJourneys() {
   try {
     const result = await api("/journeys/stale");
@@ -276,6 +365,29 @@ async function loadJourneyRuns() {
   }
 }
 
+async function loadJourneyFeedback() {
+  try {
+    const feedback = await api("/journey-feedback?limit=10");
+    els.feedbackMeta.textContent = `${feedback.length} shown`;
+    if (feedback.length === 0) {
+      els.feedbackList.classList.add("empty-state");
+      els.feedbackList.textContent = "No journey feedback found.";
+      return;
+    }
+    els.feedbackList.classList.remove("empty-state");
+    els.feedbackList.innerHTML = feedback.map((event) => `
+      <div class="admin-table-row">
+        <strong>${escapeHtml(event.patient_id || "unknown")}</strong>
+        <span>${escapeHtml(event.feedback_type || "feedback")}</span>
+        <span>${escapeHtml(event.actor || "unknown actor")}</span>
+        <span>${escapeHtml(compactDate(event.created_at))}</span>
+        <span>${escapeHtml(event.comment || "no note")}</span>
+      </div>
+    `).join("");
+  } catch (error) {
+    els.feedbackList.innerHTML = `<div class="admin-table-row empty-state">Could not load journey feedback. ${escapeHtml(error.message)}</div>`;
+  }
+}
 async function loadAuditEvents() {
   try {
     const events = await api("/audit/events?limit=10");
@@ -303,7 +415,7 @@ async function refreshDashboard() {
   authChanged();
   els.dashboardMeta.textContent = "Refreshing...";
   await loadHealth();
-  await Promise.all([loadVectorStatus(), loadAdminStatus(), loadStaleJourneys(), loadJourneyRuns(), loadAuditEvents()]);
+  await Promise.all([loadVectorStatus(), loadAdminStatus(), loadHisSyncStatus(), loadJourneyQueue(), loadStaleJourneys(), loadJourneyRuns(), loadJourneyFeedback(), loadAuditEvents()]);
   if (state.selectedPatientId) await loadSelectedPatientOps();
   els.dashboardMeta.textContent = `Updated ${new Date().toLocaleTimeString()}`;
 }
@@ -343,7 +455,7 @@ async function refreshSelectedJourney() {
       method: "POST",
       body: JSON.stringify({ use_llm: true, require_llm: false, background: false }),
     });
-    await Promise.all([loadSelectedPatientOps(), loadJourneyRuns(), loadAuditEvents(), loadStaleJourneys()]);
+    await Promise.all([loadSelectedPatientOps(), loadJourneyRuns(), loadJourneyFeedback(), loadAuditEvents(), loadStaleJourneys()]);
   } catch (error) {
     els.patientOpsContent.innerHTML = `<div class="data-row empty-state">Journey refresh failed. ${escapeHtml(error.message)}</div>`;
   } finally {
@@ -357,6 +469,9 @@ els.patientSelect.addEventListener("change", (event) => selectPatient(event.targ
 els.refreshDashboardBtn.addEventListener("click", refreshDashboard);
 els.rebuildIndexBtn.addEventListener("click", rebuildIndex);
 els.refreshStaleBtn.addEventListener("click", refreshStaleJourneys);
+if (els.scanHisBtn) els.scanHisBtn.addEventListener("click", loadHisSyncStatus);
+if (els.queueHisBtn) els.queueHisBtn.addEventListener("click", queueHisUpdates);
+if (els.processQueueBtn) els.processQueueBtn.addEventListener("click", processJourneyQueue);
 els.refreshJourneyBtn.addEventListener("click", refreshSelectedJourney);
 els.inspectPatientBtn.addEventListener("click", () => {
   const target = state.selectedPatientId ? `/inspect?patient=${encodeURIComponent(state.selectedPatientId)}` : "/inspect";
@@ -370,4 +485,3 @@ loadPatients()
     els.selectedPatientCard.innerHTML = `<div class="empty-state">Could not load admin data. ${escapeHtml(error.message)}</div>`;
     refreshDashboard().catch(() => undefined);
   });
-

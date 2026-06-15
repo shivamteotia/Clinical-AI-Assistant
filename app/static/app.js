@@ -170,6 +170,7 @@ function renderJourney(journey) {
       <span>Record: ${escapeHtml(journey.source_record_version || "unknown")}</span>
     </div>
     <p>${escapeHtml(journey.summary)}</p>
+    ${renderJourneyFeedbackControls(journey)}
     ${renderGroundedClaims(journey.claims)}
     ${renderJourneyList("Timeline", journey.timeline, (item) => `
       <strong>${escapeHtml(item.date)} - ${escapeHtml(item.title)}</strong>
@@ -182,6 +183,43 @@ function renderJourney(journey) {
 }
 
 
+function renderJourneyFeedbackControls(journey) {
+  return `
+    <div class="journey-feedback" aria-live="polite">
+      <div class="mini-heading">Clinician feedback</div>
+      <div class="feedback-actions">
+        <button class="secondary-button feedback-button" type="button" data-feedback-type="useful">Useful</button>
+        <button class="secondary-button feedback-button" type="button" data-feedback-type="missing_info">Missing info</button>
+        <button class="secondary-button feedback-button" type="button" data-feedback-type="incorrect">Incorrect</button>
+      </div>
+      <label class="feedback-comment">
+        <span>Optional note</span>
+        <textarea id="journeyFeedbackComment" maxlength="500" placeholder="Short feedback for the AI/admin team"></textarea>
+      </label>
+      <div id="journeyFeedbackStatus" class="inspect-note"></div>
+    </div>
+  `;
+}
+
+async function submitJourneyFeedback(feedbackType, button) {
+  if (!state.selectedPatientId) return;
+  const commentInput = document.querySelector("#journeyFeedbackComment");
+  const status = document.querySelector("#journeyFeedbackStatus");
+  if (button) setLoading(button, "Saving...", true);
+  if (status) status.textContent = "Saving feedback...";
+  try {
+    await api(`/patients/${encodeURIComponent(state.selectedPatientId)}/journey/feedback`, {
+      method: "POST",
+      body: JSON.stringify({ feedback_type: feedbackType, comment: commentInput?.value || null }),
+    });
+    if (commentInput) commentInput.value = "";
+    if (status) status.textContent = "Feedback recorded.";
+  } catch (error) {
+    if (status) status.textContent = `Feedback failed. ${error.message}`;
+  } finally {
+    if (button) setLoading(button, "", false);
+  }
+}
 function renderLatestRunMeta(run) {
   if (!run) return "";
   return `

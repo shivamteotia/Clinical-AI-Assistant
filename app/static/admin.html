@@ -1,10 +1,10 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Clinical AI Admin</title>
-    <link rel="stylesheet" href="/static/styles.css" />
+    <link rel="stylesheet" href="/static/styles.css?v=queue-worker-20260604-1" />
   </head>
   <body>
     <div class="app-shell inspector-shell">
@@ -36,6 +36,9 @@
           <button id="refreshDashboardBtn" class="secondary-button" type="button">Refresh Dashboard</button>
           <button id="rebuildIndexBtn" class="secondary-button" type="button">Rebuild Vector Index</button>
           <button id="refreshStaleBtn" class="primary-button" type="button">Refresh Stale Journeys</button>
+          <button id="scanHisBtn" class="secondary-button" type="button">Scan HIS Changes</button>
+          <button id="queueHisBtn" class="secondary-button" type="button">Queue HIS Updates</button>
+          <button id="processQueueBtn" class="secondary-button" type="button">Process Queue</button>
         </div>
 
         <div id="selectedPatientCard" class="patient-summary-card empty-state" aria-live="polite">
@@ -81,6 +84,13 @@
 
             <section class="section-block">
               <div class="admin-section-header">
+                <h3>System Snapshot</h3>
+              </div>
+              <div id="systemSnapshot" class="data-grid empty-state">Loading system status...</div>
+            </section>
+
+            <section class="section-block">
+              <div class="admin-section-header">
                 <div>
                   <h3>Selected Patient</h3>
                   <p id="patientOpsMeta" class="inspect-note">Choose a patient to view operational metadata.</p>
@@ -93,6 +103,26 @@
               <div id="patientOpsContent" class="data-grid empty-state">No patient selected.</div>
             </section>
 
+            <section class="section-block">
+              <div class="admin-section-header">
+                <div>
+                  <h3>HIS Sync</h3>
+                  <p class="inspect-note">New or changed HIS records that need journey generation.</p>
+                </div>
+                <span id="hisSyncMeta" class="muted"></span>
+              </div>
+              <div id="hisSyncList" class="admin-table empty-state">Loading HIS sync status...</div>
+            </section>
+            <section class="section-block">
+              <div class="admin-section-header">
+                <div>
+                  <h3>Journey Queue</h3>
+                  <p class="inspect-note">Queued generation/refresh jobs waiting for a worker.</p>
+                </div>
+                <span id="queueMeta" class="muted"></span>
+              </div>
+              <div id="queueList" class="admin-table empty-state">Loading journey queue...</div>
+            </section>
             <section class="section-block">
               <div class="admin-section-header">
                 <h3>Stale Journeys</h3>
@@ -111,6 +141,14 @@
 
             <section class="section-block">
               <div class="admin-section-header">
+                <h3>Journey Feedback</h3>
+                <span id="feedbackMeta" class="muted"></span>
+              </div>
+              <div id="feedbackList" class="admin-table empty-state">Loading journey feedback...</div>
+            </section>
+
+            <section class="section-block">
+              <div class="admin-section-header">
                 <h3>Audit Events</h3>
                 <span id="auditMeta" class="muted"></span>
               </div>
@@ -121,7 +159,6 @@
       </main>
     </div>
 
-    <script src="/static/admin.js"></script>
+    <script src="/static/admin.js?v=queue-worker-20260604-1"></script>
   </body>
 </html>
-

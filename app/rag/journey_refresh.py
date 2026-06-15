@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import json
 import os
@@ -50,6 +50,109 @@ def append_refresh_queue_event(
         file.write(json.dumps(event, sort_keys=True) + "\n")
     return event
 
+
+def read_refresh_queue_events(limit: int = 500) -> list[dict[str, Any]]:
+    bounded_limit = max(1, min(limit, 1000))
+    queue_path = get_refresh_queue_path()
+    if not queue_path.exists():
+        return []
+
+    events: list[dict[str, Any]] = []
+    for line in reversed(queue_path.read_text(encoding="utf-8").splitlines()):
+        if not line.strip():
+            continue
+        try:
+            events.append(json.loads(line))
+        except json.JSONDecodeError:
+            continue
+        if len(events) >= bounded_limit:
+            break
+    return events
+
+
+def list_pending_journey_refreshes(limit: int = 100) -> list[dict[str, Any]]:
+    events = read_refresh_queue_events(limit=1000)
+    terminal_refresh_ids = {
+        event.get("metadata", {}).get("refresh_id")
+        for event in events
+        if event.get("status") in {"completed", "failed"}
+    }
+    pending: list[dict[str, Any]] = []
+    seen_refresh_ids: set[str] = set()
+    for event in reversed(events):
+        refresh_id = event.get("refresh_id")
+        if event.get("status") != "queued" or not refresh_id:
+            continue
+        if refresh_id in terminal_refresh_ids or refresh_id in seen_refresh_ids:
+            continue
+        pending.append(event)
+        seen_refresh_ids.add(refresh_id)
+        if len(pending) >= limit:
+            break
+    return pending
+
+
+def process_pending_journey_refreshes(
+    *,
+    actor: str = "system",
+    use_llm: bool = True,
+    provider: str | None = None,
+    model: str | None = None,
+    require_llm: bool = False,
+    limit: int = 10,
+) -> dict[str, Any]:
+    pending = list_pending_journey_refreshes(limit=limit)
+    processed = []
+    failed = []
+    for event in pending:
+        patient_id = event.get("patient_id")
+        if not patient_id:
+            continue
+        metadata = event.get("metadata", {})
+        try:
+            result = refresh_patient_journey(
+                patient_id,
+                actor=actor,
+                use_llm=metadata.get("use_llm", use_llm),
+                provider=metadata.get("provider") or provider,
+                model=metadata.get("model") or model,
+                require_llm=metadata.get("require_llm", require_llm),
+                reason=event.get("reason") or "queued_refresh",
+                queued_event=event,
+            )
+            if result:
+                processed.append({
+                    "patient_id": patient_id,
+                    "refresh_id": result.get("refresh_id"),
+                    "generated_by": result.get("journey", {}).get("generated_by"),
+                    "source_record_version": result.get("journey", {}).get("source_record_version"),
+                })
+        except Exception as error:
+            failed.append({
+                "patient_id": patient_id,
+                "refresh_id": event.get("refresh_id"),
+                "error_type": error.__class__.__name__,
+                "error": str(error),
+            })
+
+    write_audit_event(
+        "journey_refresh_queue_processed",
+        actor=actor,
+        metadata={
+            "pending_count": len(pending),
+            "processed_count": len(processed),
+            "failed_count": len(failed),
+            "limit": limit,
+        },
+    )
+    return {
+        "status": "completed",
+        "pending_count": len(pending),
+        "processed_count": len(processed),
+        "failed_count": len(failed),
+        "processed": processed,
+        "failed": failed,
+    }
 
 def list_stale_patient_journeys() -> list[dict[str, Any]]:
     stale = []
@@ -221,4 +324,3 @@ def refresh_stale_patient_journeys(
         "refreshed": refreshed,
         "failed": failed,
     }
-

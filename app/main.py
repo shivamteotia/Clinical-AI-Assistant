@@ -1,4 +1,5 @@
-﻿from pathlib import Path
+from typing import Literal
+from pathlib import Path
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, Request
 from fastapi.responses import FileResponse
@@ -9,6 +10,8 @@ from app.api.canonical_his import get_canonical_patient_record
 from app.api.his import get_patient, list_patients
 from app.auth import actor_from_request, get_auth_settings, require_admin, require_doctor
 from app.audit import read_audit_events, write_audit_event
+from app.feedback import read_journey_feedback, write_journey_feedback
+from app.his_sync import queue_or_process_his_journey_work, scan_his_journey_work
 from app.rag.config import get_patient_journey_llm_settings, get_vector_store_settings
 from app.rag.answering import answer_question
 from app.rag.chunking import load_patient_chunks
@@ -16,7 +19,9 @@ from app.rag.loaders import load_patient_documents, serialize_documents
 from app.rag.llm import answer_with_local_llm
 from app.rag.journey_runs import read_journey_runs
 from app.rag.journey_refresh import (
+    list_pending_journey_refreshes,
     list_stale_patient_journeys,
+    process_pending_journey_refreshes,
     queue_patient_journey_refresh,
     refresh_patient_journey,
     refresh_stale_patient_journeys,
@@ -43,12 +48,30 @@ class SearchRequest(BaseModel):
     k: int = Field(default=3, ge=1, le=10)
 
 
+class HisSyncRequest(BaseModel):
+    use_llm: bool = True
+    model: str | None = Field(default=None, min_length=1)
+    provider: str | None = None
+    require_llm: bool = False
+    process: bool = False
+
+class JourneyQueueProcessRequest(BaseModel):
+    use_llm: bool = True
+    model: str | None = Field(default=None, min_length=1)
+    provider: str | None = None
+    require_llm: bool = False
+    limit: int = Field(default=10, ge=1, le=100)
+
 class JourneyGenerationRequest(BaseModel):
     use_llm: bool = True
     model: str | None = Field(default=DEFAULT_JOURNEY_MODEL, min_length=1)
     provider: str | None = None
     require_llm: bool = False
 
+
+class JourneyFeedbackRequest(BaseModel):
+    feedback_type: Literal["useful", "missing_info", "incorrect", "other"]
+    comment: str | None = Field(default=None, max_length=500)
 
 class JourneyRefreshRequest(BaseModel):
     use_llm: bool = True
@@ -76,6 +99,24 @@ def admin_frontend() -> FileResponse:
 def health() -> dict[str, str]:
     return {"status": "ok"}
 
+
+@app.get("/his/sync/status")
+def his_sync_status(request: Request) -> dict:
+    require_admin(request)
+    return scan_his_journey_work(persist_state=True)
+
+
+@app.post("/his/sync")
+def his_sync(request: HisSyncRequest, http_request: Request) -> dict:
+    require_admin(http_request)
+    return queue_or_process_his_journey_work(
+        actor=actor_from_request(http_request),
+        use_llm=request.use_llm,
+        provider=request.provider,
+        model=request.model,
+        require_llm=request.require_llm,
+        process=request.process,
+    )
 
 @app.get("/admin/status")
 def admin_status(request: Request) -> dict:
@@ -130,6 +171,15 @@ def rag_status() -> dict:
     return vector_store_status()
 
 
+@app.get("/journey-feedback")
+def journey_feedback_events(
+    request: Request,
+    patient_id: str | None = None,
+    limit: int = Query(default=100, ge=1, le=500),
+) -> list[dict]:
+    require_admin(request)
+    return read_journey_feedback(limit=limit, patient_id=patient_id)
+
 @app.get("/journeys/runs")
 def journey_runs(request: Request, limit: int = Query(default=100, ge=1, le=500)) -> list[dict]:
     require_admin(request)
@@ -143,6 +193,25 @@ def patient_journey_runs(patient_id: str, request: Request, limit: int = Query(d
         raise HTTPException(status_code=404, detail="Patient not found")
     return read_journey_runs(limit=limit, patient_id=patient_id)
 
+
+@app.get("/journeys/queue")
+def journey_refresh_queue(request: Request, limit: int = Query(default=100, ge=1, le=500)) -> dict:
+    require_admin(request)
+    pending = list_pending_journey_refreshes(limit=limit)
+    return {"pending_count": len(pending), "pending": pending}
+
+
+@app.post("/journeys/process-queue")
+def process_journey_refresh_queue(request: JourneyQueueProcessRequest, http_request: Request) -> dict:
+    require_admin(http_request)
+    return process_pending_journey_refreshes(
+        actor=actor_from_request(http_request),
+        use_llm=request.use_llm,
+        provider=request.provider,
+        model=request.model,
+        require_llm=request.require_llm,
+        limit=request.limit,
+    )
 
 @app.get("/journeys/stale")
 def stale_journeys(request: Request) -> dict:
@@ -226,6 +295,43 @@ def patient_journey(patient_id: str, request: Request) -> dict:
     )
     return result
 
+
+@app.post("/patients/{patient_id}/journey/feedback")
+def submit_patient_journey_feedback(
+    patient_id: str,
+    request: JourneyFeedbackRequest,
+    http_request: Request,
+) -> dict:
+    require_doctor(http_request)
+    journey = get_patient_journey(patient_id)
+    if journey is None:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    feedback = write_journey_feedback(
+        patient_id=patient_id,
+        feedback_type=request.feedback_type,
+        comment=request.comment,
+        actor=actor_from_request(http_request),
+        metadata={
+            "journey_generated_by": journey.get("generated_by"),
+            "journey_model": journey.get("journey_model"),
+            "source_record_version": journey.get("source_record_version"),
+            "is_stale": journey.get("is_stale"),
+        },
+    )
+    write_audit_event(
+        "patient_journey_feedback_submitted",
+        actor=actor_from_request(http_request),
+        patient_id=patient_id,
+        metadata={
+            "feedback_id": feedback.get("feedback_id"),
+            "feedback_type": feedback.get("feedback_type"),
+            "comment_length": len(feedback.get("comment") or ""),
+            "journey_generated_by": journey.get("generated_by"),
+            "journey_model": journey.get("journey_model"),
+            "source_record_version": journey.get("source_record_version"),
+        },
+    )
+    return {"status": "recorded", **feedback}
 
 @app.get("/patients/{patient_id}/journey/inspect")
 def patient_journey_inspection(patient_id: str, request: Request) -> dict:
@@ -441,6 +547,3 @@ def patient_ask_llm(patient_id: str, request: SearchRequest, http_request: Reque
         },
     )
     return result
-
-
-

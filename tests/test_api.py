@@ -1,4 +1,4 @@
-﻿import os
+import os
 import tempfile
 import unittest
 from contextlib import redirect_stdout
@@ -96,6 +96,47 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(journey["generated_by"], "local_fallback")
         self.assertIn("summary", journey)
 
+    def test_patient_journey_feedback_endpoint_records_feedback(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            os.environ["CLINICAL_AI_JOURNEY_FEEDBACK_PATH"] = os.path.join(temp_dir, "journey_feedback.jsonl")
+            os.environ["CLINICAL_AI_AUDIT_LOG_PATH"] = os.path.join(temp_dir, "audit.jsonl")
+            try:
+                response = self.client.post(
+                    "/patients/P001/journey/feedback",
+                    json={"feedback_type": "missing_info", "comment": "Please include latest labs."},
+                    headers={"x-user-id": "doctor-1"},
+                )
+                feedback_file_exists = os.path.exists(os.environ["CLINICAL_AI_JOURNEY_FEEDBACK_PATH"])
+            finally:
+                os.environ.pop("CLINICAL_AI_JOURNEY_FEEDBACK_PATH", None)
+                os.environ.pop("CLINICAL_AI_AUDIT_LOG_PATH", None)
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(payload["status"], "recorded")
+        self.assertEqual(payload["patient_id"], "P001")
+        self.assertEqual(payload["feedback_type"], "missing_info")
+        self.assertTrue(feedback_file_exists)
+
+    def test_admin_can_list_journey_feedback(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            os.environ["CLINICAL_AI_JOURNEY_FEEDBACK_PATH"] = os.path.join(temp_dir, "journey_feedback.jsonl")
+            os.environ["CLINICAL_AI_AUDIT_LOG_PATH"] = os.path.join(temp_dir, "audit.jsonl")
+            try:
+                self.client.post(
+                    "/patients/P001/journey/feedback",
+                    json={"feedback_type": "useful", "comment": "Helpful."},
+                )
+                response = self.client.get("/journey-feedback?patient_id=P001")
+            finally:
+                os.environ.pop("CLINICAL_AI_JOURNEY_FEEDBACK_PATH", None)
+                os.environ.pop("CLINICAL_AI_AUDIT_LOG_PATH", None)
+
+        self.assertEqual(response.status_code, 200)
+        feedback = response.json()
+        self.assertEqual(len(feedback), 1)
+        self.assertEqual(feedback[0]["patient_id"], "P001")
+        self.assertEqual(feedback[0]["feedback_type"], "useful")
     def test_patient_scoped_ask_returns_selected_patient_sources(self) -> None:
         response = self.client.post(
             "/patients/P001/ask",

@@ -1,4 +1,4 @@
-﻿import os
+import os
 import tempfile
 import unittest
 from contextlib import redirect_stdout
@@ -8,7 +8,12 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.rag.journey_refresh import list_stale_patient_journeys
+from app.rag.journey_refresh import (
+    list_pending_journey_refreshes,
+    list_stale_patient_journeys,
+    process_pending_journey_refreshes,
+    queue_patient_journey_refresh,
+)
 from app.rag.patient_journey import JOURNEY_PATH, load_patient_journeys, save_patient_journeys
 from scripts.seed_data import main as seed_data
 
@@ -79,6 +84,32 @@ class JourneyRefreshTests(unittest.TestCase):
         self.assertEqual(payload["refreshed_count"], 2)
         self.assertEqual(payload["failed_count"], 0)
         self.assertEqual(list_stale_patient_journeys(), [])
+
+    def test_process_pending_queue_refreshes_queued_patient(self) -> None:
+        queued = queue_patient_journey_refresh("P001", actor="test", metadata={"use_llm": False})
+        self.assertIsNotNone(queued)
+        self.assertEqual(len(list_pending_journey_refreshes()), 1)
+
+        result = process_pending_journey_refreshes(actor="test", use_llm=False, limit=10)
+
+        self.assertEqual(result["processed_count"], 1)
+        self.assertEqual(result["failed_count"], 0)
+        self.assertEqual(list_pending_journey_refreshes(), [])
+
+    def test_queue_endpoints_list_and_process_pending_jobs(self) -> None:
+        queued = queue_patient_journey_refresh("P001", actor="test", metadata={"use_llm": False})
+        self.assertIsNotNone(queued)
+
+        list_response = self.client.get("/journeys/queue")
+        process_response = self.client.post(
+            "/journeys/process-queue",
+            json={"use_llm": False, "limit": 10},
+        )
+
+        self.assertEqual(list_response.status_code, 200)
+        self.assertEqual(list_response.json()["pending_count"], 1)
+        self.assertEqual(process_response.status_code, 200)
+        self.assertEqual(process_response.json()["processed_count"], 1)
 
     def test_background_refresh_endpoint_queues_request(self) -> None:
         response = self.client.post(

@@ -1,4 +1,4 @@
-﻿# Clinical AI System - V1 Local HIS
+# Clinical AI System - V1 Local HIS
 <img width="1868" height="873" alt="image" src="https://github.com/user-attachments/assets/7ab172f1-11d8-467e-a60d-543ce200f541" />
 
 This is the first local prototype for the Clinical AI pipeline.
@@ -129,11 +129,14 @@ If both keys are unset, local development remains open. When keys are configured
 - `GET /inspect`
 - `GET /admin`
 - `GET /admin/status`
+- `GET /his/sync/status`
+- `POST /his/sync`
 - `GET /health`
 - `GET /patients`
 - `GET /patients/{patient_id}`
 - `GET /patients/{patient_id}/record`
 - `GET /patients/{patient_id}/journey`
+- `POST /patients/{patient_id}/journey/feedback`
 - `POST /patients/{patient_id}/journey/generate`
 - `POST /patients/{patient_id}/journey/refresh`
 - `POST /patients/{patient_id}/ask`
@@ -147,7 +150,10 @@ If both keys are unset, local development remains open. When keys are configured
 - `POST /rag/ask-llm`
 - `GET /audit/events`
 - `GET /journeys/stale`
+- `GET /journeys/queue`
+- `POST /journeys/process-queue`
 - `GET /journeys/runs`
+- `GET /journey-feedback`
 - `GET /patients/{patient_id}/journey/runs`
 - `POST /journeys/refresh-stale`
 
@@ -165,6 +171,44 @@ The admin console shows API health, vector store status, stale journeys, recent 
 
 The safe admin status endpoint is `GET /admin/status`. It returns operational flags such as auth enabled/configured, vector provider/status, LLM provider/model, stale journey count, recent run count, and recent audit count. It does not return API key values, prompts, patient notes, summaries, or generated answers.
 
+
+
+
+## Incremental HIS Sync
+
+The app should not regenerate all LLM patient journeys whenever the HIS changes. Instead, it scans canonical HIS records and compares each current record hash against the stored journey source hash.
+
+Use the Admin Console or these admin endpoints:
+
+```text
+GET /his/sync/status
+POST /his/sync
+```
+
+`GET /his/sync/status` detects patients that need work:
+
+- `new_patient`: patient exists in HIS but has no stored journey
+- `record_changed`: patient journey exists, but the source record hash no longer matches the current canonical HIS record
+
+`POST /his/sync` queues only those actionable patients by default. It does not regenerate unchanged patients. Set `process: true` to generate/refresh actionable journeys immediately; otherwise the refresh queue records the notification for a worker or operator.
+
+Run the same workflow from the CLI:
+
+```powershell
+python scripts\sync_his_journeys.py
+python scripts\sync_his_journeys.py --queue
+python scripts\sync_his_journeys.py --process --provider groq --model llama-3.3-70b-versatile
+```
+
+## Clinician Journey Feedback
+
+Doctors can submit lightweight feedback on a precomputed holistic patient journey:
+
+```text
+POST /patients/{patient_id}/journey/feedback
+```
+
+Allowed `feedback_type` values are `useful`, `missing_info`, `incorrect`, and `other`. Feedback is stored in an append-only local JSONL log and visible to admins through `GET /journey-feedback` and the Admin Console. Audit events record feedback metadata such as type and comment length, not the free-text comment itself.
 
 ## Runtime State Paths
 
@@ -417,6 +461,3 @@ POST /rag/ask-llm
 ```
 
 This endpoint retrieves patient chunks first, then asks the local Ollama model to answer only from that retrieved context.
-
-
-

@@ -1,4 +1,4 @@
-﻿import os
+import os
 import unittest
 from contextlib import redirect_stdout
 from io import StringIO
@@ -69,6 +69,32 @@ class AuthTests(unittest.TestCase):
         self.assertIn("vector_store", payload)
         self.assertNotIn("admin-test-key", str(payload))
         self.assertNotIn("doctor-test-key", str(payload))
+    def test_journey_feedback_accepts_doctor_or_admin_key(self) -> None:
+        missing = self.client.post(
+            "/patients/P001/journey/feedback",
+            json={"feedback_type": "useful"},
+        )
+        doctor = self.client.post(
+            "/patients/P001/journey/feedback",
+            json={"feedback_type": "useful"},
+            headers={"x-api-key": "doctor-test-key"},
+        )
+        admin = self.client.post(
+            "/patients/P001/journey/feedback",
+            json={"feedback_type": "useful"},
+            headers={"x-api-key": "admin-test-key"},
+        )
+
+        self.assertEqual(missing.status_code, 403)
+        self.assertEqual(doctor.status_code, 200)
+        self.assertEqual(admin.status_code, 200)
+
+    def test_journey_feedback_listing_requires_admin_key(self) -> None:
+        doctor = self.client.get("/journey-feedback", headers={"x-api-key": "doctor-test-key"})
+        admin = self.client.get("/journey-feedback", headers={"x-api-key": "admin-test-key"})
+
+        self.assertEqual(doctor.status_code, 403)
+        self.assertEqual(admin.status_code, 200)
     def test_admin_refresh_endpoint_rejects_doctor_key(self) -> None:
         response = self.client.post(
             "/patients/P001/journey/refresh",
@@ -89,4 +115,3 @@ class AuthTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
