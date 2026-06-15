@@ -32,6 +32,7 @@ from app.rag.patient_journey import (
     get_patient_journey,
     inspect_patient_journey_pipeline,
 )
+from app.rag.journey_store import journey_store_status
 from app.rag.vector_store import (
     rebuild_vector_store,
     search_patient_chunks,
@@ -150,6 +151,7 @@ def admin_status(request: Request) -> dict:
             "groq_api_key_configured": bool(journey_llm_settings.groq_api_key),
         },
         "journeys": {
+            "store": journey_store_status(),
             "stale_count": len(stale),
             "recent_run_count": len(recent_runs),
             "latest_run_status": recent_runs[0].get("status") if recent_runs else None,

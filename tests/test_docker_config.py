@@ -28,6 +28,9 @@ class DockerConfigTests(unittest.TestCase):
         self.assertIn("healthcheck:", compose)
         self.assertIn("qdrant/qdrant", compose)
         self.assertIn("local-qdrant", compose)
+        self.assertIn("postgres:16-alpine", compose)
+        self.assertIn("local-postgres", compose)
+        self.assertIn("postgres_data:", compose)
         self.assertNotIn("replace_with_your", compose)
 
     def test_dockerignore_excludes_local_state_and_credentials(self) -> None:

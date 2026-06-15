@@ -9,3 +9,4 @@ huggingface-hub==0.36.2
 tokenizers==0.20.3
 ollama==0.5.4
 qdrant-client==1.12.1
+psycopg[binary]==3.2.3

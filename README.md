@@ -98,6 +98,33 @@ Then run:
 docker compose --profile local-qdrant up --build app qdrant
 ```
 
+### Store Patient Journeys In PostgreSQL
+
+JSON remains the default local journey store so the app runs without extra infrastructure. For PostgreSQL, set:
+
+```text
+JOURNEY_STORE_PROVIDER=postgres
+DATABASE_URL=postgresql://clinical_ai:clinical_ai@postgres:5432/clinical_ai
+POSTGRES_PASSWORD=clinical_ai
+```
+
+Start the app and local PostgreSQL service:
+
+```powershell
+docker compose --profile local-postgres up --build app postgres
+```
+
+The application initializes the `patient_journeys` table and its indexes automatically. The validated `patient_journey.v1` artifact is stored in a `JSONB` column, while patient ID, schema version, record version/hash, generation time, and generator are stored as indexed/queryable columns.
+
+To migrate the existing local JSON journeys:
+
+```powershell
+python scripts\migrate_patient_journeys_to_postgres.py `
+  --database-url "postgresql://clinical_ai:clinical_ai@localhost:5432/clinical_ai"
+```
+
+PostgreSQL upserts are keyed by `patient_id`, so regenerating one patient replaces only that patient's stored journey inside a database transaction.
+
 The application image does not include `.env`, local databases, virtual environments, or runtime JSONL logs.
 
 
@@ -220,6 +247,8 @@ CLINICAL_AI_JOURNEY_PATH=data/patient_journeys.json
 CLINICAL_AI_JOURNEY_RUN_LOG_PATH=data/journey_runs.jsonl
 CLINICAL_AI_JOURNEY_REFRESH_QUEUE_PATH=data/journey_refresh_queue.jsonl
 ```
+
+Set `JOURNEY_STORE_PROVIDER=postgres` and `DATABASE_URL=...` to use PostgreSQL instead of `CLINICAL_AI_JOURNEY_PATH`. The admin status response reports the active journey store without exposing the database URL.
 
 Automated tests use temporary journey and queue paths so local precomputed patient journeys are not rewritten by test runs.
 
@@ -369,7 +398,7 @@ Patient records are exposed through a canonical dummy HIS adapter. `GET /patient
 
 Journey generation uses an episode-aware context packer before calling the LLM. The episode builder groups each patient record into chronological episodes from encounter dates, then attaches same-date labs, medication starts, and clinical notes. The packed context uses `episodic_patient_context.v1` plus `encounter_date_episodes.v1`, and emits included/total/omitted counts, input character count, estimated input tokens, and reserved output tokens so context-window usage is visible in `/inspect` and stored journey metadata.
 
-The app reads `data\patient_journeys.json` when a doctor selects a patient from the dropdown. This keeps the doctor-facing page fast: patient selection renders the stored holistic view immediately instead of waiting for an LLM call. Journey responses include source-grounded `claims`, so each summary sentence can show the HIS row, episode, encounter, lab, medication, or note IDs that support it. `POST /patients/{patient_id}/journey/generate` remains available for admin generation workflows. `POST /patients/{patient_id}/journey/refresh` and `POST /journeys/refresh-stale` are the operational refresh paths for stale summaries. Use `--require-llm` for production-style generation so local fallback summaries are not saved by accident.
+The app reads the precomputed patient journey from the configured journey store when a doctor selects a patient. JSON is available for local development, while PostgreSQL provides production-oriented transactional upserts and indexed JSONB storage. This keeps the doctor-facing page fast: patient selection renders the stored holistic view immediately instead of waiting for an LLM call. Journey responses include source-grounded `claims`, so each summary sentence can show the HIS row, episode, encounter, lab, medication, or note IDs that support it. `POST /patients/{patient_id}/journey/generate` remains available for admin generation workflows. `POST /patients/{patient_id}/journey/refresh` and `POST /journeys/refresh-stale` are the operational refresh paths for stale summaries. Use `--require-llm` for production-style generation so local fallback summaries are not saved by accident.
 
 Journey artifacts now use the versioned `patient_journey.v1` Pydantic contract. The LLM response must contain exactly `summary` and `claims`, with no unknown fields. Each claim must contain a sentence copied from the summary and at least one source ID that exists in the canonical patient record. The completed artifact is validated again before storage, including context count reconciliation, patient/run consistency, and canonical source record identity. Existing pre-versioned journey files are upgraded to `patient_journey.v1` when read, while malformed new artifacts are rejected rather than silently persisted.
 

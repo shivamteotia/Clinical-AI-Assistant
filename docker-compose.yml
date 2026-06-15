@@ -11,6 +11,8 @@
       QDRANT_COLLECTION: ${QDRANT_COLLECTION:-clinical_patient_chunks}
       PATIENT_JOURNEY_LLM_PROVIDER: ${PATIENT_JOURNEY_LLM_PROVIDER:-groq}
       PATIENT_JOURNEY_MODEL: ${PATIENT_JOURNEY_MODEL:-llama-3.3-70b-versatile}
+      JOURNEY_STORE_PROVIDER: ${JOURNEY_STORE_PROVIDER:-json}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://clinical_ai:clinical_ai@postgres:5432/clinical_ai}
     ports:
       - "8000:8000"
     volumes:
@@ -33,5 +35,25 @@
     volumes:
       - qdrant_storage:/qdrant/storage
 
+  postgres:
+    image: postgres:16-alpine
+    profiles:
+      - local-postgres
+    container_name: clinical-ai-system-postgres
+    environment:
+      POSTGRES_DB: clinical_ai
+      POSTGRES_USER: clinical_ai
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-clinical_ai}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U clinical_ai -d clinical_ai"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   qdrant_storage:
+  postgres_data:

@@ -1,5 +1,4 @@
 ﻿import json
-import os
 import time
 from time import perf_counter
 from dataclasses import dataclass
@@ -19,11 +18,14 @@ from app.rag.journey_schema import (
     validate_llm_journey_response,
     validate_patient_journey,
 )
+from app.rag.journey_store import (
+    DEFAULT_JSON_PATH,
+    get_journey_store,
+    get_json_journey_path,
+)
 from app.rag.safety import SAFETY_NOTICE
 
-BASE_DIR = Path(__file__).resolve().parents[2]
-DATA_DIR = BASE_DIR / "data"
-JOURNEY_PATH = DATA_DIR / "patient_journeys.json"
+JOURNEY_PATH = DEFAULT_JSON_PATH
 DEFAULT_JOURNEY_MODEL = "phi3"
 DEFAULT_GROQ_MODEL = "llama-3.3-70b-versatile"
 CONTEXT_STRATEGY = "episodic_patient_context.v1"
@@ -65,38 +67,21 @@ class JourneySummaryResult:
 
 
 def get_journey_path() -> Path:
-    configured_path = os.getenv("CLINICAL_AI_JOURNEY_PATH")
-    if configured_path:
-        return Path(configured_path)
-    return JOURNEY_PATH
+    return get_json_journey_path()
 
 def load_patient_journeys() -> dict[str, dict]:
-    journey_path = get_journey_path()
-    if not journey_path.exists():
-        return {}
-
-    with open(journey_path, "r", encoding="utf-8") as file:
-        journeys = json.load(file)
-
+    journeys = get_journey_store().load_all()
     validated = [validate_patient_journey(journey) for journey in journeys]
     return {journey["patient_id"]: journey for journey in validated}
 
 
 def save_patient_journeys(journeys: list[dict]) -> None:
-    journey_path = get_journey_path()
-    journey_path.parent.mkdir(parents=True, exist_ok=True)
     validated = [validate_patient_journey(journey) for journey in journeys]
-    with open(journey_path, "w", encoding="utf-8") as file:
-        json.dump(validated, file, indent=2)
-        file.write("\n")
+    get_journey_store().replace_all(validated)
 
 
 def upsert_patient_journey(journey: dict) -> None:
-    journeys_by_patient = load_patient_journeys()
-    journeys_by_patient[journey["patient_id"]] = journey
-    save_patient_journeys(
-        sorted(journeys_by_patient.values(), key=lambda item: item["patient_id"])
-    )
+    get_journey_store().upsert(validate_patient_journey(journey))
 
 
 def get_patient_journey(patient_id: str) -> dict | None:
