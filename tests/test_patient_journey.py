@@ -27,6 +27,7 @@ class PatientJourneyTests(unittest.TestCase):
 
         self.assertEqual(len(journeys), 20)
         self.assertEqual(journeys[0]["patient_id"], "P001")
+        self.assertEqual(journeys[0]["journey_schema_version"], "patient_journey.v1")
         self.assertIn("summary", journeys[0])
         self.assertIn("claims", journeys[0])
         self.assertTrue(journeys[0]["claims"])
@@ -231,6 +232,7 @@ class PatientJourneyTests(unittest.TestCase):
         self.assertEqual(payload["max_tokens"], 550)
         self.assertEqual(payload["messages"][0]["content"], PATIENT_JOURNEY_SYSTEM_PROMPT)
         self.assertIn("Return only valid JSON", payload["messages"][0]["content"])
+        self.assertIn("no additional fields", payload["messages"][0]["content"])
         self.assertIn("Patient journey context packet JSON", payload["messages"][1]["content"])
         self.assertIn('"patient_id": "PX01"', payload["messages"][1]["content"])
 

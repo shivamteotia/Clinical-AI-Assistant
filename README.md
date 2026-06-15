@@ -371,6 +371,8 @@ Journey generation uses an episode-aware context packer before calling the LLM. 
 
 The app reads `data\patient_journeys.json` when a doctor selects a patient from the dropdown. This keeps the doctor-facing page fast: patient selection renders the stored holistic view immediately instead of waiting for an LLM call. Journey responses include source-grounded `claims`, so each summary sentence can show the HIS row, episode, encounter, lab, medication, or note IDs that support it. `POST /patients/{patient_id}/journey/generate` remains available for admin generation workflows. `POST /patients/{patient_id}/journey/refresh` and `POST /journeys/refresh-stale` are the operational refresh paths for stale summaries. Use `--require-llm` for production-style generation so local fallback summaries are not saved by accident.
 
+Journey artifacts now use the versioned `patient_journey.v1` Pydantic contract. The LLM response must contain exactly `summary` and `claims`, with no unknown fields. Each claim must contain a sentence copied from the summary and at least one source ID that exists in the canonical patient record. The completed artifact is validated again before storage, including context count reconciliation, patient/run consistency, and canonical source record identity. Existing pre-versioned journey files are upgraded to `patient_journey.v1` when read, while malformed new artifacts are rejected rather than silently persisted.
+
 
 Refresh stale journeys after canonical HIS records change:
 

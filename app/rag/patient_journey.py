@@ -13,6 +13,12 @@ from app.api.his import list_patients
 from app.rag.config import get_patient_journey_llm_settings
 from app.rag.episodes import EPISODE_STRATEGY, build_patient_episodes, compact_episode_timeline
 from app.rag.journey_runs import latest_journey_run, write_journey_run
+from app.rag.journey_schema import (
+    JOURNEY_SCHEMA_VERSION,
+    source_catalog,
+    validate_llm_journey_response,
+    validate_patient_journey,
+)
 from app.rag.safety import SAFETY_NOTICE
 
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -42,8 +48,9 @@ Rules:
 - Mention that this is dummy/synthetic data only when clinically relevant.
 - Write in 1 short paragraph, suitable for a doctor-facing patient overview.
 - Focus on chronology, presenting complaint, recorded diagnosis, key labs, medications, and note context.
-- Return only valid JSON with this shape:
+- Return only valid JSON with exactly this shape and no additional fields:
   {"summary":"one paragraph","claims":[{"sentence":"one sentence from the summary","sources":["patient:P001","encounter:E001"]}]}
+- Include at least one claim, and include at least one source ID for every claim.
 - Every claim source must use IDs from the supplied record: patient:{patient_id}, episode:{episode_id}, encounter:{encounter_id}, lab:{lab_id}, medication:{medication_id}, note:{note_id}.
 """.strip()
 
@@ -71,14 +78,16 @@ def load_patient_journeys() -> dict[str, dict]:
     with open(journey_path, "r", encoding="utf-8") as file:
         journeys = json.load(file)
 
-    return {journey["patient_id"]: journey for journey in journeys}
+    validated = [validate_patient_journey(journey) for journey in journeys]
+    return {journey["patient_id"]: journey for journey in validated}
 
 
 def save_patient_journeys(journeys: list[dict]) -> None:
     journey_path = get_journey_path()
     journey_path.parent.mkdir(parents=True, exist_ok=True)
+    validated = [validate_patient_journey(journey) for journey in journeys]
     with open(journey_path, "w", encoding="utf-8") as file:
-        json.dump(journeys, file, indent=2)
+        json.dump(validated, file, indent=2)
         file.write("\n")
 
 
@@ -254,6 +263,7 @@ def generate_and_store_patient_journey(
         generated_by=journey.get("generated_by"),
     )
     journey["latest_run"] = run
+    journey = validate_patient_journey(journey, record=record, require_current_source=True)
     upsert_patient_journey(journey)
     return journey
 
@@ -308,6 +318,7 @@ def build_all_patient_journeys(
             trigger="batch_generation",
             generated_by=journey.get("generated_by"),
         )
+        journey = validate_patient_journey(journey, record=record, require_current_source=True)
         journeys.append(journey)
         if use_llm and request_delay_seconds > 0 and index < len(patients) - 1:
             time.sleep(request_delay_seconds)
@@ -343,7 +354,8 @@ def build_patient_journey(
     latest_encounter = record["encounters"][0] if record["encounters"] else None
     source_metadata = record.get("record_metadata", {})
     generated_at = datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-    return {
+    journey = {
+        "journey_schema_version": JOURNEY_SCHEMA_VERSION,
         "patient_id": patient["patient_id"],
         "patient_name": patient["name"],
         "generated_at": generated_at,
@@ -369,6 +381,7 @@ def build_patient_journey(
         "active_medications": _active_medications(record),
         "safety_notice": SAFETY_NOTICE,
     }
+    return validate_patient_journey(journey, record=record, require_current_source=True)
 
 
 def _resolved_run_provider_model(use_llm: bool, provider: str | None, model: str | None) -> tuple[str, str | None]:
@@ -453,7 +466,7 @@ def _try_ollama_summary(record: dict, model: str) -> JourneySummaryResult:
                 },
             ],
         )
-        parsed = _parse_llm_journey_content(response["message"]["content"])
+        parsed = _parse_llm_journey_content(response["message"]["content"], record)
         return JourneySummaryResult(
             summary=parsed["summary"],
             provider="ollama",
@@ -500,7 +513,7 @@ def _try_groq_summary(
         try:
             with urlopen(request, timeout=60) as response:
                 data = json.loads(response.read().decode("utf-8"))
-            parsed = _parse_llm_journey_content(data["choices"][0]["message"]["content"])
+            parsed = _parse_llm_journey_content(data["choices"][0]["message"]["content"], record)
             return JourneySummaryResult(
                 summary=parsed["summary"],
                 provider="groq",
@@ -519,7 +532,7 @@ def _try_groq_summary(
                 model=model,
                 error=f"Groq generation failed: HTTP {error.code}",
             )
-        except (KeyError, IndexError, URLError, TimeoutError, OSError) as error:
+        except (KeyError, IndexError, ValueError, URLError, TimeoutError, OSError) as error:
             return JourneySummaryResult(
                 summary=None,
                 provider="groq",
@@ -664,22 +677,13 @@ def _format_record_for_llm(record: dict) -> str:
     )
 
 
-def _parse_llm_journey_content(content: str) -> dict:
+def _parse_llm_journey_content(content: str, record: dict) -> dict:
     text = content.strip()
     try:
         parsed = json.loads(_extract_json_object(text))
-    except json.JSONDecodeError:
-        return {"summary": text, "claims": None}
-
-    if not isinstance(parsed, dict):
-        return {"summary": text, "claims": None}
-
-    summary = parsed.get("summary")
-    claims = parsed.get("claims")
-    return {
-        "summary": summary.strip() if isinstance(summary, str) and summary.strip() else text,
-        "claims": claims if isinstance(claims, list) else None,
-    }
+    except json.JSONDecodeError as error:
+        raise ValueError("LLM journey output is not valid JSON.") from error
+    return validate_llm_journey_response(parsed, _source_catalog(record))
 
 
 def _extract_json_object(text: str) -> str:
@@ -704,7 +708,7 @@ def _finalize_journey(journey: dict | None, record: dict) -> dict | None:
         return None
     fresh = _with_record_freshness(grounded, record)
     fresh["latest_run"] = latest_journey_run(record["patient"]["patient_id"])
-    return fresh
+    return validate_patient_journey(fresh)
 
 
 def _with_record_freshness(journey: dict, record: dict) -> dict:
@@ -844,12 +848,8 @@ def _infer_sources_for_sentence(record: dict, sentence: str) -> list[str]:
 
 
 def _source_catalog(record: dict) -> set[str]:
-    sources = {f"patient:{record['patient']['patient_id']}"}
+    sources = source_catalog(record)
     sources.update(f"episode:{episode['episode_id']}" for episode in build_patient_episodes(record)["episodes"])
-    sources.update(f"encounter:{row['encounter_id']}" for row in record["encounters"])
-    sources.update(f"lab:{row['lab_id']}" for row in record["labs"])
-    sources.update(f"medication:{row['medication_id']}" for row in record["medications"])
-    sources.update(f"note:{row['note_id']}" for row in record["clinical_notes"])
     return sources
 
 
