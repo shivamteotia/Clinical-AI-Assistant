@@ -13,6 +13,9 @@
       PATIENT_JOURNEY_MODEL: ${PATIENT_JOURNEY_MODEL:-llama-3.3-70b-versatile}
       JOURNEY_STORE_PROVIDER: ${JOURNEY_STORE_PROVIDER:-json}
       DATABASE_URL: ${DATABASE_URL:-postgresql://clinical_ai:clinical_ai@postgres:5432/clinical_ai}
+      TASK_QUEUE_PROVIDER: ${TASK_QUEUE_PROVIDER:-local}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL:-redis://redis:6379/0}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND:-redis://redis:6379/1}
     ports:
       - "8000:8000"
     volumes:
@@ -53,6 +56,45 @@
       interval: 10s
       timeout: 5s
       retries: 5
+
+  redis:
+    image: redis:7-alpine
+    profiles:
+      - local-worker
+    container_name: clinical-ai-system-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  worker:
+    build:
+      context: .
+    image: clinical-ai-system:local
+    container_name: clinical-ai-system-worker
+    profiles:
+      - local-worker
+    env_file:
+      - .env
+    environment:
+      VECTOR_STORE_PROVIDER: ${VECTOR_STORE_PROVIDER:-qdrant}
+      QDRANT_COLLECTION: ${QDRANT_COLLECTION:-clinical_patient_chunks}
+      PATIENT_JOURNEY_LLM_PROVIDER: ${PATIENT_JOURNEY_LLM_PROVIDER:-groq}
+      PATIENT_JOURNEY_MODEL: ${PATIENT_JOURNEY_MODEL:-llama-3.3-70b-versatile}
+      JOURNEY_STORE_PROVIDER: ${JOURNEY_STORE_PROVIDER:-json}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://clinical_ai:clinical_ai@postgres:5432/clinical_ai}
+      TASK_QUEUE_PROVIDER: celery
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL:-redis://redis:6379/0}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND:-redis://redis:6379/1}
+    command: ["celery", "-A", "app.worker.celery_app", "worker", "--loglevel=INFO", "--concurrency=1"]
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      redis:
+        condition: service_healthy
 
 volumes:
   qdrant_storage:

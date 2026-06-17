@@ -10,7 +10,7 @@ from uuid import uuid4
 from app.api.canonical_his import get_canonical_patient_record
 from app.api.his import list_patients
 from app.audit import write_audit_event
-from app.rag.journey_refresh import queue_patient_journey_refresh, refresh_patient_journey
+from app.rag.journey_refresh import queue_and_dispatch_patient_journey_refresh, refresh_patient_journey
 from app.rag.patient_journey import load_patient_journeys
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -160,7 +160,7 @@ def queue_or_process_his_journey_work(
                         "generated_by": result.get("journey", {}).get("generated_by"),
                     })
             else:
-                queued_event = queue_patient_journey_refresh(
+                queued_event = queue_and_dispatch_patient_journey_refresh(
                     patient_id,
                     actor=actor,
                     reason=reason,

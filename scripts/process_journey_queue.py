@@ -5,7 +5,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from app.rag.journey_refresh import list_pending_journey_refreshes, process_pending_journey_refreshes
+from app.rag.journey_refresh import (
+    dispatch_pending_journey_refreshes,
+    list_pending_journey_refreshes,
+    process_pending_journey_refreshes,
+)
 
 
 def main() -> None:
@@ -16,10 +20,16 @@ def main() -> None:
     parser.add_argument("--require-llm", action="store_true", help="Fail instead of falling back locally if LLM generation fails.")
     parser.add_argument("--local-only", action="store_true", help="Use local fallback generation instead of calling an LLM.")
     parser.add_argument("--dry-run", action="store_true", help="List pending queue items without processing.")
+    parser.add_argument("--dispatch", action="store_true", help="Dispatch pending queue items to the configured Celery worker.")
     args = parser.parse_args()
 
     if args.dry_run:
         result = {"pending": list_pending_journey_refreshes(limit=args.limit)}
+    elif args.dispatch:
+        result = dispatch_pending_journey_refreshes(
+            actor="journey_queue_dispatcher",
+            limit=args.limit,
+        )
     else:
         result = process_pending_journey_refreshes(
             actor="journey_queue_worker",

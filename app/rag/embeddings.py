@@ -3,7 +3,7 @@ import math
 import re
 
 from langchain_core.embeddings import Embeddings
-from sentence_transformers import SentenceTransformer
+
 
 TOKEN_PATTERN = re.compile(r"[a-zA-Z0-9_]+")
 DEFAULT_SENTENCE_TRANSFORMER_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
@@ -16,6 +16,8 @@ class HuggingFaceLocalEmbeddings(Embeddings):
         self.model_name = model_name
         self.fallback = LocalHashEmbeddings()
         try:
+            from sentence_transformers import SentenceTransformer
+
             self.model = SentenceTransformer(model_name, local_files_only=True)
         except Exception:
             self.model = None

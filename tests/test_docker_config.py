@@ -9,12 +9,21 @@ class DockerConfigTests(unittest.TestCase):
         dockerfile = (BASE_DIR / "Dockerfile").read_text(encoding="utf-8")
 
         self.assertIn("FROM python:3.12-slim", dockerfile)
-        self.assertIn("COPY requirements.txt", dockerfile)
+        self.assertIn("COPY requirements-runtime.txt", dockerfile)
+        self.assertIn("requirements-runtime.txt", dockerfile)
         self.assertIn("uvicorn", dockerfile)
         self.assertIn("python scripts/seed_data.py", dockerfile)
         self.assertIn("app.main:app", dockerfile)
         self.assertNotIn("GROQ_API_KEY", dockerfile)
         self.assertNotIn("QDRANT_API_KEY", dockerfile)
+
+    def test_runtime_requirements_exclude_local_embedding_stack(self) -> None:
+        requirements = (BASE_DIR / "requirements-runtime.txt").read_text(encoding="utf-8")
+
+        self.assertIn("celery[redis]", requirements)
+        self.assertIn("qdrant-client", requirements)
+        self.assertNotIn("sentence-transformers", requirements)
+        self.assertNotIn("torch", requirements)
 
     def test_docker_compose_has_app_and_optional_qdrant_profile(self) -> None:
         compose = (BASE_DIR / "docker-compose.yml").read_text(encoding="utf-8")
@@ -31,6 +40,10 @@ class DockerConfigTests(unittest.TestCase):
         self.assertIn("postgres:16-alpine", compose)
         self.assertIn("local-postgres", compose)
         self.assertIn("postgres_data:", compose)
+        self.assertIn("redis:7-alpine", compose)
+        self.assertIn("local-worker", compose)
+        self.assertIn("celery", compose)
+        self.assertIn("app.worker.celery_app", compose)
         self.assertNotIn("replace_with_your", compose)
 
     def test_dockerignore_excludes_local_state_and_credentials(self) -> None:

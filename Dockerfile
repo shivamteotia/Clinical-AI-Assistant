@@ -1,4 +1,4 @@
-﻿FROM python:3.12-slim
+FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -10,9 +10,9 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends build-essential curl \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt ./
+COPY requirements-runtime.txt ./
 RUN pip install --upgrade pip \
-    && pip install -r requirements.txt
+    && pip install -r requirements-runtime.txt
 
 COPY app ./app
 COPY scripts ./scripts

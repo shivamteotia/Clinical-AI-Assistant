@@ -125,6 +125,30 @@ python scripts\migrate_patient_journeys_to_postgres.py `
 
 PostgreSQL upserts are keyed by `patient_id`, so regenerating one patient replaces only that patient's stored journey inside a database transaction.
 
+### Process Journey Refreshes With Redis And Celery
+
+The local API can process queued refreshes in-process, but production should dispatch refresh jobs to a worker. Keep the JSONL refresh queue as the inspectable outbox and enable Celery for execution:
+
+```text
+TASK_QUEUE_PROVIDER=celery
+CELERY_BROKER_URL=redis://redis:6379/0
+CELERY_RESULT_BACKEND=redis://redis:6379/1
+```
+
+Start Redis, the FastAPI app, and the worker:
+
+```powershell
+docker compose --profile local-worker up --build app redis worker
+```
+
+When Celery is enabled, `POST /patients/{patient_id}/journey/refresh` with `background: true`, `POST /his/sync` with `process: false`, and `POST /journeys/process-queue` dispatch pending refresh events to Redis instead of running the LLM work inside the API process. If `TASK_QUEUE_PROVIDER=local`, those same endpoints keep the existing local behavior.
+
+The worker command is:
+
+```powershell
+celery -A app.worker.celery_app worker --loglevel=INFO --concurrency=1
+```
+
 The application image does not include `.env`, local databases, virtual environments, or runtime JSONL logs.
 
 
@@ -249,6 +273,7 @@ CLINICAL_AI_JOURNEY_REFRESH_QUEUE_PATH=data/journey_refresh_queue.jsonl
 ```
 
 Set `JOURNEY_STORE_PROVIDER=postgres` and `DATABASE_URL=...` to use PostgreSQL instead of `CLINICAL_AI_JOURNEY_PATH`. The admin status response reports the active journey store without exposing the database URL.
+Set `TASK_QUEUE_PROVIDER=celery` with `CELERY_BROKER_URL` and `CELERY_RESULT_BACKEND` to dispatch queued journey refresh work to Redis/Celery. The admin status response reports whether the task queue is enabled without exposing Redis URLs.
 
 Automated tests use temporary journey and queue paths so local precomputed patient journeys are not rewritten by test runs.
 

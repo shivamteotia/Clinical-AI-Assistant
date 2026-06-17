@@ -12,6 +12,7 @@ from app.auth import actor_from_request, get_auth_settings, require_admin, requi
 from app.audit import read_audit_events, write_audit_event
 from app.feedback import read_journey_feedback, write_journey_feedback
 from app.his_sync import queue_or_process_his_journey_work, scan_his_journey_work
+from app.queue_backend import get_task_queue_settings, task_queue_status
 from app.rag.config import get_patient_journey_llm_settings, get_vector_store_settings
 from app.rag.answering import answer_question
 from app.rag.chunking import load_patient_chunks
@@ -21,8 +22,10 @@ from app.rag.journey_runs import read_journey_runs
 from app.rag.journey_refresh import (
     list_pending_journey_refreshes,
     list_stale_patient_journeys,
+    dispatch_pending_journey_refreshes,
     process_pending_journey_refreshes,
     queue_patient_journey_refresh,
+    queue_and_dispatch_patient_journey_refresh,
     refresh_patient_journey,
     refresh_stale_patient_journeys,
 )
@@ -152,6 +155,7 @@ def admin_status(request: Request) -> dict:
         },
         "journeys": {
             "store": journey_store_status(),
+            "task_queue": task_queue_status(),
             "stale_count": len(stale),
             "recent_run_count": len(recent_runs),
             "latest_run_status": recent_runs[0].get("status") if recent_runs else None,
@@ -206,6 +210,11 @@ def journey_refresh_queue(request: Request, limit: int = Query(default=100, ge=1
 @app.post("/journeys/process-queue")
 def process_journey_refresh_queue(request: JourneyQueueProcessRequest, http_request: Request) -> dict:
     require_admin(http_request)
+    if get_task_queue_settings().enabled:
+        return dispatch_pending_journey_refreshes(
+            actor=actor_from_request(http_request),
+            limit=request.limit,
+        )
     return process_pending_journey_refreshes(
         actor=actor_from_request(http_request),
         use_llm=request.use_llm,
@@ -392,7 +401,7 @@ def refresh_patient_journey_endpoint(
     require_admin(http_request)
     actor = actor_from_request(http_request)
     if request.background:
-        queued = queue_patient_journey_refresh(
+        queued = queue_and_dispatch_patient_journey_refresh(
             patient_id,
             actor=actor,
             reason="manual_background",
@@ -405,17 +414,18 @@ def refresh_patient_journey_endpoint(
         )
         if queued is None:
             raise HTTPException(status_code=404, detail="Patient not found")
-        background_tasks.add_task(
-            refresh_patient_journey,
-            patient_id,
-            actor=actor,
-            use_llm=request.use_llm,
-            provider=request.provider,
-            model=request.model,
-            require_llm=request.require_llm,
-            reason="manual_background",
-            queued_event=queued,
-        )
+        if not get_task_queue_settings().enabled:
+            background_tasks.add_task(
+                refresh_patient_journey,
+                patient_id,
+                actor=actor,
+                use_llm=request.use_llm,
+                provider=request.provider,
+                model=request.model,
+                require_llm=request.require_llm,
+                reason="manual_background",
+                queued_event=queued,
+            )
         return {"status": "queued", **queued}
 
     try:

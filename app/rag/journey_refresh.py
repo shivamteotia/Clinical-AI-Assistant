@@ -10,6 +10,7 @@ from uuid import uuid4
 from app.api.canonical_his import get_canonical_patient_record
 from app.api.his import list_patients
 from app.audit import write_audit_event
+from app.queue_backend import enqueue_journey_refresh_task, get_task_queue_settings
 from app.rag.patient_journey import generate_and_store_patient_journey, get_patient_journey
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -154,6 +155,64 @@ def process_pending_journey_refreshes(
         "failed": failed,
     }
 
+
+def dispatch_pending_journey_refreshes(
+    *,
+    actor: str = "system",
+    limit: int = 10,
+) -> dict[str, Any]:
+    settings = get_task_queue_settings()
+    if not settings.enabled:
+        return {
+            "status": "not_configured",
+            "provider": settings.provider,
+            "pending_count": 0,
+            "dispatched_count": 0,
+            "failed_count": 0,
+            "dispatched": [],
+            "failed": [],
+        }
+
+    pending = list_pending_journey_refreshes(limit=limit)
+    dispatched = []
+    failed = []
+    for event in pending:
+        try:
+            task = enqueue_journey_refresh_task(event)
+            dispatched.append({
+                "patient_id": event.get("patient_id"),
+                "refresh_id": event.get("refresh_id"),
+                "task_id": task.get("task_id"),
+            })
+        except Exception as error:
+            failed.append({
+                "patient_id": event.get("patient_id"),
+                "refresh_id": event.get("refresh_id"),
+                "error_type": error.__class__.__name__,
+                "error": str(error),
+            })
+
+    write_audit_event(
+        "journey_refresh_queue_dispatched",
+        actor=actor,
+        metadata={
+            "provider": settings.provider,
+            "pending_count": len(pending),
+            "dispatched_count": len(dispatched),
+            "failed_count": len(failed),
+            "limit": limit,
+        },
+    )
+    return {
+        "status": "dispatched",
+        "provider": settings.provider,
+        "pending_count": len(pending),
+        "dispatched_count": len(dispatched),
+        "failed_count": len(failed),
+        "dispatched": dispatched,
+        "failed": failed,
+    }
+
 def list_stale_patient_journeys() -> list[dict[str, Any]]:
     stale = []
     for patient in list_patients():
@@ -194,6 +253,28 @@ def queue_patient_journey_refresh(
         patient_id=patient_id,
         metadata={"refresh_id": event["refresh_id"], "reason": reason, **(metadata or {})},
     )
+    return event
+
+
+def queue_and_dispatch_patient_journey_refresh(
+    patient_id: str,
+    *,
+    actor: str = "system",
+    reason: str = "manual",
+    metadata: dict[str, Any] | None = None,
+) -> dict[str, Any] | None:
+    event = queue_patient_journey_refresh(
+        patient_id,
+        actor=actor,
+        reason=reason,
+        metadata=metadata,
+    )
+    if event is None:
+        return None
+    settings = get_task_queue_settings()
+    if settings.enabled:
+        task = enqueue_journey_refresh_task(event)
+        event = {**event, "task_queue": task}
     return event
 
 
